@@ -1,0 +1,85 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+<div style="text-align: center;">
+    <h1>Hello!</h1>
+    <h4>What would you like to see now?</h4>
+</div>
+
+<div class="menu">
+    @Ajax.ActionLink(
+            "Your tasks",
+            "MyTasks",
+            "Home",
+            new AjaxOptions
+            {
+                UpdateTargetId = "UpdateContentDiv",
+                InsertionMode = InsertionMode.Replace,
+                HttpMethod = "GET",
+                LoadingElementId = "divLoading",
+                OnBegin = "onAjaxBegin",
+                OnComplete = "onAjaxComplete"
+            },
+            new { @class = "btn btn-primary" }
+        )
+    @if (User.IsInRole("Manager"))
+    {
+        @Ajax.ActionLink(
+                                         "Your team",
+                                         "MyTeam",
+                                          "Home",
+                                          new AjaxOptions
+                                          {
+                                              UpdateTargetId = "UpdateContentDiv",
+                                              InsertionMode = InsertionMode.Replace,
+                                              HttpMethod = "GET",
+                                              LoadingElementId = "divLoading",
+                                              OnBegin = "onAjaxBegin",
+                                              OnComplete = "onAjaxComplete"
+                                          },
+                                           new { @class = "btn btn-primary" }
+                                          )
+        <i></i>
+        @Ajax.ActionLink(
+                 "Task of your team",
+                 "TaskOfMyTeam",
+                 "Home",
+                 new AjaxOptions
+                 {
+                     UpdateTargetId = "UpdateContentDiv",
+                     InsertionMode = InsertionMode.Replace,
+                     HttpMethod = "GET",
+                     LoadingElementId = "divLoading",
+                     OnBegin = "onAjaxBegin",
+                     OnComplete = "onAjaxComplete"
+                 },
+                 new { @class = "btn btn-primary" }
+             )
+    }
+</div>
+
+<div id="divLoading" class="divhide">
+    @*divhide will be set as default and will be changed dynamically.*@
+
+    <img src="~/Loading.gif" alt="Loading Image" height="150" title="Loading Image" />
+</div>
+
+<div id="UpdateContentDiv">
+    @*Div to update content after Ajax Call*@
+</div>
+
+@section scripts{
+    @Scripts.Render("~/Scripts/jquery.unobtrusive-ajax.min.js")
+
+    <script>
+        function onAjaxBegin() {
+            $("#divLoading").removeClass("ShowLoader").addClass("ShowLoader");
+        }
+
+        function onAjaxComplete() {
+            $("#divLoading").removeClass("ShowLoader").addClass("HideLoader");
+        }
+    </script>
+}

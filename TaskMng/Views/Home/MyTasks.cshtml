@@ -1,0 +1,70 @@
+﻿@model IEnumerable<TaskMng.Models.TaskView>
+
+<p>
+    <br />
+    <a href="@Url.Action("Create", "Home")" title="Create new task">
+        <i class="far fa-plus-square" style="font-size:2em; color:lightsteelblue" label="Create new task"></i>
+        Create new task
+    </a>
+</p>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Name)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Status)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Progress)
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr id="task@(item.Id)">
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Status.Name)
+            </td>
+            <td>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-striped active" role="progressbar"
+                         aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width:@item.Progress%">
+                        @item.Progress%
+                    </div>
+                </div>
+            </td>
+            <td>
+                <a href="@Url.Action("Details", "Home", new { id = item.Id })" title="Details">
+                    <i class="fas fa-info-circle" style="font-size:2em; color:silver"></i>
+                </a>
+                <a href="#" title="Delete" onclick="deleteTask(@item.Id)">
+                    <i class="fas fa-trash"></i>
+                </a>
+            </td>
+        </tr>
+    }
+
+</table>
+
+    <script>
+        function deleteTask(taskId) {
+            $.ajax({
+                url: "@Url.Action("DeleteTask", "Home")",
+                method: "POST",
+                data: { id: taskId }
+            })
+            .done(function () {
+                alert("Task has been deleted.");
+                $("#task" + taskId).remove();
+            })
+            .fail(function () {
+                alert("Cannot delete the task!");
+            });
+        }
+    </script>

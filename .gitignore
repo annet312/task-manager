@@ -3,3 +3,7 @@
 ################################################################################
 
 /TaskManagerDAL/.vs
+/.vs
+/IdentityDAL/.vs/IdentityDAL/v15
+/TaskManagerBLL/obj
+/IdentityDAL/obj
