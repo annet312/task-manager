@@ -2,25 +2,12 @@
 
 <p>
     <br />
-    <a href="@Url.Action("Create", "Home")" title="Create new task">
-        <i class="far fa-plus-square" style="font-size:2em; color:lightsteelblue" data-toggle="modal" data-target="#myModal" label="Create new task"></i>
+    <a href="#" title="Create new task" data-toggle="modal" data-target="#myModal">
+        <i class="fas fa-plus-circle"></i>
         Create new task
     </a>
 </p>
-<div id="myModal" class="modal fade">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button class="close" type="button" data-dismiss="modal">×</button>
-                <h4 class="modal-title">Ctreate new task</h4>
-            </div>
-            <div class="modal-body">
-                
-            </div>
-            <div class="modal-footer"><button class="btn btn-default" type="button" data-dismiss="modal">Close</button></div>
-        </div>
-    </div>
-</div>
+
 <table class="table">
     <tr>
         <th></th>
@@ -40,10 +27,10 @@
     {
         <tr id="task@(item.Id)">
             <td>
-                <a id="iconshow-subtask@(item.Id)" href="#" title="Show subtasks" onclick="showSubtasks(@item.Id)">
+                <a id="iconshow-subtask" href="#" title="Show subtasks" onclick="showSubtasks(@item.Id)">
                     <i class="far fa-plus-square"></i>@*//change on far-fa-minus when click*@
                 </a>
-                <a id="iconhide-subtask@(item.Id)" href="#" title="Hide subtasks" hidden onclick="hideSubtasks(@item.Id)">
+                <a id="iconhide-subtask" href="#" title="Hide subtasks" class="collapse" onclick="hideSubtasks(@item.Id)">
                     <i class="far fa-minus-square"></i>
                 </a>
             </td>
@@ -75,6 +62,36 @@
 
 </table>
 
+<div id="myModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create your own task</h5>
+                <button class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="сreatetask-form" autocomplete="" method="post">
+                    <div class="form-group">
+                        <label for="task-name">Name:</label>
+                        <input type="text" class="form-control" id="newtask-name">
+                    </div>
+                    <div class="form-group">
+                        <label for="comment-text">Comment:</label>
+                        <textarea class="form-control" id="comment-text"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal">Close</button>
+                <button class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
     <script>
         function deleteTask(taskId) {
             $.ajax({
@@ -98,10 +115,11 @@
                 data: { parentId: taskId }
             })
                 .done(function (data) {
-                    $('#task' + taskId).after(data);
+                    var taskRow = $('#task' + taskId);
+                    taskRow.after(data);
 
-                    $("#iconshow-subtask" + taskId).hide();
-                    $("#iconhide-subtask" + taskId).show();
+                    $("#iconshow-subtask", taskRow).hide();
+                    $("#iconhide-subtask", taskRow).show();
             })
             .fail(function () {
                 //alert("Cannot delete the task!");
@@ -109,8 +127,9 @@
         }
 
         function hideSubtasks(taskId) {
-            $('#task' + taskId).next().remove();
-            $("#iconhide-subtask" + taskId).hide();
-            $("#iconshow-subtask" + taskId).show();
+            var taskRow = $('#task' + taskId);
+            taskRow.next().remove();
+            $("#iconhide-subtask", taskRow).hide();
+            $("#iconshow-subtask", taskRow).show();
         }
     </script>

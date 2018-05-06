@@ -87,11 +87,7 @@ namespace TaskMng.Controllers
         [HttpGet]
         public ActionResult ShowSubtask(int parentId)
         {
-          //  TaskView task = mapper.Map<TaskBLL, TaskView>(serviceTask.GetTask(parentId));
             IEnumerable<TaskView> subtasks = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(serviceTask.GetSubtasksOfTask(parentId));
-            //List<TaskView> tasks = subtasks.Prepend(task).ToList();
-            //View will take collection of tasks where first element - main task ;
-            //the rest - subtasks if they are exist
             return PartialView("ShowSubtask", subtasks);
         }
         [HttpGet]
