@@ -271,6 +271,7 @@
     <Content Include="Views\Home\MyTasks.cshtml" />
     <Content Include="Views\Home\MyTeam.cshtml" />
     <Content Include="Views\Home\TaskOfMyTeam.cshtml" />
+    <Content Include="Views\Home\ShowSubtask.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

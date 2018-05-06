@@ -1,0 +1,44 @@
+﻿@model IEnumerable<TaskMng.Models.TaskView>
+
+@*<p>
+    @Html.ActionLink("Create New", "Create")
+</p>*@
+<tr>
+    <td colspan="5">
+        <table class="table">
+            @foreach (var item in Model)
+            {
+            <tr id="task@(item.Id)">
+                <td>
+                    <i class="fas fa-circle"></i>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Status.Name)
+                </td>
+                <td>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped active" role="progressbar"
+                             aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width:@item.Progress%">
+                            @item.Progress%
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <a href="@Url.Action("Details", "Home", new { id = item.Id })" title="Details">
+                        <i class="fas fa-info-circle"></i>
+                    </a>
+                    <a href="#" title="Delete" onclick="deleteTask(@item.Id)">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            }
+        </table>
+        <div>
+            Add sub-task
+        </div>
+    </td>
+</tr>

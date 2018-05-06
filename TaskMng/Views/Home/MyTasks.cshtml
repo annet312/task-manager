@@ -3,13 +3,27 @@
 <p>
     <br />
     <a href="@Url.Action("Create", "Home")" title="Create new task">
-        <i class="far fa-plus-square" style="font-size:2em; color:lightsteelblue" label="Create new task"></i>
+        <i class="far fa-plus-square" style="font-size:2em; color:lightsteelblue" data-toggle="modal" data-target="#myModal" label="Create new task"></i>
         Create new task
     </a>
 </p>
-
+<div id="myModal" class="modal fade">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="close" type="button" data-dismiss="modal">×</button>
+                <h4 class="modal-title">Ctreate new task</h4>
+            </div>
+            <div class="modal-body">
+                
+            </div>
+            <div class="modal-footer"><button class="btn btn-default" type="button" data-dismiss="modal">Close</button></div>
+        </div>
+    </div>
+</div>
 <table class="table">
     <tr>
+        <th></th>
         <th>
             @Html.DisplayNameFor(model => model.Name)
         </th>
@@ -26,6 +40,14 @@
     {
         <tr id="task@(item.Id)">
             <td>
+                <a id="iconshow-subtask@(item.Id)" href="#" title="Show subtasks" onclick="showSubtasks(@item.Id)">
+                    <i class="far fa-plus-square"></i>@*//change on far-fa-minus when click*@
+                </a>
+                <a id="iconhide-subtask@(item.Id)" href="#" title="Hide subtasks" hidden onclick="hideSubtasks(@item.Id)">
+                    <i class="far fa-minus-square"></i>
+                </a>
+            </td>
+            <td>
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
             <td>
@@ -41,13 +63,14 @@
             </td>
             <td>
                 <a href="@Url.Action("Details", "Home", new { id = item.Id })" title="Details">
-                    <i class="fas fa-info-circle" style="font-size:2em; color:silver"></i>
+                    <i class="fas fa-info-circle"></i>
                 </a>
                 <a href="#" title="Delete" onclick="deleteTask(@item.Id)">
                     <i class="fas fa-trash"></i>
                 </a>
             </td>
         </tr>
+        //add component that will change with partial view???
     }
 
 </table>
@@ -66,5 +89,28 @@
             .fail(function () {
                 alert("Cannot delete the task!");
             });
+        }
+
+        function showSubtasks(taskId) {
+            $.ajax({
+                url: "@Url.Action("ShowSubtask", "Home")",
+                method: "GET",
+                data: { parentId: taskId }
+            })
+                .done(function (data) {
+                    $('#task' + taskId).after(data);
+
+                    $("#iconshow-subtask" + taskId).hide();
+                    $("#iconhide-subtask" + taskId).show();
+            })
+            .fail(function () {
+                //alert("Cannot delete the task!");
+            });
+        }
+
+        function hideSubtasks(taskId) {
+            $('#task' + taskId).next().remove();
+            $("#iconhide-subtask" + taskId).hide();
+            $("#iconshow-subtask" + taskId).show();
         }
     </script>

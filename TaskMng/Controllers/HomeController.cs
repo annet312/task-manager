@@ -74,12 +74,25 @@ namespace TaskMng.Controllers
         //    return View();
         //}
 
-    
+        [HttpGet]
         public ActionResult Details(int id)
         {
-            var task = mapper.Map<TaskBLL, TaskView>(serviceTask.GetTask(id));
-            var subtasks = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(serviceTask.GetSubtasksOfTask(id));
-            return View(task);
+            TaskView task = mapper.Map<TaskBLL, TaskView>(serviceTask.GetTask(id));
+            IEnumerable<TaskView> subtasks = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(serviceTask.GetSubtasksOfTask(id));
+            List<TaskView> tasks = subtasks.Prepend(task).ToList();
+            //View will take collection of tasks where first element - main task ;
+            //the rest - subtasks if they are exist
+            return View("Details", tasks);
+        }
+        [HttpGet]
+        public ActionResult ShowSubtask(int parentId)
+        {
+          //  TaskView task = mapper.Map<TaskBLL, TaskView>(serviceTask.GetTask(parentId));
+            IEnumerable<TaskView> subtasks = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(serviceTask.GetSubtasksOfTask(parentId));
+            //List<TaskView> tasks = subtasks.Prepend(task).ToList();
+            //View will take collection of tasks where first element - main task ;
+            //the rest - subtasks if they are exist
+            return PartialView("ShowSubtask", subtasks);
         }
         [HttpGet]
         public ActionResult MyTasks()
@@ -119,5 +132,36 @@ namespace TaskMng.Controllers
         {
             serviceTask.DeleteTask(id);
         }
+        [HttpPost]
+        public bool CreateTask(TaskView newTask)
+        {
+            if (ModelState.IsValid)
+            {
+                PersonView author = mapper.Map<PersonBLL, PersonView>(servicePerson.GetPerson(User.Identity.GetUserId()));
+                var task = new TaskView
+                {
+                    ParentId = null,
+                    Author = author,
+                    Assignee = newTask.Assignee,
+                    Name = newTask.Name,
+                    ETA = newTask.ETA,
+                    DueDate = newTask.DueDate,
+                    Comment = newTask.Comment
+                };
+                try
+                {
+                    serviceTask.CreateTask(mapper.Map<TaskView, TaskBLL>(task));
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
+               // return RedirectToAction("Index", "Home"); 
+
+            }
+            return false;
+        }
+       
     }
 }
