@@ -67,7 +67,7 @@ namespace TaskManagerDAL.Context
                 //userManager.AddToRole(manager.Id, role2.Name);
             }
             /// Add to table Person
-            var person = new Person { Name = manager.UserName, EAdress = manager.Email, Role = role1.Name};
+            var person = new Person { Name = manager.UserName, Email = manager.Email, Role = role1.Name};
             var team = new Team { TeamName = "Team1" };
             context.Teams.Add(team);
             person.Team.Id = team.Id;

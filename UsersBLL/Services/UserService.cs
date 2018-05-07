@@ -33,7 +33,7 @@ namespace TaskManagerUsersBLL.Services
                 }
                 await Database.UserManager.AddToRoleAsync(user.Id, userBll.Role);
 
-                var person = new Person { UserId = user.Id, EAdress = userBll.Email, Name = userBll.UserName , Role = userBll.Role};
+                var person = new Person { UserId = user.Id, Email = userBll.Email, Name = userBll.UserName , Role = userBll.Role};
                 //!!!!!TeamName надо находить
                 Database.RersonManager.Create(person, userBll.TeamName);
                 await Database.SaveAsync();

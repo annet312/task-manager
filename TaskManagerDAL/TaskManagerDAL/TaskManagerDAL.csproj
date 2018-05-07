@@ -67,9 +67,21 @@
     <Compile Include="Interfaces\IPersonManager.cs" />
     <Compile Include="Interfaces\IRepository.cs" />
     <Compile Include="Interfaces\IUnitOfWork.cs" />
-    <Compile Include="Migrations\201804232000219_FirstStateDatabase.cs" />
-    <Compile Include="Migrations\201804232000219_FirstStateDatabase.Designer.cs">
-      <DependentUpon>201804232000219_FirstStateDatabase.cs</DependentUpon>
+    <Compile Include="Migrations\201805071959129_Init.cs" />
+    <Compile Include="Migrations\201805071959129_Init.Designer.cs">
+      <DependentUpon>201805071959129_Init.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201805072016433_Rename EAddress.cs" />
+    <Compile Include="Migrations\201805072016433_Rename EAddress.Designer.cs">
+      <DependentUpon>201805072016433_Rename EAddress.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201805072025458_Fix _Task.cs" />
+    <Compile Include="Migrations\201805072025458_Fix _Task.Designer.cs">
+      <DependentUpon>201805072025458_Fix _Task.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201805072054477_Fix Person.cs" />
+    <Compile Include="Migrations\201805072054477_Fix Person.Designer.cs">
+      <DependentUpon>201805072054477_Fix Person.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -83,13 +95,22 @@
     <Compile Include="Repositories\UnitOfWork.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201804232000219_FirstStateDatabase.resx">
-      <DependentUpon>201804232000219_FirstStateDatabase.cs</DependentUpon>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201805071959129_Init.resx">
+      <DependentUpon>201805071959129_Init.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201805072016433_Rename EAddress.resx">
+      <DependentUpon>201805072016433_Rename EAddress.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201805072025458_Fix _Task.resx">
+      <DependentUpon>201805072025458_Fix _Task.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201805072054477_Fix Person.resx">
+      <DependentUpon>201805072054477_Fix Person.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

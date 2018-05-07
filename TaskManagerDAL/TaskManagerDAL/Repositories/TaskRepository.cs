@@ -25,7 +25,7 @@ namespace TaskManagerDAL.Repositories
         }
         public IEnumerable<_Task> Find(Func<_Task, Boolean> predicate)
         {
-            var tasks = dataBase.Tasks.Include(p => p.Author).Include(p => p.Assignee).Include(p => p.Status).Where(predicate).ToList();
+            var tasks = dataBase.Tasks.ToList();//.Include(p => p.Author).Include(p => p.Assignee).Include(p => p.Status).Where(predicate).ToList();
             return tasks;
         }
         public void Create(_Task task)

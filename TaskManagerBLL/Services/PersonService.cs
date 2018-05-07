@@ -56,19 +56,19 @@ namespace TaskManagerBLL.Services
 
             var teams = db.Teams.Find(p => (p.TeamName == TeamName));
             var person = db.People.Find(p => (p.Name == ManagerName)).FirstOrDefault();
-            var managers = db.Teams.Find(p => (p.ManagerId == person.Id));
+           // var managers = db.Teams.Find(p => (p.ManagerId == person.Id));
             if (teams.Any())
             {
                 throw new ArgumentException("Team with this name is already exist", TeamName);
             }
-            if (managers.Any())
-            {
-                //TO DO change Name of Team!!
-                throw new ArgumentException("This Manager has already had a team", TeamName);
-            }
+            //if (managers.Any())
+            //{
+            //    //TO DO change Name of Team!!
+            //    throw new ArgumentException("This Manager has already had a team", TeamName);
+            //}
             var team = new Team();
             team.TeamName = TeamName;
-            team.ManagerId = person.Id;
+            //team.ManagerId = person.Id;
             db.Teams.Create(team);
             return team.Id;
         }
@@ -79,29 +79,29 @@ namespace TaskManagerBLL.Services
             return mapper.Map<IEnumerable<Team>, IEnumerable<TeamBLL>>(result);
         }
 
-        public IEnumerable<PersonBLL> GetManagerTeam(PersonBLL manager)
-        {//???TOCHECK
-            if (manager == null)
-            {
-                throw new ArgumentNullException("manager","Manager is null");
-            }
-            var team = db.Teams.Find(t => (t.ManagerId == manager.Id)).FirstOrDefault();
-            if (team == null)
-            {
-                throw new ArgumentException("Unknown team");
-            }
-            var people = db.People.Find(p => (p.Team == team));
+        //public IEnumerable<PersonBLL> GetManagerTeam(PersonBLL manager)
+        //{//???TOCHECK
+        //    if (manager == null)
+        //    {
+        //        throw new ArgumentNullException("manager","Manager is null");
+        //    }
+        //    var team = db.Teams.Find(t => (t.ManagerId == manager.Id)).FirstOrDefault();
+        //    if (team == null)
+        //    {
+        //        throw new ArgumentException("Unknown team");
+        //    }
+        //    var people = db.People.Find(p => (p.Team == team));
 
-            return mapper.Map<IEnumerable<Person>, IEnumerable<PersonBLL>>(people);
-        }
+        //    return mapper.Map<IEnumerable<Person>, IEnumerable<PersonBLL>>(people);
+        //}
         public void DeletePersonFromTeam(PersonBLL programmer)
         {
             //if programmer isn't a manager then can be delete from team
-            var teammate = db.Teams.Find(t=>(t.ManagerId == programmer.Id));
-            if (teammate.Any())
-            {
-                throw new ArgumentException("Cannot delete manager from team","programmer");
-            }
+            //var teammate = db.Teams.Find(t=>(t.ManagerId == programmer.Id));
+            //if (teammate.Any())
+            //{
+            //    throw new ArgumentException("Cannot delete manager from team","programmer");
+            //}
             var person = mapper.Map<PersonBLL, Person>(programmer);
             var res = db.People.Find(p => (p.Name == person.Name));
             if (!res.Any())
@@ -116,11 +116,11 @@ namespace TaskManagerBLL.Services
 
         public void AddPersonToTeam(PersonBLL programmer, TeamBLL team)
         {
-            var teammate = db.Teams.Find(t => (t.ManagerId == programmer.Id));
-            if (teammate.Any())
-            {
-                throw new ArgumentException("Cannot add manager to team", "programmer");
-            }
+            //var teammate = db.Teams.Find(t => (t.ManagerId == programmer.Id));
+            //if (teammate.Any())
+            //{
+            //    throw new ArgumentException("Cannot add manager to team", "programmer");
+            //}
             var person = mapper.Map<PersonBLL, Person>(programmer);
             var res = db.People.Find(p => (p.Name == person.Name));
             if (!res.Any())

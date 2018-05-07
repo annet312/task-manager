@@ -6,14 +6,14 @@ namespace TaskManagerDAL.Migrations
     using System.Data.Entity.Migrations.Infrastructure;
     using System.Resources;
     
-    [GeneratedCode("EntityFramework.Migrations", "6.1.0-30225")]
-    public sealed partial class FirstStateDatabase : IMigrationMetadata
+    [GeneratedCode("EntityFramework.Migrations", "6.2.0-61023")]
+    public sealed partial class RenameEAddress : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(FirstStateDatabase));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(RenameEAddress));
         
         string IMigrationMetadata.Id
         {
-            get { return "201804232000219_FirstStateDatabase"; }
+            get { return "201805072016433_Rename EAddress"; }
         }
         
         string IMigrationMetadata.Source
