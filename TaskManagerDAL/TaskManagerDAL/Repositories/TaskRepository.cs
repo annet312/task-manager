@@ -25,14 +25,26 @@ namespace TaskManagerDAL.Repositories
         }
         public IEnumerable<_Task> Find(Func<_Task, Boolean> predicate)
         {
-            var tasks = dataBase.Tasks.ToList();//.Include(p => p.Author).Include(p => p.Assignee).Include(p => p.Status).Where(predicate).ToList();
+            var tasks = dataBase.Tasks.Include(p => p.Author).Include(p => p.Assignee).Include(p => p.Status).Where(predicate).ToList();
             return tasks;
         }
         public void Create(_Task task)
         {
-            var elem = dataBase.Tasks.Include(p => p.Assignee).Include(p => p.Author).Include(p => p.Status).FirstOrDefault();
-            dataBase.Tasks.Attach(elem);
-            dataBase.Tasks.Add(task);
+            
+            var taskForCreate = new _Task
+            {
+                Name = task.Name,
+                ParentId = task.ParentId,
+                AuthorId = task.Author.Id,
+                AssigneeId = task.Assignee.Id,
+                StatusId = task.Status.Id,
+                Progress = task.Progress,
+                DateStart = task.DateStart,
+                ETA = task.ETA,
+                DueDate = task.DueDate,
+                Comment = task.Comment
+            };
+            dataBase.Tasks.Add(taskForCreate);
         }
         public void Update(_Task task)
         {

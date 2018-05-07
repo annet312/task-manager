@@ -24,7 +24,8 @@ namespace TaskManagerBLL.Infrastructure
         public override void Load()
         {
             //"DefaultConnection";
-            connectionString = "Data Source = (LocalDB)\\MSSQLLocalDB; AttachDbFilename = C:\\Users\\Anna\\Documents\\LabsEpam\\Project\\TaskMng\\App_Data\\TaskMng.mdf; Integrated Security = True";
+            connectionString = "Data Source = (LocalDB)\\MSSQLLocalDB; AttachDbFilename = C:\\Users\\Anna\\Documents\\LabsEpam\\task-manager\\TaskMng\\App_Data\\TaskMng.mdf; Integrated Security = True";
+
             Bind<IUnitOfWork>().To<UnitOfWork>().WithConstructorArgument(connectionString);
             Bind<ITaskService>().To<TaskService>().InSingletonScope();
             Bind<IPersonService>().To<PersonService>().InSingletonScope();

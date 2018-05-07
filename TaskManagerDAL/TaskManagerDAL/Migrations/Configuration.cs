@@ -20,7 +20,7 @@ namespace TaskManagerDAL.Migrations
 
         protected override void Seed(TaskManagerContext context)
         {
-            //IdentityInitialSetup(context);
+            IdentityInitialSetup(context);
             TaskManagerInitialSetup(context);
             context.SaveChanges();
            
@@ -43,7 +43,6 @@ namespace TaskManagerDAL.Migrations
             // Creating manager and programmer
             var manager = new ApplicationUser { Email = "Manager1_mail@gmail.com", UserName = "Manager1Name" };
             string password = "_Manager1_";
-
             var result = userManager.Create(manager, password);
             if (result.Succeeded)
             {
@@ -52,11 +51,13 @@ namespace TaskManagerDAL.Migrations
                 //userManager.AddToRole(manager.Id, role2.Name);
             }
             /// Add to table Person
-            var person = new Person { Name = manager.UserName, Email = manager.Email, Role = role1.Name };
             var team = new Team { TeamName = "Team1" };
-            context.Teams.Add(team);
+            var person = new Person { Name = manager.UserName, UserId = manager.Id, Email = manager.Email, Team = team, Role = role1.Name };
+           
+            context.Teams.AddOrUpdate(team);
             person.Team.Id = team.Id;
             context.People.Add(person);
+            
         }
         public void TaskManagerInitialSetup(TaskManagerContext context)
         {
