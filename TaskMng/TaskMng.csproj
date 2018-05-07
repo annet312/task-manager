@@ -201,6 +201,8 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\AccountViewModels.cs" />
+    <Compile Include="Models\CreateTaskView.cs" />
+    <Compile Include="Models\DetailsTaskView.cs" />
     <Compile Include="Models\PersonView.cs" />
     <Compile Include="Models\StatusView.cs" />
     <Compile Include="Models\TaskView.cs" />

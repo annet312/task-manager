@@ -21,16 +21,18 @@ namespace TaskManagerDAL.Repositories
         }
         public _Task Get(int id)
         {
-            return dataBase.Tasks.Find(id);
+            return dataBase.Tasks.Include(p => p.Assignee).Include(p=>p.Author).Include(p=>p.Status).SingleOrDefault(p => p.Id == id);
         }
         public IEnumerable<_Task> Find(Func<_Task, Boolean> predicate)
         {
             var tasks = dataBase.Tasks.Include(p => p.Author).Include(p => p.Assignee).Include(p => p.Status).Where(predicate).ToList();
             return tasks;
         }
-        public void Create(_Task person)
+        public void Create(_Task task)
         {
-            dataBase.Tasks.Add(person);
+            var elem = dataBase.Tasks.Include(p => p.Assignee).Include(p => p.Author).Include(p => p.Status).FirstOrDefault();
+            dataBase.Tasks.Attach(elem);
+            dataBase.Tasks.Add(task);
         }
         public void Update(_Task task)
         {

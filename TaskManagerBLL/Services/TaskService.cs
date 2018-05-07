@@ -108,15 +108,27 @@ namespace TaskManagerBLL.Services
             }
             db.Save();
         }
-        public void CreateTask(TaskBLL task)
+        public void CreateTask(TaskBLL task, string authorId,string assigneeId )
         {
-            var status = mapper.Map<Status, StatusBLL>(db.Statuses.Find(s => (s.Name == "New")).FirstOrDefault());
+            PersonBLL author = mapper.Map<Person,PersonBLL>(db.People.Find(p => p.UserId == authorId).Single());
+            Person assignee = db.People.Find(p => p.UserId == authorId).Single();
+            PersonBLL assigneeBLL;
+            if ((assigneeId == string.Empty) || (assigneeId == null))
+            {
+                assigneeBLL = author;
+            }
+            else
+            {
+                assigneeBLL = mapper.Map<Person, PersonBLL>(assignee);
+               
+            }
+            var status = mapper.Map<Status, StatusBLL>(db.Statuses.Find(s => (s.Name == "New")).Single());
             var newTask = new TaskBLL
             {
                 ParentId = null,
-                Author = task.Author,
+                Author = author,
                 Name = task.Name,
-                Assignee = task.Assignee,
+                Assignee = assigneeBLL,
                 Status = status,
                 Progress = 0,
                 DateStart = null,

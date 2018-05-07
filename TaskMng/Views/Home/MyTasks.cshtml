@@ -2,7 +2,7 @@
 
 <p>
     <br />
-    <a href="#" title="Create new task" data-toggle="modal" data-target="#myModal">
+    <a href="#" title="Create new task" data-toggle="modal" data-target="#myModalCreateTask">
         <i class="fas fa-plus-circle"></i>
         Create new task
     </a>
@@ -49,7 +49,7 @@
                 </div>
             </td>
             <td>
-                <a href="@Url.Action("Details", "Home", new { id = item.Id })" title="Details">
+                <a href="#" title="Details" onclick="details(@item.Id)" data-toggle="modal" data-target="#myModalDetailsTask">
                     <i class="fas fa-info-circle"></i>
                 </a>
                 <a href="#" title="Delete" onclick="deleteTask(@item.Id)">
@@ -62,7 +62,7 @@
 
 </table>
 
-<div id="myModal" class="modal fade">
+<div id="myModalCreateTask" class="modal fade" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -72,27 +72,77 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form id="сreatetask-form" autocomplete="" method="post">
-                    <div class="form-group">
-                        <label for="task-name">Name:</label>
-                        <input type="text" class="form-control" id="newtask-name">
-                    </div>
-                    <div class="form-group">
-                        <label for="comment-text">Comment:</label>
-                        <textarea class="form-control" id="comment-text"></textarea>
-                    </div>
-                </form>
+                <div class="form-group">
+                    <label for="task-name">Name:</label>
+                    <input type="text" class="form-control" id="newtask-name">
+                </div>
+                <div class="form-group">
+                    <label for="comment-text">Comment:</label>
+                    <textarea class="form-control" id="comment-text"></textarea>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-default" data-dismiss="modal">Close</button>
-                <button class="btn btn-primary">Save changes</button>
+                <button class="btn btn-primary" type="button" onclick="createMyMainTask()">Save task</button>
             </div>
         </div>
     </div>
 </div>
 
+<div id="myModalDetailsTask" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Details of Task </h5>
+                <button class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="detailOfTask"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
     <script>
+        function details(mainId) {
+             $.ajax({
+                url: "@Url.Action("Details", "Home")",
+                 method: "GET",
+                 data: { id: mainId },
+             })
+            .done(function (data) {
+               $("#detailOfTask").html(data) ;
+            })
+            .fail(function () {
+                alert("Cannot find the task");
+            });
+        }
+
+        function createMyMainTask() {
+            var task = {
+                name : $("#newtask-name").val(),
+                assigneeId : "",
+                comment : $("#comment-text").val()
+            };
+            $.ajax({
+                url: "@Url.Action("CreateTask", "Home")",
+                method: "POST",
+                data: { newTask: task }
+            })
+            .done(function () {
+                alert("Task has been added.");
+                top.location.href = '/Home/Index'
+            })
+            .fail(function () {
+                alert("Cannot add the task!");
+            });
+        }
+
         function deleteTask(taskId) {
             $.ajax({
                 url: "@Url.Action("DeleteTask", "Home")",

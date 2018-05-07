@@ -15,7 +15,7 @@ namespace TaskManagerBLL.Interfaces
         void DeleteTask(int taskId);
         void AddSubtask(TaskBLL subtask, int taskId, bool forceToSave = true);
         void AddSubtasksFromTemplate(int taskId, int templateId);
-        void CreateTask(TaskBLL task);
+        void CreateTask(TaskBLL task, string authorId, string assigneeId);
         void SaveChangeTask(TaskBLL task);
         IEnumerable<TaskBLL> GetSubtasksOfTask(int Id);
         void SetNewStatus(int statusId, TaskBLL task);

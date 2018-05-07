@@ -79,10 +79,12 @@ namespace TaskMng.Controllers
         {
             TaskView task = mapper.Map<TaskBLL, TaskView>(serviceTask.GetTask(id));
             IEnumerable<TaskView> subtasks = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(serviceTask.GetSubtasksOfTask(id));
-            List<TaskView> tasks = subtasks.Prepend(task).ToList();
-            //View will take collection of tasks where first element - main task ;
-            //the rest - subtasks if they are exist
-            return View("Details", tasks);
+            DetailsTaskView tasks = new DetailsTaskView
+                                        {
+                                            MainTask = task,
+                                            Subtasks = subtasks
+                                        };
+            return PartialView("Details", tasks);
         }
         [HttpGet]
         public ActionResult ShowSubtask(int parentId)
@@ -129,27 +131,25 @@ namespace TaskMng.Controllers
             serviceTask.DeleteTask(id);
         }
         [HttpPost]
-        public bool CreateTask(TaskView newTask)
+        public bool CreateTask(CreateTaskView newTask)
         {
             if (ModelState.IsValid)
             {
-                PersonView author = mapper.Map<PersonBLL, PersonView>(servicePerson.GetPerson(User.Identity.GetUserId()));
+                //PersonView author = mapper.Map<PersonBLL, PersonView>(servicePerson.GetPerson(User.Identity.GetUserId()));
+                string authorId = User.Identity.GetUserId();
+                string assigneeId = newTask.AssigneeId;
                 var task = new TaskView
                 {
                     ParentId = null,
-                    Author = author,
-                    Assignee = newTask.Assignee,
                     Name = newTask.Name,
-                    ETA = newTask.ETA,
-                    DueDate = newTask.DueDate,
                     Comment = newTask.Comment
                 };
                 try
                 {
-                    serviceTask.CreateTask(mapper.Map<TaskView, TaskBLL>(task));
+                    serviceTask.CreateTask(mapper.Map<TaskView, TaskBLL>(task), authorId, assigneeId);
                     return true;
                 }
-                catch
+                catch (Exception e)
                 {
                     return false;
                 }

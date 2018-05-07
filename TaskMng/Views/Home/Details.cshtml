@@ -1,60 +1,41 @@
-﻿@model IEnumerable<TaskMng.Models.TaskView>
-
-@{
-    ViewBag.Title = "Details";
-}
-
-
-@using (Html.BeginForm())
-{
-    @Html.AntiForgeryToken()
-
-    <div>
-        <span style="font-size:40px">@Html.DisplayNameFor(model => model.First().Name) : </span>
-        <span id="name-task" style="color:slategrey; font-size:40px">@Html.DisplayFor(model => model.First().Name)</span>
-        @*<input id="new-name-task" type="text" class="hide" value="@Html.DisplayFor(model => model.First().Name)"/>*@
-        <a href="#" title="Change name">
-            <i style="font-size:20px; color:darkblue" class="fas fa-edit" onclick="changeNameTask('name-task','new-name-task')"></i>
-        </a>
-    </div>
-    <div>
-        @if (Model.Count() > 1)
-        {
-            <b style="font-size :medium">Subtasks</b>
-            <table style="font-size :medium; counter-reset:initial">
-                    @foreach (var item in Model.Skip(1))
-                    {
-                <tr style="counter-increment:inherit">
-                    <td></td>
-                    <td id="task@(item.Id)">@item.Name
-                        <a href="#" title="Change name">
-                            <i style="font-size:15px; color:darkblue" class="fas fa-edit" onclick="ChangeNameTask('task@(item.Id)')"></i>
-                        </a>
-                    </td>
-                    <td>@item.Status</td>
-                    <td>@item.Progress</td>
-                    <td>
-                        </td>
-                </tr>
-                     }
-            </table>
-        }
-     </div>
- 
- }
+﻿@model TaskMng.Models.DetailsTaskView
 
 <div>
-    @Html.ActionLink("Back to List", "Index")
-</div>
-<script>
-    function changeNameTask(idold,idnew) {
-        var changeComponent = document.getElementById(idold);
-        $('#' + idold).hide();
-        $('#' + idnew).show();
+    <div class="form-row">
+        <div class="col">
+            <label for="status">Name</label>
+            <h4>@Model.MainTask.Name</h4>
+        </div>
+        <div class="col">
+            <label for="status">Status</label>
+            <span id="status" class="form-control">@Model.MainTask.Status.Name</span>
+        </div>
+    </div>
 
-   
-    }
-</script>
-@section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
-}
+    <div class="form-row">
+        <div class="col">
+            <label for="status">Author</label>
+            <span class="form-control">@Model.MainTask.Author.Name</span>
+        </div>
+        <div class="col">
+            <label for="status">Assignee</label>
+            <span class="form-control">@Model.MainTask.Assignee.Name</span>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="col">
+            <label for="status">Date start</label>
+            <span class="form-control">@Model.MainTask.DateStart.Value</span>
+        </div>
+        <div class="col">
+            <label for="status">ETA</label>
+            <span class="form-control">@Model.MainTask.ETA.Value</span>
+        </div>
+        <div class="col">
+            <label for="status">Due Date</label>
+            <span class="form-control">@Model.MainTask.DueDate.Value</span>
+        </div>
+    </div>
+
+</div>

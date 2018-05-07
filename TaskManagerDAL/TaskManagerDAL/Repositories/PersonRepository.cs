@@ -21,7 +21,7 @@ namespace TaskManagerDAL.Repositories
         }
         public Person Get(int id)
         {
-            return dataBase.People.Find(id);
+            return dataBase.People.Include(p => p.Team).Include(p => p.ApplicationUser).SingleOrDefault(p => p.Id == id);
         }
         public IEnumerable<Person> Find(Func<Person, Boolean> predicate)
         {
