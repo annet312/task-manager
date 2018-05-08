@@ -52,9 +52,13 @@
                 <a href="#" title="Details" onclick="details(@item.Id)" data-toggle="modal" data-target="#myModalDetailsTask">
                     <i class="fas fa-info-circle"></i>
                 </a>
+                <a href="#" title="Edit" onclick="editMainTask(@item.Id)" data-toggle="modal" data-target="#myModalEditMainTask">
+                    <i class="far fa-edit"></i>
+                </a>
                 <a href="#" title="Delete" onclick="deleteTask(@item.Id)">
                     <i class="fas fa-trash"></i>
                 </a>
+
             </td>
         </tr>
         //add component that will change with partial view???
@@ -89,6 +93,7 @@
     </div>
 </div>
 
+
 <div id="myModalDetailsTask" class="modal fade" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -99,7 +104,31 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div id="detailOfTask"></div>
+                <div id="detailOfTask">
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="myModalEditMainTask" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Task</h5>
+                <button class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="editTask">
+
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-default" data-dismiss="modal">Close</button>
@@ -109,6 +138,20 @@
 </div>
 
     <script>
+        function editMainTask(taskId) {
+             $.ajax({
+                url: "@Url.Action("EditTask", "Home")",
+                 method: "POST",
+                 data: { id: taskId },
+             })
+                 .done(function (data) {
+                $("#editTask").html(data) ;
+            })
+            .fail(function () {
+                alert("Cannot find the task");
+            });
+        }
+
         function details(mainId) {
              $.ajax({
                 url: "@Url.Action("Details", "Home")",

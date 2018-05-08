@@ -16,6 +16,7 @@ namespace TaskManagerBLL.Interfaces
         void AddPersonToTeam(PersonBLL programmer, TeamBLL team);
         void ChangeTeamName(int id, string NewName);
         IEnumerable<PersonBLL> GetPeopleInTeam(string managerId);
+        IEnumerable<PersonBLL> GetPeopleInTeam(int managerId);
         IEnumerable<PersonBLL> GetPeopleWithoutTeam();
         PersonBLL GetPerson(int id);
         PersonBLL GetPerson(string id);

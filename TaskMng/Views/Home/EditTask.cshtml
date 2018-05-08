@@ -1,0 +1,114 @@
+﻿@model TaskMng.Models.DetailsTaskView
+
+
+@Html.AntiForgeryToken()
+
+<h4>Edit Task</h4>
+<div>
+    <div class="form-row">
+        <div class="col-md-7">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Name</span>
+                </div>
+                <input type="text" class="form-control" placeholder="Name of task" value="@Model.MainTask.Name" aria-describedby="basic-addon1">
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon2">Status</span>
+                </div>
+                <select name="status" id="status" aria-describedby="basic-addon2" onclick="showStatus(@Model.MainTask.Id)">
+                    <option value="@Model.MainTask.Status.Id" selected id="old-status">@Model.MainTask.Status.Name</option>
+                    @* here partial view ChooseStatus*@
+                </select>
+            </div>
+        </div>
+    </div>
+
+    @if (User.IsInRole("Manager"))
+    {
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon3">Assignee</span>
+            </div>
+            <select name="assignee" id="assignee" aria-describedby="basic-addon3" onclick="showAssignee(@Model.MainTask.Author.Id)">
+                <option value="@Model.MainTask.Assignee.Id" selected id="old-assignee">@Model.MainTask.Assignee.Name</option>
+                @* Here partial view Choose Assignee *@
+            </select>
+        </div>
+    }
+    <div class="form-row"> 
+        <div class="col-md-6">
+
+            <label for="eta">ETA</label>
+            <input type="time" />
+           
+        </div>
+        <div class="col-md-6">
+                <label for="due-date">Due Date</label>
+                <span class="form-control" id="due-date">@Model.MainTask.DueDate</span>
+        </div>
+    </div>
+</div>
+
+<div class="form-group">
+    <div class="col-md-offset-2 col-md-10">
+        <input type="submit" value="Save" class="btn btn-default" />
+    </div>
+</div>
+
+@*<script>
+        // Example starter JavaScript for disabling form submissions if there are invalid fields
+        (function () {
+            'use strict';
+            window.addEventListener('load', function () {
+                // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                var forms = document.getElementsByClassName('needs-validation');
+                // Loop over them and prevent submission
+                var validation = Array.prototype.filter.call(forms, function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>*@
+<script>
+
+        function showStatus(id) {
+            $.ajax({
+                url: "@Url.Action("ChooseStatus", "Home")",
+                method: "GET",
+            })
+                .done(function (status) {
+                    var statusRow = $('#old-status');
+                    statusRow.replaceWith(status);
+            })
+            .fail(function () {
+            });
+        }
+    function showAssignee(id) {
+            $.ajax({
+                url: "@Url.Action("ChooseAssignee", "Home")",
+                method: "GET",
+                data: { managerId: id },
+            })
+                .done(function (assignee) {
+                    var assigneeRow = $('#old-assignee');
+                    assigneeRow.replaceWith(assignee);
+            })
+                .fail(function () {
+                    alert("Cannot do it!");
+            });
+        }
+</script>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+}

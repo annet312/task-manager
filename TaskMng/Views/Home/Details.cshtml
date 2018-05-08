@@ -2,40 +2,143 @@
 
 <div>
     <div class="form-row">
-        <div class="col">
-            <label for="status">Name</label>
-            <h4>@Model.MainTask.Name</h4>
+        <div class="col-md-10">
+            <label for="name-main-task">Name</label>
+            <h4 id="name-main-task">@Model.MainTask.Name</h4>
         </div>
-        <div class="col">
+        <div class="col-md-2">
             <label for="status">Status</label>
             <span id="status" class="form-control">@Model.MainTask.Status.Name</span>
         </div>
     </div>
-
+    <div class="form-group">
+        <label for="progress">Progress</label>
+        <div class="progress" id="progress">
+            <div class="progress-bar progress-bar-striped active" role="progressbar"
+                 aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width:@Model.MainTask.Progress%">
+                @Model.MainTask.Progress%
+            </div>
+        </div>
+    </div>
     <div class="form-row">
         <div class="col">
-            <label for="status">Author</label>
-            <span class="form-control">@Model.MainTask.Author.Name</span>
+            <label for="author">Author</label>
+            <span class="form-control" id="author">@Model.MainTask.Author.Name</span>
         </div>
         <div class="col">
-            <label for="status">Assignee</label>
-            <span class="form-control">@Model.MainTask.Assignee.Name</span>
+            <label for="assignee">Assignee</label>
+            <span class="form-control" id="assignee">@Model.MainTask.Assignee.Name</span>
         </div>
     </div>
 
     <div class="form-row">
         <div class="col">
-            <label for="status">Date start</label>
-            <span class="form-control">@Model.MainTask.DateStart.Value</span>
+            @if (Model.MainTask.DateStart.HasValue)
+            {
+                <label for="date-start">Date start</label>
+                <span class="form-control" id="date-start">@Model.MainTask.DateStart</span>
+                }
+                else
+                {
+                        <label for="date-start-na">Date start</label>
+                        <span class="form-control" id="date-start-na">N/A</span>
+                }
+                </div>
+        <div class="col">
+
+            @if (Model.MainTask.DateStart.HasValue)
+            {
+                <label for="eta">ETA</label>
+                <span class="form-control" id="eta">@Model.MainTask.ETA</span>
+                }
+                else
+                {
+                        <label for="eta-na">ETA</label>
+                        <span class="form-control" id="eta-na">N/A</span>
+                }
         </div>
         <div class="col">
-            <label for="status">ETA</label>
-            <span class="form-control">@Model.MainTask.ETA.Value</span>
-        </div>
-        <div class="col">
-            <label for="status">Due Date</label>
-            <span class="form-control">@Model.MainTask.DueDate.Value</span>
+
+            @if (Model.MainTask.DateStart.HasValue)
+            {
+                <label for="due-date">Due Date</label>
+                <span class="form-control" id="due-date">@Model.MainTask.DueDate</span>
+            }
+            else
+            {
+                    <label for="due-date-na">Due Date</label>
+                    <span class="form-control" id="due-date-na">N/A</span>
+            }
         </div>
     </div>
+    <label for="list-subtasks">Subtasks</label>
+    <div id="list-subtasks">
+    @for(var i=0; i<Model.Subtasks.Count(); i++)
+        {
+        <div class="form-control">
+            <div id="subtask-i" class="form-row">
+                <div class="col-md-1">
+                    <h6 id="numSubtask">@(i + 1)</h6>
+                </div>
+                <div class="col-md-11">
+                    <h6 id="name-subtask">@Model.Subtasks.ElementAt(i).Name</h6>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col-md-10">
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped active" role="progressbar"
+                             aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width:@Model.Subtasks.ElementAt(i).Progress%">
+                            @Model.Subtasks.ElementAt(i).Progress%
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <p id="status-subtask">@Model.Subtasks.ElementAt(i).Status.Name</p>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col-md-4">
+                    @if (Model.Subtasks.ElementAt(i).DateStart.HasValue)
+                    {
+                        <label for="date-start-subtask">Date start</label>
+                        <span class="form-control" id="date-start-subtask">@Model.Subtasks.ElementAt(i).DateStart</span>
+                    }
+                    else
+                    {
+                        <label for="date-start-na-subtask">Date start</label>
+                        <span class="form-control" id="date-start-na-subtask">N/A</span>
+                    }
+                </div>
+                <div class="col-md-4">
+                    @if (Model.Subtasks.ElementAt(i).ETA.HasValue)
+                     {
+                        <label for="eta-subtask">ETA</label>
+                        <span class="form-control" id="eta-subtask">@Model.Subtasks.ElementAt(i).ETA</span>
+                     }
+                    else
+                    {
+                        <label for="eta-na-subtask">ETA</label>
+                        <span class="form-control" id="eta-na-subtask">N/A</span>
+                    }
+                </div>
+                 <div class="col-md-4">
+
+                    @if (Model.Subtasks.ElementAt(i).DueDate.HasValue)
+                    {
+                        <label for="due-date">Due Date</label>
+                        <span class="form-control" id="due-date">@Model.Subtasks.ElementAt(i).DueDate</span>
+                    }
+                    else
+                    {
+                            <label for="due-date-na">Due Date</label>
+                            <span class="form-control" id="due-date-na">N/A</span>
+                    }
+                </div>
+            </div>
+        </div>
+
+     }
+     </div>
 
 </div>

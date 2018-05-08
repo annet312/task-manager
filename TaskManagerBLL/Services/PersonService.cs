@@ -141,16 +141,27 @@ namespace TaskManagerBLL.Services
         public IEnumerable<PersonBLL> GetPeopleInTeam(string managerId)
         {
             var manager = db.People.Find(p => p.UserId == managerId).SingleOrDefault();
+            var people = GetPeopleInTeam(manager);
+            return people;
+        }
+        public IEnumerable<PersonBLL> GetPeopleInTeam(int managerId)
+        {
+            var manager = db.People.Find(p => p.Id == managerId).SingleOrDefault();
+            var people = GetPeopleInTeam(manager);
+            return people;
+        }
+        private IEnumerable<PersonBLL> GetPeopleInTeam(Person manager)
+        {
             IEnumerable<PersonBLL> people = new List<PersonBLL>();
             if (manager == null)
             {
-                throw new ArgumentException("Manager is not found","managerId");
+                throw new ArgumentException("Manager is not found", "managerId");
             }
             if (manager.Team == null)
             {
                 return people;
             }
-            people = mapper.Map<IEnumerable<Person>, IEnumerable<PersonBLL>>(db.People.Find(p => ((p.Team != null)&&(p.Team.Id == manager.Team.Id) && (p.Id != manager.Id))));
+            people = mapper.Map<IEnumerable<Person>, IEnumerable<PersonBLL>>(db.People.Find(p => ((p.Team != null) && (p.Team.Id == manager.Team.Id))));
             return people;
         }
         public PersonBLL GetPerson(int id)

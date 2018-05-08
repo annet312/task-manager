@@ -55,7 +55,22 @@ namespace TaskMng.Controllers
             //    return View("MyTask", tasks.ToList());
             //}
         }
-
+        [HttpGet]
+        public ActionResult ChooseStatus()
+        {
+            ICollection<StatusView> status = mapper.Map<IEnumerable<StatusBLL>, IEnumerable<StatusView>>(serviceTask.GetAllStatuses()).ToList();
+            if(User.IsInRole("Programmer"))
+            {
+                status.Remove(status.Where(s => (s.Name == "Complete")).Single());
+            }
+            return PartialView("ChooseStatus", status);
+        }
+        [HttpGet]
+        public ActionResult ChooseAssignee(int managerId)
+        {
+            var assignees = mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(servicePerson.GetPeopleInTeam(managerId));
+            return PartialView("ChooseAssignee", assignees);
+        }
         public ActionResult About()
         {
             ViewBag.Message = "Statuses";
@@ -86,6 +101,20 @@ namespace TaskMng.Controllers
                                         };
             return PartialView("Details", tasks);
         }
+
+        [HttpPost]
+        public ActionResult EditTask(int id)
+        {
+            TaskView task = mapper.Map<TaskBLL, TaskView>(serviceTask.GetTask(id));
+            IEnumerable<TaskView> subtasks = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(serviceTask.GetSubtasksOfTask(id));
+            DetailsTaskView tasks = new DetailsTaskView
+            {
+                MainTask = task,
+                Subtasks = subtasks
+            };
+            return PartialView("EditTask", tasks);
+        }
+
         [HttpGet]
         public ActionResult ShowSubtask(int parentId)
         {
