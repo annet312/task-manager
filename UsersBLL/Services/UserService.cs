@@ -61,16 +61,7 @@ namespace TaskManagerUsersBLL.Services
 
         public async Task SetInitialData(UserBLL adminBll/*, List<string> roles*/)
         {
-            //foreach (string roleName in roles)
-            //{
-            //    var role = await Database.RoleManager.FindByNameAsync(roleName);
-            //    if (role == null)
-            //    {
-            //        role = new ApplicationRole { Name = roleName };
-            //        await Database.RoleManager.CreateAsync(role);
-            //    }
-            //}
-
+         
             await Create(adminBll);
         }
 

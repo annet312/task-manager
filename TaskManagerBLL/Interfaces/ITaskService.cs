@@ -16,9 +16,9 @@ namespace TaskManagerBLL.Interfaces
         void AddSubtask(TaskBLL subtask, int taskId, bool forceToSave = true);
         void AddSubtasksFromTemplate(int taskId, int templateId);
         void CreateTask(TaskBLL task, string authorId, string assigneeId);
-        void SaveChangeTask(TaskBLL task);
+        void SaveChangeTask(TaskBLL task, string assignee);
         IEnumerable<TaskBLL> GetSubtasksOfTask(int Id);
-        void SetNewStatus(int statusId, TaskBLL task);
+        void SetNewStatus(int taskid, string statusName);
         TaskBLL GetTask(int id);
         IEnumerable<TaskBLL> GetTasksOfTeam(string managerId);
         IEnumerable<TaskBLL> GetOverDueTasks(int teamId);

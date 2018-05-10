@@ -39,6 +39,12 @@
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Status.Name)
+                   <form onchange="setNewStatus(@item.Id)">
+                        <select name="status" id="status@(item.Id)"  onclick ="showStatus(@item.Id)" >
+                            <option value=@item.Status.Name selected id="old-status@(item.Id)">@item.Status.Name</option>
+                            @* here partial view ChooseStatus*@
+                        </select>
+                    </form>
             </td>
             <td>
                 <div class="progress">
@@ -76,18 +82,20 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div class="form-group">
-                    <label for="task-name">Name:</label>
-                    <input type="text" class="form-control" id="newtask-name" required>
-                </div>
-                <div class="form-group">
-                    <label for="comment-text">Comment:</label>
-                    <textarea class="form-control" id="comment-text"></textarea>
-                </div>
+                <div class="form-control" id="create-task">
+                    <div class="form-group">
+                        <label for="task-name">Name:</label>
+                        <input type="text" class="form-control" id="newtask-name" required>
+                    </div>                   
+                        <div class="form-group">
+                            <label for="comment-text">Comment:</label>
+                            <textarea class="form-control" id="comment-text"></textarea>
+                        </div>
+                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-default" data-dismiss="modal">Close</button>
-                <button class="btn btn-primary" type="button" onclick="createMyMainTask()">Save task</button>
+                <button class="btn btn-primary" type="button" onclick="createMyMainTask()" id="save-created-task" disabled>Save task</button>
             </div>
         </div>
     </div>
@@ -126,13 +134,13 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div id="editTask">
-
-                </div>
+                    <span id="EditTaskId"></span>
+                    <div class="form" id="edit-form">
+                    </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-default" data-dismiss="modal">Close</button>
-                <button class="btn btn-primary" type="button" >Save task</button>
+                <button class="btn btn-primary" type="button" disabled id="save-task" onclick="saveEditTask()">Save task</button>
             </div>
         </div>
     </div>
@@ -141,18 +149,51 @@
 
 
     <script>
-
+        
         function editMainTask(taskId) {
              $.ajax({
                 url: "@Url.Action("EditTask", "Home")",
                  method: "POST",
                  data: { id: taskId },
              })
-                 .done(function (data) {
-                $("#editTask").html(data) ;
+             .done(function (data) {
+                 $("#edit-form").html(data);
+                 $("#save-task").data('editTaskId', taskId);
             })
             .fail(function () {
-                alert("Cannot find the task");
+                $("#edit-form").html("<p>Cannot find task</p>");
+            });
+        }
+
+        $('#edit-form').change(function () {
+            $('#save-task').prop('disabled',false);
+        })
+
+        $('#myModalEditMainTask').on('hidden.bs.modal', function (e) {
+            $('#save-task').prop('disabled', true);
+        })
+
+        function saveEditTask() {
+            var task = {
+                Id: $("#save-task").data('editTaskId'),
+                Name: $("#nameEditTask").val(),
+                Assignee: $("select#assignee").val(),
+                ETA : $("#timepicker2").val(),
+                DueDate: $("#timepicker3").val(),
+                Comment: $("#comment").val(),
+            };
+           
+             $.ajax({
+                url: "@Url.Action("SaveEditTask", "Home")",
+                 method: "POST",
+                 data: { taskForEdit: task },
+             })
+             .done(function (Msg) {
+                 alert(Msg);
+                 top.location.href = '/Home/Index';
+            })
+            .fail(function () {
+                $("#edit-form").html("<p>Cannot find task</p>");
             });
         }
 
@@ -170,6 +211,11 @@
             });
         }
 
+
+        $('#newtask-name').change(function () {
+            $('#save-created-task').removeAttr('disabled');
+        })
+
         function createMyMainTask() {
             var task = {
                 name : $("#newtask-name").val(),
@@ -181,8 +227,8 @@
                 method: "POST",
                 data: { newTask: task }
             })
-            .done(function () {
-                alert("Task has been added.");
+            .done(function (Msg) {
+                alert(Msg);
                 top.location.href = '/Home/Index'
             })
             .fail(function () {
@@ -228,5 +274,26 @@
             taskRow.next().remove();
             $("#iconhide-subtask", taskRow).hide();
             $("#iconshow-subtask", taskRow).show();
+        }
+         function showStatus(taskId) {
+            $.ajax({
+                url: "@Url.Action("ChooseStatus", "Home")",
+                method: "GET",
+            })
+                .done(function (status) {
+                    var statusRow = $('#old-status' + taskId);
+                    statusRow.replaceWith(status);
+            })
+            .fail(function () {
+            });
+        }
+        function setNewStatus(taskId) {
+            
+            var statusName = $('select#status'+taskId).val();
+            $.ajax({
+                url: "@Url.Action("ChooseStatus", "Home")",
+                method: "POST",
+                data: { id: taskId, status: statusName}
+            })
         }
     </script>

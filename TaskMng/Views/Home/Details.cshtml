@@ -37,25 +37,25 @@
             {
                 <label for="date-start">Date start</label>
                 <span class="form-control" id="date-start">@Model.MainTask.DateStart</span>
-                }
-                else
-                {
-                        <label for="date-start-na">Date start</label>
-                        <span class="form-control" id="date-start-na">N/A</span>
-                }
-                </div>
+            }
+            else
+            {
+                <label for="date-start-na">Date start</label>
+                <span class="form-control" id="date-start-na">N/A</span>
+            }
+        </div>
         <div class="col">
 
             @if (Model.MainTask.DateStart.HasValue)
             {
                 <label for="eta">ETA</label>
                 <span class="form-control" id="eta">@Model.MainTask.ETA</span>
-                }
-                else
-                {
-                        <label for="eta-na">ETA</label>
-                        <span class="form-control" id="eta-na">N/A</span>
-                }
+            }
+            else
+            {
+                <label for="eta-na">ETA</label>
+                <span class="form-control" id="eta-na">N/A</span>
+            }
         </div>
         <div class="col">
 
@@ -66,14 +66,23 @@
             }
             else
             {
-                    <label for="due-date-na">Due Date</label>
-                    <span class="form-control" id="due-date-na">N/A</span>
+                <label for="due-date-na">Due Date</label>
+                <span class="form-control" id="due-date-na">N/A</span>
             }
         </div>
     </div>
+    @if (!Model.MainTask.Comment.IsEmpty())
+    {
+        <label for="comment-main">Comment</label>
+        <div class="form-control" id="comment-main">
+            <p style="font:small">@Model.MainTask.Comment</p>
+        </div>
+    }
+    @if (Model.Subtasks.Any())
+    {
     <label for="list-subtasks">Subtasks</label>
     <div id="list-subtasks">
-    @for(var i=0; i<Model.Subtasks.Count(); i++)
+        @for (var i = 0; i < Model.Subtasks.Count(); i++)
         {
         <div class="form-control">
             <div id="subtask-i" class="form-row">
@@ -100,45 +109,53 @@
             <div class="form-row">
                 <div class="col-md-4">
                     @if (Model.Subtasks.ElementAt(i).DateStart.HasValue)
-                    {
-                        <label for="date-start-subtask">Date start</label>
-                        <span class="form-control" id="date-start-subtask">@Model.Subtasks.ElementAt(i).DateStart</span>
+            {
+                <label for="date-start-subtask">Date start</label>
+                <span class="form-control" id="date-start-subtask">@Model.Subtasks.ElementAt(i).DateStart</span>
                     }
                     else
                     {
-                        <label for="date-start-na-subtask">Date start</label>
-                        <span class="form-control" id="date-start-na-subtask">N/A</span>
+        <label for="date-start-na-subtask">Date start</label>
+        <span class="form-control" id="date-start-na-subtask">N/A</span>
                     }
                 </div>
                 <div class="col-md-4">
                     @if (Model.Subtasks.ElementAt(i).ETA.HasValue)
-                     {
-                        <label for="eta-subtask">ETA</label>
-                        <span class="form-control" id="eta-subtask">@Model.Subtasks.ElementAt(i).ETA</span>
-                     }
+            {
+                <label for="eta-subtask">ETA</label>
+                <span class="form-control" id="eta-subtask">@Model.Subtasks.ElementAt(i).ETA</span>
+                    }
                     else
                     {
-                        <label for="eta-na-subtask">ETA</label>
-                        <span class="form-control" id="eta-na-subtask">N/A</span>
+        <label for="eta-na-subtask">ETA</label>
+        <span class="form-control" id="eta-na-subtask">N/A</span>
                     }
                 </div>
-                 <div class="col-md-4">
+                <div class="col-md-4">
 
                     @if (Model.Subtasks.ElementAt(i).DueDate.HasValue)
-                    {
-                        <label for="due-date">Due Date</label>
-                        <span class="form-control" id="due-date">@Model.Subtasks.ElementAt(i).DueDate</span>
+            {
+                <label for="due-date">Due Date</label>
+                <span class="form-control" id="due-date">@Model.Subtasks.ElementAt(i).DueDate</span>
                     }
                     else
                     {
-                            <label for="due-date-na">Due Date</label>
-                            <span class="form-control" id="due-date-na">N/A</span>
+                     <label for="due-date-na">Due Date</label>
+                 <span class="form-control" id="due-date-na">N/A</span>
                     }
                 </div>
+
             </div>
+            @if (!Model.Subtasks.ElementAt(i).Comment.IsEmpty())
+            {
+                <label for="comment-subtask">Comment</label>
+                <div class="form-control" id="comment-subtask">
+                    <p>@Model.Subtasks.ElementAt(i).Comment</p>
+                </div>
+            }
         </div>
 
-     }
-     </div>
-
+        }
+    </div>
+    }
 </div>

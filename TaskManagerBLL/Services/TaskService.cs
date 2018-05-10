@@ -108,25 +108,39 @@ namespace TaskManagerBLL.Services
             }
             db.Save();
         }
-        public void CreateTask(TaskBLL task, string authorId,string assigneeId )
+        public void CreateTask(TaskBLL task, string author,string assignee )
         {
-            PersonBLL author = mapper.Map<Person,PersonBLL>(db.People.Find(p => p.UserId == authorId).Single());
+            PersonBLL authorBLL = mapper.Map<Person,PersonBLL>(db.People.Find(p => p.Name == author).Single());
             
             PersonBLL assigneeBLL;
-            if ((assigneeId == string.Empty) || (assigneeId == null))
+            if (string.IsNullOrEmpty(assignee))
             {
-                assigneeBLL = author;
+                assigneeBLL = authorBLL;
             }
             else
             {
-                Person assignee = db.People.Find(p => p.UserId == assigneeId).Single();
-                assigneeBLL = mapper.Map<Person, PersonBLL>(assignee);
+                try
+                {
+                    assigneeBLL = mapper.Map<Person, PersonBLL>(db.People.Find(p => p.Name == assignee).Single());
+                }
+                catch (InvalidOperationException e)
+                {
+                    throw new InvalidOperationException( "Name of assignee not single in DataBase", e);
+                }
             }
-            var status = mapper.Map<Status, StatusBLL>(db.Statuses.Find(s => (s.Name == "New")).Single());
+            StatusBLL status;
+            try
+            {
+                status = mapper.Map<Status, StatusBLL>(db.Statuses.Find(s => (s.Name == "New")).Single());
+            }
+            catch (ArgumentNullException e)
+            {
+                throw new ArgumentNullException("Name of status 'new' not single in DataBase", e);
+            }
             var newTask = new TaskBLL
             {
                 ParentId = null,
-                Author = author,
+                Author = authorBLL,
                 Name = task.Name,
                 Assignee = assigneeBLL,
                 Status = status,
@@ -136,26 +150,48 @@ namespace TaskManagerBLL.Services
                 DueDate = task.DueDate,
                 Comment = task.Comment
             };
+
             db.Tasks.Create(mapper.Map<TaskBLL, _Task>(newTask));
             db.Save();
         }
-        public void SaveChangeTask(TaskBLL task)
+        public void SaveChangeTask(TaskBLL task, string assigneeName)
         {//!!!!TODO UPDATE except delete/add
-            db.Tasks.Delete(task.Id);
-            var oldId = task.Id;
-            db.Tasks.Create(mapper.Map<TaskBLL, _Task>(task));
-            if (task.ParentId == null)
+
+            _Task taskForEdit = db.Tasks.Get(task.Id);
+
+            if (taskForEdit != null)
             {
-                var subtasks = db.Tasks.Find(t => (t.ParentId == oldId));
-                foreach (var subtask in subtasks)
+                if(taskForEdit.Name != task.Name)
+                    taskForEdit.Name = task.Name;
+                if(taskForEdit.ParentId != task.ParentId)
+                    taskForEdit.ParentId = task.ParentId;
+                if (assigneeName == null)
                 {
-                    var oldSubtask = db.Tasks.Get(subtask.Id);
-                    db.Tasks.Delete(subtask.Id);
-                    oldSubtask.ParentId = task.Id;
-                    db.Tasks.Create(oldSubtask);
+                    throw new ArgumentNullException("assigneeName", "Cannot be null");
                 }
+                if (taskForEdit.Assignee.Name != assigneeName)
+                {
+                    Person assignee;
+                    try
+                    {
+                        assignee = db.People.Find(p => (p.Name == assigneeName)).Single();
+                    }
+                    catch(InvalidOperationException e)
+                    {
+                        throw new InvalidOperationException("Assignee is not single in DataBase", e);
+                    }
+                    taskForEdit.Assignee = assignee;
+                }
+                if(taskForEdit.ETA != task.ETA)
+                     taskForEdit.ETA = task.ETA;
+                if(taskForEdit.DueDate != task.DueDate)
+                    taskForEdit.DueDate = task.DueDate;
+                if(taskForEdit.Comment != task.Comment)
+                    taskForEdit.Comment = task.Comment;
+                
+                db.Tasks.Update(taskForEdit);
+                db.Save();
             }
-            db.Save();
         }
         public IEnumerable<TaskBLL> GetSubtasksOfTask(int Id)
         {
@@ -170,7 +206,7 @@ namespace TaskManagerBLL.Services
             var num = 0;
             if (MainTask.Progress.HasValue)
             {
-                sumProgress = MainTask.Progress.Value;
+                sumProgress += MainTask.Progress.Value;
             }
             num++;
 
@@ -185,46 +221,57 @@ namespace TaskManagerBLL.Services
             sumProgress = sumProgress / num;
             return sumProgress;
         }
-        public void SetNewStatus(int statusId, TaskBLL task)
+        public void SetNewStatus(int taskId, string statusName)
         {
-            var status = db.Statuses.Get(statusId);
-            var OldTask = db.Tasks.Get(task.Id);
-            OldTask.Status = status;
-
-            switch (status.Name)
+            Status status;
+            try
             {
-                case "Underway":
-                    {
-                        OldTask.DateStart = DateTime.Now;
-                        OldTask.Progress = 0;
-                        break;
-                    }
-                case "Execute":
-                    {
-                        OldTask.Progress = 100;
-                        OldTask.DueDate = DateTime.Now;
-                        break;
-                    }
-                case "Complete":
-                    {
-                        OldTask.Progress = 100;
-                        OldTask.DueDate = DateTime.Now;
-                        break;
-                    }
-                default:
-                    {
-                        OldTask.Progress = 0;
-                    }
-                    break;
+                status = db.Statuses.Find(s => (s.Name == statusName)).Single();
             }
-            if (OldTask.ParentId.HasValue)
+            catch (InvalidOperationException e)
             {
-                var progress = CalculateProgressofSubTask(OldTask.ParentId.Value);
-                var taskForChange = db.Tasks.Get(OldTask.ParentId.Value);
-                db.Tasks.Delete(taskForChange.Id);
-                db.Tasks.Create(taskForChange);
+                throw new InvalidOperationException("Status name isn't single in DataBase",e);
             }
-            db.Tasks.Create(OldTask);
+            _Task task = db.Tasks.Get(taskId);
+            if (task == null)
+            {
+                throw new ArgumentException("Task wasn't found", "id");
+            }
+            task.Status = status;
+            if (task.ParentId == null)
+            {
+                switch (statusName)
+                {
+                    case "Underway":
+                        {
+                            task.DateStart = DateTime.Now;
+                            task.Progress = 0;
+                            break;
+                        }
+                    case "Execute":
+                        {
+                            task.Progress = 99;
+                            task.DueDate = DateTime.Now;
+                            break;
+                        }
+                    case "Complete":
+                        {
+                            task.Progress = 100;
+                            break;
+                        }
+                    default:
+                        {
+                            
+                        }
+                        break;
+                }
+            }
+            else
+            {
+                int progress = CalculateProgressofSubTask(task.ParentId.Value);
+            }
+            db.Tasks.Update(task);
+            db.Save();
         }
 
         public IEnumerable<TaskBLL> GetTasksOfTeam(string managerId)

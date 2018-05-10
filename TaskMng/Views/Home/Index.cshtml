@@ -60,10 +60,10 @@
     }
 </div>
 
-<div id="divLoading" class="divhide" style="text-align: center;">
+<div id="divLoading" class="divhide" style="text-align: center;" hidden>
     @*divhide will be set as default and will be changed dynamically.*@
 
-    <img src="~/Loading.gif" alt="Loading Image" height="150" title="Loading Image" />
+    <img src="~/Content/images/Loading.gif" alt="Loading Image" height="150" title="Loading Image" />
 </div>
 
 <div id="UpdateContentDiv">
@@ -75,11 +75,11 @@
 
     <script>
         function onAjaxBegin() {
-            $("#divLoading").removeClass("ShowLoader").addClass("ShowLoader");
+            $("#divLoading").removeAttr('hidden');
         }
 
         function onAjaxComplete() {
-            $("#divLoading").removeClass("ShowLoader").addClass("HideLoader");
+            $("#divLoading").attr('hidden');
         }
     </script>
 }

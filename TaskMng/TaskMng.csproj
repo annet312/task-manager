@@ -205,6 +205,7 @@
     <Compile Include="Models\DetailsTaskView.cs" />
     <Compile Include="Models\PersonView.cs" />
     <Compile Include="Models\StatusView.cs" />
+    <Compile Include="Models\TaskEditView.cs" />
     <Compile Include="Models\TaskView.cs" />
     <Compile Include="Models\TeamView.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -221,6 +222,7 @@
     <Content Include="Content\font-awesome.min.css" />
     <Content Include="Content\fontawesome\fontawesome-all.js" />
     <Content Include="Content\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="Content\images\Loading.gif" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\fontawesome-webfont.svg" />
     <Content Include="Global.asax" />
