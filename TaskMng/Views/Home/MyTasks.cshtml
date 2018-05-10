@@ -38,13 +38,7 @@
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Status.Name)
-                   <form onchange="setNewStatus(@item.Id)">
-                        <select name="status" id="status@(item.Id)"  onclick ="showStatus(@item.Id)" >
-                            <option value=@item.Status.Name selected id="old-status@(item.Id)">@item.Status.Name</option>
-                            @* here partial view ChooseStatus*@
-                        </select>
-                    </form>
+                <select onchange="setNewStatus(@item.Id)" data-status="@(item.Status.Name)"></select>
             </td>
             <td>
                 <div class="progress">
@@ -149,7 +143,6 @@
 
 
     <script>
-        
         function editMainTask(taskId) {
              $.ajax({
                 url: "@Url.Action("EditTask", "Home")",
@@ -279,6 +272,7 @@
             $.ajax({
                 url: "@Url.Action("ChooseStatus", "Home")",
                 method: "GET",
+                data: {id: taskId}
             })
                 .done(function (status) {
                     var statusRow = $('#old-status' + taskId);
@@ -289,11 +283,30 @@
         }
         function setNewStatus(taskId) {
             
-            var statusName = $('select#status'+taskId).val();
+            var statusName = $('#task' + taskId + ' select').val();
             $.ajax({
-                url: "@Url.Action("ChooseStatus", "Home")",
+                url: "@Url.Action("SetNewStatus", "Home")",
                 method: "POST",
                 data: { id: taskId, status: statusName}
             })
         }
+
+        function setStatuses() {
+            $.each($(".table select"), function () {
+                var $this = $(this);
+                $this.val($this.data("status"));
+            });
+        }
+
+        $(document).ready(function () {
+            $.ajax({
+                url: "@Url.Action("GetStatuses", "Home")",
+                method: "GET"
+            })
+            .done(function (data) {
+                $(".table select").html(data);
+
+                setStatuses();
+            });
+        });
     </script>

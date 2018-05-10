@@ -17,36 +17,24 @@
                 <span class="input-group-text" id="basic-addon2">Status</span>
             </div>
             
-            <select name="status" id="status" aria-describedby="basic-addon2" onclick="showStatus(@Model.Id)" disabled>
-                <option value="@Model.Status.Id" selected id="old-status">@Model.Status.Name</option>
-                @* here partial view ChooseStatus*@
+            <select aria-describedby="basic-addon2" disabled>
+                <option selected>@Model.Status.Name</option>
            </select>
         </div>
     </div>
 </div>
+
 <div class="input-group mb-3">
     <div class="input-group-prepend">
         <span class="input-group-text" id="basic-addon3">Assignee</span>
     </div>
-    @if (User.IsInRole("Manager"))
-    {
-        <select name="assignee" id="assignee" aria-describedby="basic-addon3" onclick="showAssignee(@Model.Author.Id)">
-            <option value=@Model.Assignee.Name selected id="old-assignee">@Model.Assignee.Name</option>
-            @* Here partial view Choose Assignee *@
-        </select>
-    }
-    else
-    {
-        <select name = "assignee" id = "assignee" aria - describedby = "basic-addon3" onclick = "showAssignee(@Model.Author.Id)" disabled>
-            <option value = @Model.Assignee.Name selected id = "old-assignee"> @Model.Assignee.Name </option>
-            @* Here partial view Choose Assignee *@
-        </select>
-    }
-</div >
+    <select id="assignee" aria-describedby="basic-addon3" data-assignee="@(Model.Assignee.Name)" onclick="showAssignees(@Model.Author.Id)" onchange="updateAssignee()" @(!User.IsInRole("Manager") ? "disabled" : string.Empty)>
+        <option selected>@(Model.Assignee.Name)</option>
+    </select>
+</div>
 
     <div class="form-row">
         <div class="col-md-6">
-
             <label for="eta">ETA</label>
             <div class="input-group bootstrap-timepicker timepicker" id="eta">
                 <input name="eta" id="timepicker2" type="text" class="form-control input-small" value="@Model.ETA">
@@ -89,23 +77,22 @@
     //    }
 
     //});
-       
-    function showAssignee(id) {
+
+        function showAssignees(managerId) {
             $.ajax({
-                url: "@Url.Action("ChooseAssignee", "Home")",
+                url: "@Url.Action("GetAssignees", "Home")",
                 method: "GET",
-                data: { managerId: id },
+                data: { managerId: managerId }
             })
-                .done(function (assignee) {
-                    var assigneeRow = $('#old-assignee');
-                    assigneeRow.replaceWith(assignee);
-            })
-                .fail(function () {
-                    alert("Cannot do it!");
+            .done(function (data) {
+                var assignee = $("#assignee");
+                assignee.html(data);
+                assignee.val(assignee.data("assignee"));
             });
         }
-    </script>
-    @section Scripts {
-        @Scripts.Render("~/bundles/jqueryval")
 
-    }
+        function updateAssignee() {
+            var assignee = $("#assignee");
+            assignee.data("assignee", assignee.val());
+        }
+    </script>

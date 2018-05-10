@@ -44,21 +44,21 @@ namespace TaskMng.Controllers
          
         }
         [HttpGet]
-        public ActionResult ChooseStatus()
+        public ActionResult GetStatuses()
         {
-            ICollection<StatusView> status = mapper.Map<IEnumerable<StatusBLL>, IEnumerable<StatusView>>(serviceTask.GetAllStatuses()).ToList();
-            if(User.IsInRole("Programmer"))
+            ICollection<StatusView> statuses = mapper.Map<IEnumerable<StatusBLL>, IEnumerable<StatusView>>(serviceTask.GetAllStatuses()).ToList();
+            if (User.IsInRole("Programmer"))
             {
-                status.Remove(status.Where(s => (s.Name == "Complete")).Single());
+                statuses.Remove(statuses.Where(s => (s.Name == "Complete")).Single());
             }
-            return PartialView("ChooseStatus", status);
+            return PartialView("StatusList", statuses);
         }
 
         [HttpGet]
-        public ActionResult ChooseAssignee(int managerId)
+        public ActionResult GetAssignees(int managerId)
         {
-            var assignees = mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(servicePerson.GetPeopleInTeam(managerId));
-            return PartialView("ChooseAssignee", assignees);
+            IEnumerable<PersonView> assignees = mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(servicePerson.GetPeopleInTeam(managerId));
+            return PartialView("AssigneeList", assignees);
         }
         public ActionResult About()
         {

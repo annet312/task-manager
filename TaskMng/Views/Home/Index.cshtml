@@ -60,9 +60,7 @@
     }
 </div>
 
-<div id="divLoading" class="divhide" style="text-align: center;" hidden>
-    @*divhide will be set as default and will be changed dynamically.*@
-
+<div id="divLoading" style="text-align: center;" hidden>
     <img src="~/Content/images/Loading.gif" alt="Loading Image" height="150" title="Loading Image" />
 </div>
 
@@ -71,8 +69,6 @@
 </div>
 
 @section scripts{
-    @Scripts.Render("~/Scripts/jquery.unobtrusive-ajax.min.js")
-
     <script>
         function onAjaxBegin() {
             $("#divLoading").removeAttr('hidden');

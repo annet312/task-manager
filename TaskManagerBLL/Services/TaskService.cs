@@ -242,6 +242,20 @@ namespace TaskManagerBLL.Services
             {
                 switch (statusName)
                 {
+                    case "New":
+                        {
+                            task.DateStart = null;
+                            //?? subtask date need set in null and subtask.status in "new"
+                            IEnumerable<TaskBLL> subtasks = GetSubtasksOfTask(task.Id);
+                            foreach(var subtask in subtasks)
+                            {
+                                subtask.Status = mapper.Map<Status, StatusBLL> (status);
+                                subtask.Progress = 0;
+                                db.Tasks.Update(mapper.Map<TaskBLL,_Task>(subtask));
+                            }
+                            task.Progress = 0;
+                            break;
+                        }
                     case "Underway":
                         {
                             task.DateStart = DateTime.Now;
@@ -268,9 +282,10 @@ namespace TaskManagerBLL.Services
             }
             else
             {
+               
                 int progress = CalculateProgressofSubTask(task.ParentId.Value);
             }
-            db.Tasks.Update(task);
+             db.Tasks.Update(task);
             db.Save();
         }
 
