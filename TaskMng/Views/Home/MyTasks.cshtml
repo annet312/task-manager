@@ -66,9 +66,9 @@
 
 </table>
 
-<div id="myModalCreateTask" class="modal fade" role="dialog">
+<div id="myModalCreateTask" class="modal fade" role="dialog" style="opacity:initial;">
     <div class="modal-dialog">
-        <div class="modal-content">
+        <div class="modal-content" style="position:fixed">
             <div class="modal-header">
                 <h5 class="modal-title">Create your own task</h5>
                 <button class="close" data-dismiss="modal" aria-label="Close">
@@ -78,7 +78,7 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label for="task-name">Name:</label>
-                    <input type="text" class="form-control" id="newtask-name">
+                    <input type="text" class="form-control" id="newtask-name" required>
                 </div>
                 <div class="form-group">
                     <label for="comment-text">Comment:</label>
@@ -94,9 +94,9 @@
 </div>
 
 
-<div id="myModalDetailsTask" class="modal fade" role="dialog">
+<div id="myModalDetailsTask" class="modal fade" role="dialog" style="opacity:initial">
     <div class="modal-dialog">
-        <div class="modal-content">
+        <div class="modal-content" style="position:fixed">
             <div class="modal-header">
                 <h5 class="modal-title">Details of Task </h5>
                 <button class="close" data-dismiss="modal" aria-label="Close">
@@ -116,9 +116,9 @@
 </div>
 
 
-<div id="myModalEditMainTask" class="modal fade" role="dialog">
+<div id="myModalEditMainTask" class="modal fade" role="dialog" style="opacity:initial">
     <div class="modal-dialog">
-        <div class="modal-content">
+        <div class="modal-content" style="position:fixed">
             <div class="modal-header">
                 <h5 class="modal-title">Edit Task</h5>
                 <button class="close" data-dismiss="modal" aria-label="Close">
@@ -132,12 +132,16 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-default" data-dismiss="modal">Close</button>
+                <button class="btn btn-primary" type="button" >Save task</button>
             </div>
         </div>
     </div>
 </div>
 
+
+
     <script>
+
         function editMainTask(taskId) {
              $.ajax({
                 url: "@Url.Action("EditTask", "Home")",

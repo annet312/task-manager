@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Moq;
-using TaskManagerBLL.Services;
 using TaskManagerDAL.Repositories;
 
 namespace TaskManagerBLL.Services.Tests

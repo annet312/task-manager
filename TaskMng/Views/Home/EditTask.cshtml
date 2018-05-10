@@ -1,6 +1,5 @@
 ﻿@model TaskMng.Models.DetailsTaskView
 
-
 @Html.AntiForgeryToken()
 
 <h4>Edit Task</h4>
@@ -43,12 +42,22 @@
         <div class="col-md-6">
 
             <label for="eta">ETA</label>
-            <input type="time" />
-           
+            <div class="input-group bootstrap-timepicker timepicker" id="eta">
+                <input id="timepicker2" type="text" class="form-control input-small" value="@Model.MainTask.ETA">
+                <span class="input-group-addon">
+                    <i class="glyphicon glyphicon-time"></i>
+                </span>
+            </div>
+
         </div>
         <div class="col-md-6">
-                <label for="due-date">Due Date</label>
-                <span class="form-control" id="due-date">@Model.MainTask.DueDate</span>
+            <label for="eta">Due date</label>
+            <div class="input-group bootstrap-timepicker timepicker" id="due-date">
+                <input id="timepicker3" type="text" class="form-control input-small" value="@Model.MainTask.DueDate">
+                <span class="input-group-addon">
+                    <i class="glyphicon glyphicon-time"></i>
+                </span>
+            </div>
         </div>
     </div>
 </div>
@@ -80,6 +89,14 @@
         })();
     </script>*@
 <script>
+       // $('#timepicker2').timepicker({
+       //     minuteStep: 1,
+       //         template: 'modal',
+       //         appendWidgetTo: 'body',
+       //         showSeconds: true,
+       //         showMeridian: false,
+       //         defaultTime: false
+       //});
 
         function showStatus(id) {
             $.ajax({
