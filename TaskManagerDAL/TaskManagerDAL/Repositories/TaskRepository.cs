@@ -13,6 +13,7 @@ namespace TaskManagerDAL.Repositories
         private TaskManagerContext dataBase;
         public TaskRepository(TaskManagerContext context)
         {
+
             dataBase = context;
         }
         public IEnumerable<_Task> GetAll()
@@ -50,6 +51,7 @@ namespace TaskManagerDAL.Repositories
         {
             dataBase.Entry(task).State = EntityState.Modified;
         }
+
         public void Delete(int id)
         {
             _Task task = dataBase.Tasks.Find(id);

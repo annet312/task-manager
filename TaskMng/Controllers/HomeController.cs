@@ -1,15 +1,14 @@
-﻿using System;
+﻿using AutoMapper;
+using Microsoft.AspNet.Identity;
+using Ninject;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
-using TaskManagerBLL.Interfaces;
-using AutoMapper;
 using TaskManagerBLL.Infrastructure;
-using Ninject;
+using TaskManagerBLL.Interfaces;
 using TaskManagerBLL.Models;
 using TaskMng.Models;
-using Microsoft.AspNet.Identity;
 
 namespace TaskMng.Controllers
 {

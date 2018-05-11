@@ -142,171 +142,166 @@
 
 
 
-    <script>
-        function editMainTask(taskId) {
-             $.ajax({
-                url: "@Url.Action("EditTask", "Home")",
-                 method: "POST",
-                 data: { id: taskId },
-             })
-             .done(function (data) {
-                 $("#edit-form").html(data);
-                 $("#save-task").data('editTaskId', taskId);
-            })
-            .fail(function () {
-                $("#edit-form").html("<p>Cannot find task</p>");
-            });
-        }
+<script>
 
-        $('#edit-form').change(function () {
-            $('#save-task').prop('disabled',false);
+    //src = "~/Scripts/src/Taskscripts.js"
+
+
+
+function editMainTask(taskId) {
+    $.ajax({
+        url: "@Url.Action("EditTask", "Home")",
+        method: "POST",
+        data: { id: taskId },
+    })
+        .done(function (data) {
+            $("#edit-form").html(data);
+            $("#save-task").data('editTaskId', taskId);
         })
-
-        $('#myModalEditMainTask').on('hidden.bs.modal', function (e) {
-            $('#save-task').prop('disabled', true);
-        })
-
-        function saveEditTask() {
-            var task = {
-                Id: $("#save-task").data('editTaskId'),
-                Name: $("#nameEditTask").val(),
-                Assignee: $("select#assignee").val(),
-                ETA : $("#timepicker2").val(),
-                DueDate: $("#timepicker3").val(),
-                Comment: $("#comment").val(),
-            };
-           
-             $.ajax({
-                url: "@Url.Action("SaveEditTask", "Home")",
-                 method: "POST",
-                 data: { taskForEdit: task },
-             })
-             .done(function (Msg) {
-                 alert(Msg);
-                 top.location.href = '/Home/Index';
-            })
-            .fail(function () {
-                $("#edit-form").html("<p>Cannot find task</p>");
-            });
-        }
-
-        function details(mainId) {
-             $.ajax({
-                url: "@Url.Action("Details", "Home")",
-                 method: "GET",
-                 data: { id: mainId },
-             })
-            .done(function (data) {
-               $("#detailOfTask").html(data) ;
-            })
-            .fail(function () {
-                alert("Cannot find the task");
-            });
-        }
-
-
-        $('#newtask-name').change(function () {
-            $('#save-created-task').removeAttr('disabled');
-        })
-
-        function createMyMainTask() {
-            var task = {
-                name : $("#newtask-name").val(),
-                assigneeId : "",
-                comment : $("#comment-text").val()
-            };
-            $.ajax({
-                url: "@Url.Action("CreateTask", "Home")",
-                method: "POST",
-                data: { newTask: task }
-            })
-            .done(function (Msg) {
-                alert(Msg);
-                top.location.href = '/Home/Index'
-            })
-            .fail(function () {
-                alert("Cannot add the task!");
-            });
-        }
-
-        function deleteTask(taskId) {
-            $.ajax({
-                url: "@Url.Action("DeleteTask", "Home")",
-                method: "POST",
-                data: { id: taskId }
-            })
-            .done(function () {
-                alert("Task has been deleted.");
-                $("#task" + taskId).remove();
-            })
-            .fail(function () {
-                alert("Cannot delete the task!");
-            });
-        }
-
-        function showSubtasks(taskId) {
-            $.ajax({
-                url: "@Url.Action("ShowSubtask", "Home")",
-                method: "GET",
-                data: { parentId: taskId }
-            })
-                .done(function (data) {
-                    var taskRow = $('#task' + taskId);
-                    taskRow.after(data);
-
-                    $("#iconshow-subtask", taskRow).hide();
-                    $("#iconhide-subtask", taskRow).show();
-            })
-            .fail(function () {
-                //alert("Cannot delete the task!");
-            });
-        }
-
-        function hideSubtasks(taskId) {
-            var taskRow = $('#task' + taskId);
-            taskRow.next().remove();
-            $("#iconhide-subtask", taskRow).hide();
-            $("#iconshow-subtask", taskRow).show();
-        }
-         function showStatus(taskId) {
-            $.ajax({
-                url: "@Url.Action("ChooseStatus", "Home")",
-                method: "GET",
-                data: {id: taskId}
-            })
-                .done(function (status) {
-                    var statusRow = $('#old-status' + taskId);
-                    statusRow.replaceWith(status);
-            })
-            .fail(function () {
-            });
-        }
-        function setNewStatus(taskId) {
-            
-            var statusName = $('#task' + taskId + ' select').val();
-            $.ajax({
-                url: "@Url.Action("SetNewStatus", "Home")",
-                method: "POST",
-                data: { id: taskId, status: statusName}
-            })
-        }
-
-        function setStatuses() {
-            $.each($(".table select"), function () {
-                var $this = $(this);
-                $this.val($this.data("status"));
-            });
-        }
-
-        $(document).ready(function () {
-            $.ajax({
-                url: "@Url.Action("GetStatuses", "Home")",
-                method: "GET"
-            })
-            .done(function (data) {
-                $(".table select").html(data);
-
-                setStatuses();
-            });
+        .fail(function () {
+            $("#edit-form").html("<p>Cannot find task</p>");
         });
-    </script>
+}
+
+$('#edit-form').change(function () {
+    $('#save-task').prop('disabled', false);
+})
+
+$('#myModalEditMainTask').on('hidden.bs.modal', function (e) {
+    $('#save-task').prop('disabled', true);
+})
+
+function saveEditTask() {
+    var task = {
+        Id: $("#save-task").data('editTaskId'),
+        Name: $("#nameEditTask").val(),
+        Assignee: $("select#assignee").val(),
+        ETA: $("#timepicker2").val(),
+        DueDate: $("#timepicker3").val(),
+        Comment: $("#comment").val(),
+    };
+
+    $.ajax({
+        url: "@Url.Action("SaveEditTask", "Home")",
+        method: "POST",
+        data: { taskForEdit: task },
+    })
+        .done(function (Msg) {
+            alert(Msg);
+            top.location.href = '/Home/Index';
+        })
+        .fail(function () {
+            $("#edit-form").html("<p>Cannot find task</p>");
+        });
+}
+
+function details(mainId) {
+    $.ajax({
+        url: "@Url.Action("Details", "Home")",
+        method: "GET",
+        data: { id: mainId },
+    })
+        .done(function (data) {
+            $("#detailOfTask").html(data);
+        })
+        .fail(function () {
+            alert("Cannot find the task");
+        });
+}
+
+
+$('#newtask-name').change(function () {
+    $('#save-created-task').removeAttr('disabled');
+})
+
+function createMyMainTask() {
+    var task = {
+        name: $("#newtask-name").val(),
+        assigneeId: "",
+        comment: $("#comment-text").val()
+    };
+    $.ajax({
+        url: "@Url.Action("CreateTask", "Home")",
+        method: "POST",
+        data: { newTask: task }
+    })
+        .done(function (Msg) {
+            alert(Msg);
+            top.location.href = '/Home/Index'
+        })
+        .fail(function () {
+            alert("Cannot add the task!");
+        });
+}
+
+function deleteTask(taskId) {
+    $.ajax({
+        url: "@Url.Action("DeleteTask", "Home")",
+        method: "POST",
+        data: { id: taskId }
+    })
+        .done(function () {
+            alert("Task has been deleted.");
+            $("#task" + taskId).remove();
+        })
+        .fail(function () {
+            alert("Cannot delete the task!");
+        });
+}
+
+function showSubtasks(taskId) {
+    $.ajax({
+        url: "@Url.Action("ShowSubtask", "Home")",
+        method: "GET",
+        data: { parentId: taskId }
+    })
+        .done(function (data) {
+            var taskRow = $('#task' + taskId);
+            taskRow.after(data);
+
+            $("#iconshow-subtask", taskRow).hide();
+            $("#iconhide-subtask", taskRow).show();
+        })
+        .fail(function () {
+            //alert("Cannot delete the task!");
+        });
+}
+
+function hideSubtasks(taskId) {
+    var taskRow = $('#task' + taskId);
+    taskRow.next().remove();
+    $("#iconhide-subtask", taskRow).hide();
+    $("#iconshow-subtask", taskRow).show();
+}
+
+function setNewStatus(taskId) {
+
+    var statusName = $('#task' + taskId + ' select').val();
+    $.ajax({
+        url: "@Url.Action("SetNewStatus", "Home")",
+        method: "POST",
+        data: { id: taskId, status: statusName }
+    })
+}
+
+function setStatuses() {
+    $.each($(".table select"), function () {
+        var $this = $(this);
+        $this.val($this.data("status"));
+    });
+}
+
+$(document).ready(function () {
+    $.ajax({
+        url: "@Url.Action("GetStatuses", "Home")",
+        method: "GET"
+    })
+    .done(function (data) {
+        $(".table select").html(data);
+
+        setStatuses();
+    });
+});
+
+
+</script>

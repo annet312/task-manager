@@ -161,12 +161,9 @@ namespace TaskManagerBLL.Services
 
             if (taskForEdit != null)
             {
-                if(taskForEdit.Name != task.Name)
-                    taskForEdit.Name = task.Name;
-                if(taskForEdit.ParentId != task.ParentId)
-                    taskForEdit.ParentId = task.ParentId;
-                if (assigneeName == null)
-                {
+                if ((assigneeName == null)&&(task.ParentId != null))
+                { 
+                    //We cannot change assignee for subtask - only for main task
                     throw new ArgumentNullException("assigneeName", "Cannot be null");
                 }
                 if (taskForEdit.Assignee.Name != assigneeName)
@@ -181,34 +178,39 @@ namespace TaskManagerBLL.Services
                         throw new InvalidOperationException("Assignee is not single in DataBase", e);
                     }
                     taskForEdit.Assignee = assignee;
+                    if(taskForEdit.ParentId == null)
+                    {
+                        IEnumerable<_Task> subtasks = mapper.Map<IEnumerable<TaskBLL>,IEnumerable<_Task>>(GetSubtasksOfTask(taskForEdit.Id));
+                        //for change assignee for all subtask of edited Task
+                        foreach(var subtask in subtasks)
+                        {
+                            subtask.Assignee = assignee;
+                            db.Tasks.Update(subtask);
+                        }
+                    }
                 }
-                if(taskForEdit.ETA != task.ETA)
-                     taskForEdit.ETA = task.ETA;
-                if(taskForEdit.DueDate != task.DueDate)
-                    taskForEdit.DueDate = task.DueDate;
-                if(taskForEdit.Comment != task.Comment)
-                    taskForEdit.Comment = task.Comment;
+                taskForEdit.Name = task.Name;
+                taskForEdit.ETA = task.ETA;
+                taskForEdit.DueDate = task.DueDate;
+                taskForEdit.Comment = task.Comment;
                 
                 db.Tasks.Update(taskForEdit);
                 db.Save();
             }
         }
+
         public IEnumerable<TaskBLL> GetSubtasksOfTask(int Id)
         {
             var subtasks = db.Tasks.Find(t => (t.ParentId == Id));
             return mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(subtasks);
         }
-        private int CalculateProgressofSubTask(int Id)
+
+        private int CalculateProgressofSubTask(int mainTaskId, int changedSubtaskId, int? changedSubtaskProgress)
         {
-            var MainTask = db.Tasks.Get(Id);
-            var subtasks = GetSubtasksOfTask(Id);
-            var sumProgress = 0;
-            var num = 0;
-            if (MainTask.Progress.HasValue)
-            {
-                sumProgress += MainTask.Progress.Value;
-            }
-            num++;
+            var MainTask = db.Tasks.Get(mainTaskId);
+            var subtasks = GetSubtasksOfTask(mainTaskId).Where(s => s.Id != changedSubtaskId);
+            int sumProgress = changedSubtaskProgress.HasValue ? changedSubtaskProgress.Value : 0;
+            int num = 1;
 
             foreach (var subtask in subtasks)
             {
@@ -238,54 +240,62 @@ namespace TaskManagerBLL.Services
                 throw new ArgumentException("Task wasn't found", "id");
             }
             task.Status = status;
-            if (task.ParentId == null)
+            switch (statusName)
             {
-                switch (statusName)
-                {
-                    case "New":
+                case "New":
+                    {
+                        task.DateStart = null;
+                        task.Progress = 0;
+                        break;
+                    }
+                case "In progress":
+                    {
+                        task.DateStart = DateTime.Now;
+                        task.Progress = 0;
+                        break;
+                    }
+                case "Done":
+                    {
+                        task.Progress = 100;
+                        if (!task.ParentId.HasValue)
                         {
-                            task.DateStart = null;
-                            //?? subtask date need set in null and subtask.status in "new"
-                            IEnumerable<TaskBLL> subtasks = GetSubtasksOfTask(task.Id);
-                            foreach(var subtask in subtasks)
+                            IEnumerable<_Task> subtasks = db.Tasks.Find(t => t.ParentId == task.Id);
+                            foreach (var subtask in subtasks)
                             {
-                                subtask.Status = mapper.Map<Status, StatusBLL> (status);
-                                subtask.Progress = 0;
-                                db.Tasks.Update(mapper.Map<TaskBLL,_Task>(subtask));
+                                subtask.StatusId = status.Id;
+                                subtask.Progress = 100;
+                                db.Tasks.Update(subtask);
                             }
-                            task.Progress = 0;
-                            break;
-                        }
-                    case "Underway":
-                        {
-                            task.DateStart = DateTime.Now;
-                            task.Progress = 0;
-                            break;
-                        }
-                    case "Execute":
-                        {
-                            task.Progress = 99;
-                            task.DueDate = DateTime.Now;
-                            break;
-                        }
-                    case "Complete":
-                        {
-                            task.Progress = 100;
-                            break;
-                        }
-                    default:
-                        {
-                            
                         }
                         break;
-                }
+                    }
+                case "Closed":
+                    {
+                        task.Progress = 100;
+                        break;
+                    }
+                default:
+                    break;
             }
-            else
+
+            db.Tasks.Update(task);
+
+            if (task.ParentId.HasValue )
             {
+                int progress = CalculateProgressofSubTask(task.ParentId.Value, task.Id, task.Progress);
+                _Task mainTask = db.Tasks.Get(task.ParentId.Value);
+                if (mainTask.Status.Name == "New")
+                {
+                    var underwayStatusList = new string[3] { "Executed", "Underway", "Completed"};
+                    if (underwayStatusList.Contains(task.Status.Name))
+                    {
+                        mainTask.StatusId = db.Statuses.Find(s => (s.Name == "Underway")).Single().Id;
+                    }
+                }
+                mainTask.Progress = progress;
+                db.Tasks.Update(mainTask);
                
-                int progress = CalculateProgressofSubTask(task.ParentId.Value);
             }
-             db.Tasks.Update(task);
             db.Save();
         }
 
