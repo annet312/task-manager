@@ -12,7 +12,7 @@ namespace TaskManagerBLL.Interfaces
         IEnumerable<StatusBLL> GetAllStatuses();
         IEnumerable<TaskTemplateBLL> GetAllTemplates();
         IEnumerable<TaskTemplateBLL> GetSubtasksOfTemplate(int tempplateId);
-        void DeleteTask(int taskId);
+        void DeleteTask(int taskId, string currentUserName);
         void AddSubtask(TaskBLL subtask, int taskId, bool forceToSave = true);
         void AddSubtasksFromTemplate(int taskId, int templateId);
         void CreateTask(TaskBLL task, string authorId, string assigneeId);

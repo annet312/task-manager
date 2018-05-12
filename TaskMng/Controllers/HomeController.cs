@@ -4,6 +4,7 @@ using Ninject;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Web.Mvc;
 using TaskManagerBLL.Infrastructure;
 using TaskManagerBLL.Interfaces;
@@ -168,9 +169,18 @@ namespace TaskMng.Controllers
         }
 
         [HttpPost]
-        public void DeleteTask(int id)
+        public HttpStatusCode DeleteTask(int id)
         {
-            serviceTask.DeleteTask(id);
+            try
+            {
+                //Try to delete this task and send task id and current user Name for check if he can delete it
+                //because deleting task is available only for author of task 
+                serviceTask.DeleteTask(id, User.Identity.Name);
+            }
+            catch
+            {
+            }
+            return HttpStatusCode.OK;
         }
         [HttpPost]
         public ActionResult SetNewStatus(int id, string status)

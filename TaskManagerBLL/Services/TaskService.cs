@@ -55,19 +55,49 @@ namespace TaskManagerBLL.Services
             return mapper.Map<IEnumerable<TaskTemplate>, IEnumerable<TaskTemplateBLL>>(result);
         }
 
-        public void DeleteTask(int taskId)
+        public void DeleteTask(int taskId, string currentUserName)
         {
-            var task = mapper.Map<_Task, TaskBLL>(db.Tasks.Get(taskId));
-            if (task.ParentId == null)
+            TaskBLL task = null;
+            try
             {
-                var subtasksForDelete = GetSubtasksOfTask(task.Id);
-                foreach (var subtask in subtasksForDelete)
-                {
-                    db.Tasks.Delete(subtask.Id);
-                }
+                task = mapper.Map<_Task, TaskBLL>(db.Tasks.Get(taskId));
             }
-            db.Tasks.Delete(task.Id);
-            db.Save();
+            catch (Exception e) //TO DO Normal exception handler
+            {
+                throw e;
+            }
+            if (task == null)
+            {
+                throw new ArgumentException("Task with this id not found", "taskId");
+            }
+            if (string.IsNullOrEmpty(currentUserName))
+            {
+                throw new ArgumentException("Initiator of deleting task is undefined", "currentUserName");
+            }
+            if (task.Author.Name == currentUserName)
+            {
+                if (!task.ParentId.HasValue)
+                {
+                    IEnumerable<TaskBLL> subtasksForDelete = GetSubtasksOfTask(task.Id);
+                    foreach (var subtask in subtasksForDelete)
+                    {
+                        db.Tasks.Delete(subtask.Id);
+                    }
+                }
+                else
+                {
+                    //then need to calculate new progress for parent task
+                    _Task parrentTask = db.Tasks.Get(task.ParentId.Value);
+                    parrentTask.Progress = CalculateProgressofSubTask(task.ParentId.Value, task.Id, 0 , true);
+                    db.Tasks.Update(parrentTask);
+                }
+                db.Tasks.Delete(task.Id);
+                db.Save();
+            }
+            else
+            {
+                throw new InvalidOperationException("Access error. You cannot delete this task");
+            }
         }
 
         public void AddSubtask(TaskBLL subtask, int taskId, bool forceToSave = true)
@@ -205,13 +235,16 @@ namespace TaskManagerBLL.Services
             return mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(subtasks);
         }
 
-        private int CalculateProgressofSubTask(int mainTaskId, int changedSubtaskId, int? changedSubtaskProgress)
+        private int CalculateProgressofSubTask(int mainTaskId, int changedSubtaskId, int? changedSubtaskProgress, bool flIfDelete = false)
         {
             var MainTask = db.Tasks.Get(mainTaskId);
             var subtasks = GetSubtasksOfTask(mainTaskId).Where(s => s.Id != changedSubtaskId);
             int sumProgress = changedSubtaskProgress.HasValue ? changedSubtaskProgress.Value : 0;
             int num = 1;
-
+            if (flIfDelete)
+            {
+                num--;
+            }
             foreach (var subtask in subtasks)
             {
                 if (subtask.Progress.HasValue)
