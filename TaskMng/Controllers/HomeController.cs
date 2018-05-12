@@ -39,9 +39,9 @@ namespace TaskMng.Controllers
         }
 
         public ActionResult Index()
-      {
+        {
             return View();
-         
+
         }
         [HttpGet]
         public ActionResult GetStatuses()
@@ -84,17 +84,17 @@ namespace TaskMng.Controllers
             TaskView task = mapper.Map<TaskBLL, TaskView>(serviceTask.GetTask(id));
             IEnumerable<TaskView> subtasks = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(serviceTask.GetSubtasksOfTask(id));
             DetailsTaskView tasks = new DetailsTaskView
-                                        {
-                                            MainTask = task,
-                                            Subtasks = subtasks
-                                        };
+            {
+                MainTask = task,
+                Subtasks = subtasks
+            };
             return PartialView("Details", tasks);
         }
 
         [HttpPost]
         public ActionResult EditTask(int id)
         {
-            TaskView task = mapper.Map<TaskBLL, TaskView>(serviceTask.GetTask(id));         
+            TaskView task = mapper.Map<TaskBLL, TaskView>(serviceTask.GetTask(id));
             return PartialView("EditTask", task);
         }
 
@@ -142,7 +142,7 @@ namespace TaskMng.Controllers
             {
 
                 ViewBag.Message = "You haven't tasks";
-            }           
+            }
             return PartialView("MyTasks", tasks);
         }
 
@@ -183,13 +183,13 @@ namespace TaskMng.Controllers
             return HttpStatusCode.OK;
         }
         [HttpPost]
-        public ActionResult SetNewStatus(int id, string status)
+        public HttpStatusCode SetNewStatus(int id, string status)
         {
             if (status != null)
             {
                 serviceTask.SetNewStatus(id, status);
             }
-            return new HttpStatusCodeResult(200);
+            return HttpStatusCode.OK;
         }
         [HttpPost]
         public string CreateTask(CreateTaskView newTask)
@@ -198,7 +198,7 @@ namespace TaskMng.Controllers
             {
                 //PersonView author = mapper.Map<PersonBLL, PersonView>(servicePerson.GetPerson(User.Identity.GetUserId()));
                 string author = User.Identity.Name;
-                string assignee= newTask.Assignee;
+                string assignee = newTask.Assignee;
                 var task = new TaskView
                 {
                     ParentId = null,
@@ -208,7 +208,7 @@ namespace TaskMng.Controllers
                 try
                 {
                     serviceTask.CreateTask(mapper.Map<TaskView, TaskBLL>(task), author, assignee);
-                    
+
                 }
                 catch (InvalidOperationException e)
                 {
@@ -222,6 +222,60 @@ namespace TaskMng.Controllers
             }
             return ("Task was created");
         }
-       
+
+        [HttpPost]
+        public HttpStatusCode AddSubtask(int parentId, int? TemplateId, CreateTaskView newSubtask,string assigneeName)
+        {
+            string assignee;
+            
+            string author = User.Identity.Name;
+
+            if (TemplateId.HasValue)
+            {
+                if(!User.IsInRole("Manager"))
+                {
+                    if(string.IsNullOrEmpty(assigneeName))
+                    {
+                        return HttpStatusCode.PreconditionFailed;
+                    }
+                    assignee = assigneeName;
+                }
+                else
+                {
+                    assignee = author;
+                }
+                serviceTask.AddSubtasksFromTemplate(parentId, TemplateId.Value, author, assignee);
+                // TO DO exceptions
+                return HttpStatusCode.OK;
+            }
+            
+            if (newSubtask != null)
+            {
+                if (!User.IsInRole("Manager"))
+                {
+                    assignee = User.Identity.Name;
+                }
+                else
+                {
+                    if (newSubtask.Assignee == null)
+                    {
+                        return HttpStatusCode.PreconditionFailed;
+                    }
+                    assignee = newSubtask.Assignee;
+                }
+                var task = new TaskView
+                {
+                    ParentId = parentId,
+                    Name = newSubtask.Name,
+                    Comment = newSubtask.Comment
+                };
+                task.Assignee.Name = assignee;
+                task.Author.Name = author;
+                serviceTask.AddSubtask(mapper.Map<TaskView,TaskBLL>(task), parentId, author, assignee);
+                //TODO Exceptions
+                return HttpStatusCode.OK;
+            }
+            return HttpStatusCode.PreconditionFailed;///???
+        }
     }
 }

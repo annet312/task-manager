@@ -103,7 +103,7 @@ namespace TaskManagerBLL.Services
         public void AddSubtask(TaskBLL subtask, int taskId, bool forceToSave = true)
         {
             var task = mapper.Map<_Task, TaskBLL>(db.Tasks.Get(taskId));
-            var status = mapper.Map<Status, StatusBLL>(db.Statuses.Find(s => (s.Name == "New")).FirstOrDefault());
+            var status = mapper.Map<Status, StatusBLL>(db.Statuses.Find(s => (s.Name == "New")).Single());
             var newSubtask = new TaskBLL { ParentId = task.Id,
                 Author = task.Author,
                 Name = subtask.Name,
@@ -118,12 +118,29 @@ namespace TaskManagerBLL.Services
             db.Tasks.Create(mapper.Map<TaskBLL, _Task>(newSubtask));
             if (forceToSave)
             {
+                _Task parentTask = db.Tasks.Get(taskId);
+                parentTask.Progress = CalculateProgressOfSubtask(taskId, 1);
+                db.Tasks.Update(parentTask);
                 db.Save();//??
             }
         }
-        public void AddSubtasksFromTemplate(int taskId, int templateId)
+        public void AddSubtask(TaskBLL subtask, int taskId,  string authorName, string assigneeName, bool forceToSave = true)
+        { 
+            //TO DO Exception
+            PersonBLL author = mapper.Map<Person, PersonBLL>(db.People.Find(p => (p.Name == authorName)).Single());
+            PersonBLL assignee = mapper.Map<Person, PersonBLL>(db.People.Find(p => (p.Name == assigneeName)).Single());
+            subtask.Assignee = assignee;
+            subtask.Author = author;
+
+            AddSubtask(subtask, taskId);
+        }
+
+        public void AddSubtasksFromTemplate(int taskId, int templateId , string authorName, string assigneeName)
         {
-            var subtaskNames = GetSubtasksOfTemplate(templateId);
+            IEnumerable<TaskTemplateBLL> subtaskNames = GetSubtasksOfTemplate(templateId);
+            //TO DO EXCEPTIONS
+            PersonBLL author = mapper.Map<Person, PersonBLL>(db.People.Find(p => (p.Name == authorName)).Single());
+            PersonBLL assignee = mapper.Map<Person, PersonBLL>(db.People.Find(p => (p.Name == assigneeName)).Single());
             foreach (var subtaskName in subtaskNames)
             {
                 var subtask = new TaskBLL
@@ -132,12 +149,18 @@ namespace TaskManagerBLL.Services
                     ParentId = taskId,
                     ETA = null,
                     DueDate = null,
-                    Comment = null
+                    Comment = null,
+                    Assignee = assignee,
+                    Author = author
                 };
                 AddSubtask(subtask, taskId, false);
             }
+            _Task parentTask = db.Tasks.Get(taskId);
+            parentTask.Progress = CalculateProgressOfSubtask(taskId, subtaskNames.Count());
+            db.Tasks.Update(parentTask);
             db.Save();
         }
+        
         public void CreateTask(TaskBLL task, string author,string assignee )
         {
             PersonBLL authorBLL = mapper.Map<Person,PersonBLL>(db.People.Find(p => p.Name == author).Single());
@@ -235,16 +258,32 @@ namespace TaskManagerBLL.Services
             return mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(subtasks);
         }
 
-        private int CalculateProgressofSubTask(int mainTaskId, int changedSubtaskId, int? changedSubtaskProgress, bool flIfDelete = false)
+        private int CalculateProgressOfSubtask(int mainTaskId, int numAdded)
+        {
+            var MainTask = db.Tasks.Get(mainTaskId);
+            var subtasks = GetSubtasksOfTask(mainTaskId);
+            int sumProgress = 0;
+            int num = numAdded;
+
+            foreach (var subtask in subtasks)
+            {
+                if (subtask.Progress.HasValue)
+                {
+                    sumProgress += subtask.Progress.Value;
+                }
+                num++;
+            }
+            sumProgress = sumProgress / num;
+            return sumProgress;
+        }
+
+        private int CalculateProgressOfSubtask(int mainTaskId, int changedSubtaskId, int? changedSubtaskProgress)
         {
             var MainTask = db.Tasks.Get(mainTaskId);
             var subtasks = GetSubtasksOfTask(mainTaskId).Where(s => s.Id != changedSubtaskId);
             int sumProgress = changedSubtaskProgress.HasValue ? changedSubtaskProgress.Value : 0;
             int num = 1;
-            if (flIfDelete)
-            {
-                num--;
-            }
+           
             foreach (var subtask in subtasks)
             {
                 if (subtask.Progress.HasValue)
@@ -315,7 +354,7 @@ namespace TaskManagerBLL.Services
 
             if (task.ParentId.HasValue )
             {
-                int progress = CalculateProgressofSubTask(task.ParentId.Value, task.Id, task.Progress);
+                int progress = CalculateProgressOfSubTask(task.ParentId.Value, task.Id, task.Progress);
                 _Task mainTask = db.Tasks.Get(task.ParentId.Value);
                 if (mainTask.Status.Name == "New")
                 {
