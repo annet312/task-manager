@@ -224,54 +224,30 @@ namespace TaskMng.Controllers
         }
 
         [HttpPost]
-        public HttpStatusCode AddSubtask(int parentId, int? TemplateId, CreateTaskView newSubtask,string assigneeName)
+        public HttpStatusCode AddSubtask(int parentId, int? TemplateId, CreateTaskView newSubtask)
         {
-            string assignee;
             
             string author = User.Identity.Name;
 
             if (TemplateId.HasValue)
             {
-                if(!User.IsInRole("Manager"))
-                {
-                    if(string.IsNullOrEmpty(assigneeName))
-                    {
-                        return HttpStatusCode.PreconditionFailed;
-                    }
-                    assignee = assigneeName;
-                }
-                else
-                {
-                    assignee = author;
-                }
-                serviceTask.AddSubtasksFromTemplate(parentId, TemplateId.Value, author, assignee);
+               
+                serviceTask.AddSubtasksFromTemplate(parentId, TemplateId.Value, author);
                 // TO DO exceptions
                 return HttpStatusCode.OK;
             }
             
             if (newSubtask != null)
             {
-                if (!User.IsInRole("Manager"))
-                {
-                    assignee = User.Identity.Name;
-                }
-                else
-                {
-                    if (newSubtask.Assignee == null)
-                    {
-                        return HttpStatusCode.PreconditionFailed;
-                    }
-                    assignee = newSubtask.Assignee;
-                }
+            
                 var task = new TaskView
                 {
                     ParentId = parentId,
                     Name = newSubtask.Name,
                     Comment = newSubtask.Comment
                 };
-                task.Assignee.Name = assignee;
-                task.Author.Name = author;
-                serviceTask.AddSubtask(mapper.Map<TaskView,TaskBLL>(task), parentId, author, assignee);
+              
+                serviceTask.AddSubtask(mapper.Map<TaskView,TaskBLL>(task), parentId, author);
                 //TODO Exceptions
                 return HttpStatusCode.OK;
             }

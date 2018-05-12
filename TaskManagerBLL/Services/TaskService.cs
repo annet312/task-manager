@@ -88,7 +88,7 @@ namespace TaskManagerBLL.Services
                 {
                     //then need to calculate new progress for parent task
                     _Task parrentTask = db.Tasks.Get(task.ParentId.Value);
-                    parrentTask.Progress = CalculateProgressofSubTask(task.ParentId.Value, task.Id, 0 , true);
+                    parrentTask.Progress = CalculateProgressOfSubtask(task.ParentId.Value, task.Id, 0);
                     db.Tasks.Update(parrentTask);
                 }
                 db.Tasks.Delete(task.Id);
@@ -124,23 +124,21 @@ namespace TaskManagerBLL.Services
                 db.Save();//??
             }
         }
-        public void AddSubtask(TaskBLL subtask, int taskId,  string authorName, string assigneeName, bool forceToSave = true)
+        public void AddSubtask(TaskBLL subtask, int taskId,  string authorName, bool forceToSave = true)
         { 
             //TO DO Exception
             PersonBLL author = mapper.Map<Person, PersonBLL>(db.People.Find(p => (p.Name == authorName)).Single());
-            PersonBLL assignee = mapper.Map<Person, PersonBLL>(db.People.Find(p => (p.Name == assigneeName)).Single());
-            subtask.Assignee = assignee;
             subtask.Author = author;
 
             AddSubtask(subtask, taskId);
         }
 
-        public void AddSubtasksFromTemplate(int taskId, int templateId , string authorName, string assigneeName)
+        public void AddSubtasksFromTemplate(int taskId, int templateId , string authorName)
         {
             IEnumerable<TaskTemplateBLL> subtaskNames = GetSubtasksOfTemplate(templateId);
             //TO DO EXCEPTIONS
             PersonBLL author = mapper.Map<Person, PersonBLL>(db.People.Find(p => (p.Name == authorName)).Single());
-            PersonBLL assignee = mapper.Map<Person, PersonBLL>(db.People.Find(p => (p.Name == assigneeName)).Single());
+            
             foreach (var subtaskName in subtaskNames)
             {
                 var subtask = new TaskBLL
@@ -150,7 +148,7 @@ namespace TaskManagerBLL.Services
                     ETA = null,
                     DueDate = null,
                     Comment = null,
-                    Assignee = assignee,
+                  //  Assignee = mapper.Map<_Task, TaskBLL>(parentTask).Assignee,
                     Author = author
                 };
                 AddSubtask(subtask, taskId, false);
@@ -354,7 +352,7 @@ namespace TaskManagerBLL.Services
 
             if (task.ParentId.HasValue )
             {
-                int progress = CalculateProgressOfSubTask(task.ParentId.Value, task.Id, task.Progress);
+                int progress = CalculateProgressOfSubtask(task.ParentId.Value, task.Id, task.Progress);
                 _Task mainTask = db.Tasks.Get(task.ParentId.Value);
                 if (mainTask.Status.Name == "New")
                 {

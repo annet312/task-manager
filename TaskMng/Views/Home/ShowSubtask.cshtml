@@ -1,9 +1,10 @@
 ﻿@model IEnumerable<TaskMng.Models.TaskView>
 
-
 <tr>
     <td colspan="5">
-        <table class="table">
+        @if (Model.Any())
+        {
+            <table class="table">
             @foreach (var item in Model)
             {
                 <tr id="task@(item.Id)">
@@ -14,7 +15,7 @@
                         @Html.DisplayFor(modelItem => item.Name)
                     </td>
                     <td>
-                        <select id="status@(item.Id)" aria-describedby="basic-addon3" data-status="@(item.Status.Name)" onclick="showStatuses(@item.Id)" onchange="setNewStatus(@item.Id)")>
+                        <select id="status@(item.Id)" aria-describedby="basic-addon3" data-status="@(item.Status.Name)" onchange="setNewStatus(@item.Id)">
                             <option selected>@(item.Status.Name)</option>
                         </select>
                     </td>
@@ -33,37 +34,13 @@
                     </td>
                 </tr>
             }
-        </table>
+            </table>
+        }
         <div>
-            Add sub-task
+            <a href="#" title="Add subtask" data-toggle="modal" data-target="#myModalAddSubtask" onclick="saveParentTaskId()">
+                <i class="fas fa-plus-circle"></i>
+                Add subtask
+            </a>
         </div>
     </td>
 </tr>
-
-<script>
-
- function showStatuses(id) {
-            $.ajax({
-                url: "@Url.Action("GetStatuses", "Home")",
-                method: "GET",
-            })
-            .done(function (data) {
-                var status = $("#status"+id);
-                status.html(data);
-                status.val(status.data("status"));
-            });
-    }
-    function setNewStatus(taskId) {
-        var statusName = $('#task' + taskId + ' select').val();
-        $.ajax({
-            url: "@Url.Action("SetNewStatus", "Home")",
-            method: "POST",
-            data: { id: taskId, status: statusName }
-        })
-            .then
-            (function () {
-                var status = $("#status" + taskId);
-                status.data("status", status.val());
-            })
-    }
-</script>

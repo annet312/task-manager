@@ -25,7 +25,7 @@
 
     @foreach (var item in Model)
     {
-        <tr id="task@(item.Id)">
+        <tr id="task@(item.Id)" data-task-id="@(item.Id)">
             <td>
                 <a id="iconshow-subtask" href="#" title="Show subtasks" onclick="showSubtasks(@item.Id)">
                     <i class="far fa-plus-square"></i>@*//change on far-fa-minus when click*@
@@ -80,12 +80,12 @@
                     <div class="form-group">
                         <label for="task-name">Name:</label>
                         <input type="text" class="form-control" id="newtask-name" required>
-                    </div>                   
-                        <div class="form-group">
-                            <label for="comment-text">Comment:</label>
-                            <textarea class="form-control" id="comment-text"></textarea>
-                        </div>
-                 </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="comment-text">Comment:</label>
+                        <textarea class="form-control" id="comment-text"></textarea>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-default" data-dismiss="modal">Close</button>
@@ -105,7 +105,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="height: 600px; overflow-y: auto;">
                 <div id="detailOfTask">
 
                 </div>
@@ -128,9 +128,9 @@
                 </button>
             </div>
             <div class="modal-body">
-                    <span id="EditTaskId"></span>
-                    <div class="form" id="edit-form">
-                    </div>
+                <span id="EditTaskId"></span>
+                <div class="form" id="edit-form">
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-default" data-dismiss="modal">Close</button>
@@ -140,20 +140,94 @@
     </div>
 </div>
 
-
+<div id="myModalAddSubtask" class="modal fade" role="dialog" style="opacity:initial;">
+    <div class="modal-dialog">
+        <div class="modal-content" style="position:fixed">
+            <div class="modal-header">
+                <h5 class="modal-title">Add subtask</h5>
+                <button class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-control" id="add-subtask">
+                    <div class="form-group">
+                        <label for="newsubtask-name">Name:</label>
+                        <input type="text" class="form-control" id="newsubtask-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="Subtask-comment-text">Comment:</label>
+                        <textarea class="form-control" id="Subtask-comment-text"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal">Close</button>
+                <button class="btn btn-primary" type="button" onclick="addSubtask()" id="save-added-task" disabled>Save subtask</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
+    function showStatuses(id) {
+        $.ajax({
+            url: "@Url.Action("GetStatuses", "Home")",
+            method: "GET"
+        })
+        .done(function (data) {
+            var status = $("#status" + id);
+            status.html(data);
+            status.val(status.data("status"));
+        });
+    }
 
-    //src = "~/Scripts/src/Taskscripts.js"
+    function setNewStatus(taskId) {
+        var statusName = $("#task" + taskId + " select").val();
+        $.ajax({
+            url: "@Url.Action("SetNewStatus", "Home")",
+            method: "POST",
+            data: { id: taskId, status: statusName }
+        })
+        .done(function () {
+            $("#myTasksBtn").click();
+        });
+    }
 
+    function saveParentTaskId() {
+        var parentTaskId = $(this).parent("tr[data-task-id]").data("task-id");
+        $("#save-added-task").data("parentTaskId", parentTaskId);
+    }
 
+    function addSubtask() {
+        var task = {
+            name: $("#newsubtask-name").val(),
+            comment: $("#comment-text").val()
+        };
+        $.ajax({
+            url: "@Url.Action("AddSubtask", "Home")",
+            method: "POST",
+            data: {
+                parentId: $("#save-added-task").data("parentTaskId"),
+                templateId: null,
+                newSubtask: task
+            }
+        })
+        .done(function () {
+            alert("Subtask was added");
+            $("#myTasksBtn").click();
+        })
+        .fail(function () {
+            alert("Cannot add the subtask!");
+        });
+    }
 
-function editMainTask(taskId) {
-    $.ajax({
-        url: "@Url.Action("EditTask", "Home")",
-        method: "POST",
-        data: { id: taskId },
-    })
+    function editMainTask(taskId) {
+        $.ajax({
+            url: "@Url.Action("EditTask", "Home")",
+            method: "POST",
+            data: { id: taskId },
+        })
         .done(function (data) {
             $("#edit-form").html(data);
             $("#save-task").data('editTaskId', taskId);
@@ -161,85 +235,72 @@ function editMainTask(taskId) {
         .fail(function () {
             $("#edit-form").html("<p>Cannot find task</p>");
         });
-}
+    }
 
-$('#edit-form').change(function () {
-    $('#save-task').prop('disabled', false);
-})
+    function saveEditTask() {
+        var task = {
+            Id: $("#save-task").data('editTaskId'),
+            Name: $("#nameEditTask").val(),
+            Assignee: $("select#assignee").val(),
+            ETA: $("#timepicker2").val(),
+            DueDate: $("#timepicker3").val(),
+            Comment: $("#comment").val(),
+        };
 
-$('#myModalEditMainTask').on('hidden.bs.modal', function (e) {
-    $('#save-task').prop('disabled', true);
-})
-
-function saveEditTask() {
-    var task = {
-        Id: $("#save-task").data('editTaskId'),
-        Name: $("#nameEditTask").val(),
-        Assignee: $("select#assignee").val(),
-        ETA: $("#timepicker2").val(),
-        DueDate: $("#timepicker3").val(),
-        Comment: $("#comment").val(),
-    };
-
-    $.ajax({
-        url: "@Url.Action("SaveEditTask", "Home")",
-        method: "POST",
-        data: { taskForEdit: task },
-    })
+        $.ajax({
+            url: "@Url.Action("SaveEditTask", "Home")",
+            method: "POST",
+            data: { taskForEdit: task },
+        })
         .done(function (Msg) {
             alert(Msg);
-            top.location.href = '/Home/Index';
+            $("#myTasksBtn").click();
         })
         .fail(function () {
             $("#edit-form").html("<p>Cannot find task</p>");
         });
-}
+    }
 
-function details(mainId) {
-    $.ajax({
-        url: "@Url.Action("Details", "Home")",
-        method: "GET",
-        data: { id: mainId },
-    })
+    function details(mainId) {
+        $.ajax({
+            url: "@Url.Action("Details", "Home")",
+            method: "GET",
+            data: { id: mainId },
+        })
         .done(function (data) {
             $("#detailOfTask").html(data);
         })
         .fail(function () {
             alert("Cannot find the task");
         });
-}
+    }
 
-
-$('#newtask-name').change(function () {
-    $('#save-created-task').removeAttr('disabled');
-})
-
-function createMyMainTask() {
-    var task = {
-        name: $("#newtask-name").val(),
-        assigneeId: "",
-        comment: $("#comment-text").val()
-    };
-    $.ajax({
-        url: "@Url.Action("CreateTask", "Home")",
-        method: "POST",
-        data: { newTask: task }
-    })
+    function createMyMainTask() {
+        var task = {
+            name: $("#newtask-name").val(),
+            assigneeId: "",
+            comment: $("#comment-text").val()
+        };
+        $.ajax({
+            url: "@Url.Action("CreateTask", "Home")",
+            method: "POST",
+            data: { newTask: task }
+        })
         .done(function (Msg) {
             alert(Msg);
-            top.location.href = '/Home/Index'
+            $("#myTasksBtn").click();
         })
         .fail(function () {
             alert("Cannot add the task!");
         });
-}
+    }
 
-function deleteTask(taskId) {
-    $.ajax({
-        url: "@Url.Action("DeleteTask", "Home")",
-        method: "POST",
-        data: { id: taskId }
-    })
+    function deleteTask(taskId) {
+        $.ajax({
+            url: "@Url.Action("DeleteTask", "Home")",
+            method: "POST",
+            data: { id: taskId }
+        })
         .done(function () {
             alert("Task has been deleted.");
             $("#task" + taskId).remove();
@@ -247,60 +308,76 @@ function deleteTask(taskId) {
         .fail(function () {
             alert("Cannot delete the task!");
         });
-}
+    }
 
-function showSubtasks(taskId) {
-    $.ajax({
-        url: "@Url.Action("ShowSubtask", "Home")",
-        method: "GET",
-        data: { parentId: taskId }
-    })
+    function showSubtasks(taskId) {
+        $.ajax({
+            url: "@Url.Action("ShowSubtask", "Home")",
+            method: "GET",
+            data: { parentId: taskId }
+        })
         .done(function (data) {
-            var taskRow = $('#task' + taskId);
+            var taskRow = $("#task" + taskId);
             taskRow.after(data);
 
             $("#iconshow-subtask", taskRow).hide();
             $("#iconhide-subtask", taskRow).show();
+
+            getStatuses(function (statuses) {
+                setStatuses(statuses, taskRow.next().find("select"));
+            }); 
         })
-        .fail(function () {
+    }
+
+    function hideSubtasks(taskId) {
+        var taskRow = $('#task' + taskId);
+        taskRow.next().remove();
+        $("#iconhide-subtask", taskRow).hide();
+        $("#iconshow-subtask", taskRow).show();
+    }
+
+    function setStatuses(statuses, selects) {
+        selects.html(statuses);
+        $.each(selects, function () {
+            var $this = $(this);
+            $this.val($this.data("status"));
         });
-}
+    }
 
-function hideSubtasks(taskId) {
-    var taskRow = $('#task' + taskId);
-    taskRow.next().remove();
-    $("#iconhide-subtask", taskRow).hide();
-    $("#iconshow-subtask", taskRow).show();
-}
+    @*function getStatuses(handler) {
+        $.ajax({
+            //url: "@Url.Action("GetStatuses", "Home")",
+            url: "/Home/GetStatuses",
+            method: "GET"
+        })
+        .done(function (data) {
+            handler(data);
+        });
+    }*@
 
-function setNewStatus(taskId) {
+    $(document).ready(function () {
+        getStatuses(function handler(statuses) {
+            setStatuses(statuses, $(".table select"));
+        });     
 
-    var statusName = $('#task' + taskId + ' select').val();
-    $.ajax({
-        url: "@Url.Action("SetNewStatus", "Home")",
-        method: "POST",
-        data: { id: taskId, status: statusName }
-    })
-}
+        $("#edit-form").change(function () {
+            $("#save-task").prop("disabled", false);
+        });
 
-function setStatuses() {
-    $.each($(".table select"), function () {
-        var $this = $(this);
-        $this.val($this.data("status"));
+        $("#myModalEditMainTask").on("hidden.bs.modal", function (e) {
+            $("#save-task").prop("disabled", true);
+        });
+
+        $("#add-subtask").change(function () {
+            $("#save-added-task").prop("disabled", false);
+        });
+
+        $("#myModalAddSubtask").on("hidden.bs.modal", function (e) {
+            $("#save-added-task").prop("disabled", true);
+        });
+
+        $("#newtask-name").change(function () {
+            $("#save-created-task").removeAttr("disabled");
+        })
     });
-}
-
-$(document).ready(function () {
-    $.ajax({
-        url: "@Url.Action("GetStatuses", "Home")",
-        method: "GET"
-    })
-    .done(function (data) {
-        $(".table select").html(data);
-
-        setStatuses();
-    });
-});
-
-
 </script>
