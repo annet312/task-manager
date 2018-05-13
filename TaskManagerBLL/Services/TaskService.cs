@@ -88,7 +88,7 @@ namespace TaskManagerBLL.Services
                 {
                     //then need to calculate new progress for parent task
                     _Task parrentTask = db.Tasks.Get(task.ParentId.Value);
-                    parrentTask.Progress = CalculateProgressOfSubtask(task.ParentId.Value, task.Id, 0);
+                    parrentTask.Progress = CalculateProgressOfSubtask(task.ParentId.Value, task.Id, 100);
                     db.Tasks.Update(parrentTask);
                 }
                 db.Tasks.Delete(task.Id);
@@ -206,37 +206,40 @@ namespace TaskManagerBLL.Services
             db.Save();
         }
         public void SaveChangeTask(TaskBLL task, string assigneeName)
-        {//!!!!TODO UPDATE except delete/add
+        {
 
             _Task taskForEdit = db.Tasks.Get(task.Id);
 
             if (taskForEdit != null)
             {
-                if ((assigneeName == null)&&(task.ParentId != null))
+                if (!taskForEdit.ParentId.HasValue)
                 { 
-                    //We cannot change assignee for subtask - only for main task
-                    throw new ArgumentNullException("assigneeName", "Cannot be null");
-                }
-                if (taskForEdit.Assignee.Name != assigneeName)
-                {
-                    Person assignee;
-                    try
+                    if ((assigneeName == null) && (task.ParentId != null))
                     {
-                        assignee = db.People.Find(p => (p.Name == assigneeName)).Single();
+                        //We cannot change assignee for subtask - only for main task
+                        throw new ArgumentNullException("assigneeName", "Cannot be null");
                     }
-                    catch(InvalidOperationException e)
+                    if (taskForEdit.Assignee.Name != assigneeName)
                     {
-                        throw new InvalidOperationException("Assignee is not single in DataBase", e);
-                    }
-                    taskForEdit.Assignee = assignee;
-                    if(taskForEdit.ParentId == null)
-                    {
-                        IEnumerable<_Task> subtasks = mapper.Map<IEnumerable<TaskBLL>,IEnumerable<_Task>>(GetSubtasksOfTask(taskForEdit.Id));
-                        //for change assignee for all subtask of edited Task
-                        foreach(var subtask in subtasks)
+                        Person assignee;
+                        try
                         {
-                            subtask.Assignee = assignee;
-                            db.Tasks.Update(subtask);
+                            assignee = db.People.Find(p => (p.Name == assigneeName)).Single();
+                        }
+                        catch (InvalidOperationException e)
+                        {
+                            throw new InvalidOperationException("Assignee is not single in DataBase", e);
+                        }
+                        taskForEdit.Assignee = assignee;
+                        if (taskForEdit.ParentId == null)
+                        {
+                            IEnumerable<_Task> subtasks = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<_Task>>(GetSubtasksOfTask(taskForEdit.Id));
+                            //for change assignee for all subtask of edited Task
+                            foreach (var subtask in subtasks)
+                            {
+                                subtask.Assignee = assignee;
+                                db.Tasks.Update(subtask);
+                            }
                         }
                     }
                 }
@@ -322,6 +325,10 @@ namespace TaskManagerBLL.Services
                     {
                         task.DateStart = DateTime.Now;
                         task.Progress = 0;
+                        if(!task.ParentId.HasValue)
+                        {
+                            task.Progress = CalculateProgressOfSubtask(task.Id, 0);
+                        }
                         break;
                     }
                 case "Done":
@@ -347,16 +354,14 @@ namespace TaskManagerBLL.Services
                 default:
                     break;
             }
-
-            db.Tasks.Update(task);
-
-            if (task.ParentId.HasValue )
+            
+            if (task.ParentId.HasValue)
             {
                 int progress = CalculateProgressOfSubtask(task.ParentId.Value, task.Id, task.Progress);
                 _Task mainTask = db.Tasks.Get(task.ParentId.Value);
                 if (mainTask.Status.Name == "New")
                 {
-                    var underwayStatusList = new string[3] { "Executed", "Underway", "Completed"};
+                    var underwayStatusList = new string[3] { "Executed", "Underway", "Completed" };
                     if (underwayStatusList.Contains(task.Status.Name))
                     {
                         mainTask.StatusId = db.Statuses.Find(s => (s.Name == "Underway")).Single().Id;
@@ -364,8 +369,9 @@ namespace TaskManagerBLL.Services
                 }
                 mainTask.Progress = progress;
                 db.Tasks.Update(mainTask);
-               
             }
+            
+            db.Tasks.Update(task);
             db.Save();
         }
 

@@ -28,6 +28,9 @@
                         </div>
                     </td>
                     <td>
+                        <a href="#" title="Edit" onclick="editTask(@item.Id)" data-toggle="modal" data-target="#myModalEditTask">
+                            <i class="far fa-edit"></i>
+                        </a>
                         <a href="#" title="Delete" onclick="deleteTask(@item.Id)">
                             <i class="fas fa-trash"></i>
                         </a>
@@ -37,7 +40,7 @@
             </table>
         }
         <div>
-            <a href="#" title="Add subtask" data-toggle="modal" data-target="#myModalAddSubtask" onclick="saveParentTaskId()">
+            <a href="#" title="Add subtask" data-toggle="modal" data-target="#myModalAddSubtask" onclick="saveParentTaskId(@ViewBag.ParentId)">
                 <i class="fas fa-plus-circle"></i>
                 Add subtask
             </a>

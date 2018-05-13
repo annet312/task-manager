@@ -98,6 +98,8 @@ namespace TaskMng.Controllers
             return PartialView("EditTask", task);
         }
 
+
+
         [HttpPost]
         public string SaveEditTask(TaskEditView taskForEdit)
         {
@@ -131,6 +133,7 @@ namespace TaskMng.Controllers
         public ActionResult ShowSubtask(int parentId)
         {
             IEnumerable<TaskView> subtasks = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(serviceTask.GetSubtasksOfTask(parentId));
+            ViewBag.ParentId = parentId;
             return PartialView("ShowSubtask", subtasks);
         }
 

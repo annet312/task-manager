@@ -30,47 +30,21 @@
             <span class="form-control" id="assignee">@Model.MainTask.Assignee.Name</span>
         </div>
     </div>
-
     <div class="form-row">
-        <div class="col">
-            @if (Model.MainTask.DateStart.HasValue)
-            {
+        <div class="col-md-4">
                 <label for="date-start">Date start</label>
-                <span class="form-control" id="date-start">@Model.MainTask.DateStart</span>
-            }
-            else
-            {
-                <label for="date-start-na">Date start</label>
-                <span class="form-control" id="date-start-na">N/A</span>
-            }
+                <span class="form-control" id="date-start">@(Model.MainTask.DateStart.HasValue ? Model.MainTask.DateStart.Value.ToString() : "N/A")</span>
         </div>
-        <div class="col">
-
-            @if (Model.MainTask.DateStart.HasValue)
-            {
+        <div class="col-md-4">
                 <label for="eta">ETA</label>
-                <span class="form-control" id="eta">@Model.MainTask.ETA</span>
-            }
-            else
-            {
-                <label for="eta-na">ETA</label>
-                <span class="form-control" id="eta-na">N/A</span>
-            }
+                <span class="form-control" id="eta">@(Model.MainTask.ETA.HasValue ? Model.MainTask.ETA.Value.ToString() : "N/A")</span>            
         </div>
-        <div class="col">
-
-            @if (Model.MainTask.DateStart.HasValue)
-            {
+        <div class="col-md-4">
                 <label for="due-date">Due Date</label>
-                <span class="form-control" id="due-date">@Model.MainTask.DueDate</span>
-            }
-            else
-            {
-                <label for="due-date-na">Due Date</label>
-                <span class="form-control" id="due-date-na">N/A</span>
-            }
+                <span class="form-control" id="due-date">@(Model.MainTask.DueDate.HasValue ? Model.MainTask.DueDate.Value.ToString() : "N/A")</span>
         </div>
     </div>
+
     @if (!Model.MainTask.Comment.IsEmpty())
     {
         <label for="comment-main">Comment</label>
@@ -107,42 +81,17 @@
                 </div>
             </div>
             <div class="form-row">
-                <div class="col-md-4">
-                    @if (Model.Subtasks.ElementAt(i).DateStart.HasValue)
-            {
-                <label for="date-start-subtask">Date start</label>
-                <span class="form-control" id="date-start-subtask">@Model.Subtasks.ElementAt(i).DateStart</span>
-                    }
-                    else
-                    {
-        <label for="date-start-na-subtask">Date start</label>
-        <span class="form-control" id="date-start-na-subtask">N/A</span>
-                    }
+                <div class="col-md-4">                 
+                    <label for="date-start-subtask">Date start</label>
+                    <span class="form-control" id="date-start-subtask">@(Model.Subtasks.ElementAt(i).DateStart.HasValue ?  Model.Subtasks.ElementAt(i).DateStart.Value.ToString() : "N/A")</span>
                 </div>
                 <div class="col-md-4">
-                    @if (Model.Subtasks.ElementAt(i).ETA.HasValue)
-            {
-                <label for="eta-subtask">ETA</label>
-                <span class="form-control" id="eta-subtask">@Model.Subtasks.ElementAt(i).ETA</span>
-                    }
-                    else
-                    {
-        <label for="eta-na-subtask">ETA</label>
-        <span class="form-control" id="eta-na-subtask">N/A</span>
-                    }
+                     <label for="eta-subtask">ETA</label>
+                     <span class="form-control" id="eta-subtask">@(Model.Subtasks.ElementAt(i).ETA.HasValue ? Model.Subtasks.ElementAt(i).ETA.Value.ToString() : "N/A")</span>
                 </div>
                 <div class="col-md-4">
-
-                    @if (Model.Subtasks.ElementAt(i).DueDate.HasValue)
-            {
-                <label for="due-date">Due Date</label>
-                <span class="form-control" id="due-date">@Model.Subtasks.ElementAt(i).DueDate</span>
-                    }
-                    else
-                    {
-                     <label for="due-date-na">Due Date</label>
-                 <span class="form-control" id="due-date-na">N/A</span>
-                    }
+                    <label for="due-date">Due Date</label>
+                    <span class="form-control" id="due-date">@(Model.Subtasks.ElementAt(i).DueDate.HasValue ? Model.Subtasks.ElementAt(i).DueDate.Value.ToString() : "N/A")</span>
                 </div>
 
             </div>
@@ -154,7 +103,6 @@
                 </div>
             }
         </div>
-
         }
     </div>
     }

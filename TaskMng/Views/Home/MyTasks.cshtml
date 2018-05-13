@@ -52,7 +52,7 @@
                 <a href="#" title="Details" onclick="details(@item.Id)" data-toggle="modal" data-target="#myModalDetailsTask">
                     <i class="fas fa-info-circle"></i>
                 </a>
-                <a href="#" title="Edit" onclick="editMainTask(@item.Id)" data-toggle="modal" data-target="#myModalEditMainTask">
+                <a href="#" title="Edit" onclick="editTask(@item.Id)" data-toggle="modal" data-target="#myModalEditTask">
                     <i class="far fa-edit"></i>
                 </a>
                 <a href="#" title="Delete" onclick="deleteTask(@item.Id)">
@@ -118,7 +118,7 @@
 </div>
 
 
-<div id="myModalEditMainTask" class="modal fade" role="dialog" style="opacity:initial">
+<div id="myModalEditTask" class="modal fade" role="dialog" style="opacity:initial">
     <div class="modal-dialog">
         <div class="modal-content" style="position:fixed">
             <div class="modal-header">
@@ -140,6 +140,28 @@
     </div>
 </div>
 
+@*<div id="myModalEditSubtask" class="modal fade" role="dialog" style="opacity:initial">
+    <div class="modal-dialog">
+        <div class="modal-content" style="position:fixed">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Task</h5>
+                <button class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <span id="EditSubtaskId"></span>
+                <div class="form" id="edit-subtask-form">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal">Close</button>
+                <button class="btn btn-primary" type="button" disabled id="save-subtask" onclick="saveEditSubtask()">Save task</button>
+            </div>
+        </div>
+    </div>
+</div>*@
+
 <div id="myModalAddSubtask" class="modal fade" role="dialog" style="opacity:initial;">
     <div class="modal-dialog">
         <div class="modal-content" style="position:fixed">
@@ -157,12 +179,12 @@
                     </div>
                     <div class="form-group">
                         <label for="Subtask-comment-text">Comment:</label>
-                        <textarea class="form-control" id="Subtask-comment-text"></textarea>
+                        <textarea class="form-control" id="subtask-comment-text"></textarea>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-default" data-dismiss="modal">Close</button>
+                <button class="btn btn-default" data-dismiss="modal" id="close-modal">Close</button>
                 <button class="btn btn-primary" type="button" onclick="addSubtask()" id="save-added-task" disabled>Save subtask</button>
             </div>
         </div>
@@ -194,16 +216,19 @@
         });
     }
 
-    function saveParentTaskId() {
-        var parentTaskId = $(this).parent("tr[data-task-id]").data("task-id");
-        $("#save-added-task").data("parentTaskId", parentTaskId);
+    function saveParentTaskId(parentId) {
+        console.log(parentId);
+        $("#save-added-task").data("parentTaskId", parentId);
+       
     }
 
     function addSubtask() {
         var task = {
             name: $("#newsubtask-name").val(),
-            comment: $("#comment-text").val()
+            comment: $("#subtask-comment-text").val()
         };
+        console.log(task);
+        console.log($("#save-added-task").data("parentTaskId"));
         $.ajax({
             url: "@Url.Action("AddSubtask", "Home")",
             method: "POST",
@@ -222,15 +247,15 @@
         });
     }
 
-    function editMainTask(taskId) {
+    function editTask(taskId) {
         $.ajax({
             url: "@Url.Action("EditTask", "Home")",
             method: "POST",
-            data: { id: taskId },
+            data: { id: taskId }
         })
         .done(function (data) {
             $("#edit-form").html(data);
-            $("#save-task").data('editTaskId', taskId);
+            $("#save-task").data("editTaskId", taskId);
         })
         .fail(function () {
             $("#edit-form").html("<p>Cannot find task</p>");
@@ -246,7 +271,7 @@
             DueDate: $("#timepicker3").val(),
             Comment: $("#comment").val(),
         };
-
+        
         $.ajax({
             url: "@Url.Action("SaveEditTask", "Home")",
             method: "POST",
@@ -260,6 +285,29 @@
             $("#edit-form").html("<p>Cannot find task</p>");
         });
     }
+
+    @*function saveEditSubtask() {
+        var subtask = {
+            Id: $("#save-subtask").data('editsubtaskId'),
+            Name: $("#nameEditSubtask").val(),
+            //ETA: $("#timepicker2").val(),
+            //DueDate: $("#timepicker3").val(),
+            Comment: $("#commentsubtask").val(),
+        };
+
+        $.ajax({
+            url: "@Url.Action("SaveEditTask", "Home")",
+            method: "POST",
+            data: { taskForEdit: subtask },
+        })
+        .done(function (Msg) {
+            alert(Msg);
+            $("#myTasksBtn").click();
+        })
+        .fail(function () {
+            $("#edit-form").html("<p>Cannot find task</p>");
+        });
+    }*@
 
     function details(mainId) {
         $.ajax({
@@ -344,16 +392,24 @@
         });
     }
 
-    @*function getStatuses(handler) {
-        $.ajax({
-            //url: "@Url.Action("GetStatuses", "Home")",
-            url: "/Home/GetStatuses",
-            method: "GET"
-        })
-        .done(function (data) {
-            handler(data);
-        });
-    }*@
+    
+        function showAssignees(managerId) {
+            $.ajax({
+                url: "@Url.Action("GetAssignees", "Home")",
+                method: "GET",
+                data: { managerId: managerId }
+            })
+            .done(function (data) {
+                var assignee = $("#assignee");
+                assignee.html(data);
+                assignee.val(assignee.data("assignee"));
+            });
+        }
+
+        function updateAssignee() {
+            var assignee = $("#assignee");
+            assignee.data("assignee", assignee.val());
+        }
 
     $(document).ready(function () {
         getStatuses(function handler(statuses) {

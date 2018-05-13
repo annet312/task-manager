@@ -23,7 +23,8 @@
         </div>
     </div>
 </div>
-
+@if (!Model.ParentId.HasValue)
+{
 <div class="input-group mb-3">
     <div class="input-group-prepend">
         <span class="input-group-text" id="basic-addon3">Assignee</span>
@@ -32,7 +33,7 @@
         <option selected>@(Model.Assignee.Name)</option>
     </select>
 </div>
-
+}
     <div class="form-row">
         <div class="col-md-6">
             <label for="eta">ETA</label>
@@ -78,21 +79,4 @@
 
     //});
 
-        function showAssignees(managerId) {
-            $.ajax({
-                url: "@Url.Action("GetAssignees", "Home")",
-                method: "GET",
-                data: { managerId: managerId }
-            })
-            .done(function (data) {
-                var assignee = $("#assignee");
-                assignee.html(data);
-                assignee.val(assignee.data("assignee"));
-            });
-        }
-
-        function updateAssignee() {
-            var assignee = $("#assignee");
-            assignee.data("assignee", assignee.val());
-        }
     </script>
