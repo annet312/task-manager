@@ -21,19 +21,7 @@ namespace TaskManagerDAL.Repositories
         }
         public _Task Get(int id)
         {
-            _Task result;
-            try
-            {
-                result = dataBase.Tasks.Include(p => p.Assignee).Include(p => p.Author).Include(p => p.Status).SingleOrDefault(p => p.Id == id);
-            }
-            catch (NullReferenceException e)
-            {
-                throw new NullReferenceException("No tasks in database", e);
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Error in database access", e);
-            }
+            _Task result = dataBase.Tasks.Include(p => p.Assignee).Include(p => p.Author).Include(p => p.Status).SingleOrDefault(p => p.Id == id);
             return result;
         }
         public IEnumerable<_Task> Find(Func<_Task, Boolean> predicate)

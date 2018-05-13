@@ -9,10 +9,9 @@
             {
                 <tr id="task@(item.Id)">
                     <td>
-                        <i class="fas fa-circle"></i>
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Name)
+                        <ul style="margin: 0;">
+                            <li>@Html.DisplayFor(modelItem => item.Name)</li>
+                        </ul>
                     </td>
                     <td>
                         <select id="status@(item.Id)" aria-describedby="basic-addon3" data-status="@(item.Status.Name)" onchange="setNewStatus(@item.Id)">
@@ -28,20 +27,15 @@
                         </div>
                     </td>
                     <td>
-                        <a href="#" title="Edit" onclick="editTask(@item.Id)" data-toggle="modal" data-target="#myModalEditTask">
-                            <i class="far fa-edit"></i>
-                        </a>
-                        <a href="#" title="Delete" onclick="deleteTask(@item.Id)">
-                            <i class="fas fa-trash"></i>
-                        </a>
+                        <a href="#" title="Edit" class="oi oi-pencil" onclick="editTask(@item.Id)" data-toggle="modal" data-target="#myModalEditTask" aria-hidden="true"></a>
+                        <a href="#" title="Delete" class="oi oi-trash" onclick="deleteTask(@item.Id)" aria-hidden="true"></a>
                     </td>
                 </tr>
             }
             </table>
         }
         <div>
-            <a href="#" title="Add subtask" data-toggle="modal" data-target="#myModalAddSubtask" onclick="saveParentTaskId(@ViewBag.ParentId)">
-                <i class="fas fa-plus-circle"></i>
+            <a href="#" title="Add subtask" class="oi oi-plus" data-toggle="modal" data-target="#addTaskModal" onclick="saveParentTaskId(@ViewBag.ParentId)" aria-hidden="true">
                 Add subtask
             </a>
         </div>

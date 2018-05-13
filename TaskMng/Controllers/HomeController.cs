@@ -98,8 +98,6 @@ namespace TaskMng.Controllers
             return PartialView("EditTask", task);
         }
 
-
-
         [HttpPost]
         public string SaveEditTask(TaskEditView taskForEdit)
         {
@@ -201,60 +199,43 @@ namespace TaskMng.Controllers
             {
                 //PersonView author = mapper.Map<PersonBLL, PersonView>(servicePerson.GetPerson(User.Identity.GetUserId()));
                 string author = User.Identity.Name;
-                string assignee = newTask.Assignee;
-                var task = new TaskView
+
+                if (newTask.TemplateId.HasValue)
                 {
-                    ParentId = null,
-                    Name = newTask.Name,
-                    Comment = newTask.Comment
-                };
+                    serviceTask.AddSubtasksFromTemplate(newTask.ParentId.Value, newTask.TemplateId.Value, author);
+                    // TO DO exceptions
+                    return "Task was created";
+                }
+
+                var task = new TaskView
+                           {
+                               ParentId = newTask.ParentId,
+                               Name = newTask.Name,
+                               Comment = newTask.Comment
+                           };
+            
                 try
                 {
-                    serviceTask.CreateTask(mapper.Map<TaskView, TaskBLL>(task), author, assignee);
-
+                    if (!newTask.ParentId.HasValue)
+                    {
+                        serviceTask.CreateTask(mapper.Map<TaskView, TaskBLL>(task), author, newTask.Assignee);
+                    }
+                    else
+                    {
+                        serviceTask.AddSubtask(mapper.Map<TaskView, TaskBLL>(task), task.ParentId.Value);
+                    }
                 }
                 catch (InvalidOperationException e)
                 {
-                    return ("Task wasn't created because " + e.Message);
+                    return ("Task wasn't created. Error: " + e.Message);
                 }
                 catch (Exception e)
                 {
-                    return ("Task wasn't created because " + e.Message);
+                    return ("Task wasn't created. Error: " + e.Message);
                 }
-
             }
-            return ("Task was created");
-        }
 
-        [HttpPost]
-        public HttpStatusCode AddSubtask(int parentId, int? TemplateId, CreateTaskView newSubtask)
-        {
-            
-            string author = User.Identity.Name;
-
-            if (TemplateId.HasValue)
-            {
-               
-                serviceTask.AddSubtasksFromTemplate(parentId, TemplateId.Value, author);
-                // TO DO exceptions
-                return HttpStatusCode.OK;
-            }
-            
-            if (newSubtask != null)
-            {
-            
-                var task = new TaskView
-                {
-                    ParentId = parentId,
-                    Name = newSubtask.Name,
-                    Comment = newSubtask.Comment
-                };
-              
-                serviceTask.AddSubtask(mapper.Map<TaskView,TaskBLL>(task), parentId, author);
-                //TODO Exceptions
-                return HttpStatusCode.OK;
-            }
-            return HttpStatusCode.PreconditionFailed;///???
+            return "Task was created";
         }
     }
 }

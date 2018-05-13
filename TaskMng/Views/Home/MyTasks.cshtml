@@ -2,8 +2,7 @@
 
 <p>
     <br />
-    <a href="#" title="Create new task" data-toggle="modal" data-target="#myModalCreateTask">
-        <i class="fas fa-plus-circle"></i>
+    <a href="#" class="oi oi-plus" title="Create new task" data-toggle="modal" data-target="#addTaskModal" aria-hidden="true">
         Create new task
     </a>
 </p>
@@ -27,12 +26,8 @@
     {
         <tr id="task@(item.Id)" data-task-id="@(item.Id)">
             <td>
-                <a id="iconshow-subtask" href="#" title="Show subtasks" onclick="showSubtasks(@item.Id)">
-                    <i class="far fa-plus-square"></i>@*//change on far-fa-minus when click*@
-                </a>
-                <a id="iconhide-subtask" href="#" title="Hide subtasks" class="collapse" onclick="hideSubtasks(@item.Id)">
-                    <i class="far fa-minus-square"></i>
-                </a>
+                <a id="iconshow-subtask" href="#" class="oi oi-collapse-right" title="Show subtasks" onclick="showSubtasks(@item.Id)" aria-hidden="true"></a>
+                <a id="iconhide-subtask" href="#" class="oi oi-collapse-down collapse" title="Hide subtasks" onclick="hideSubtasks(@item.Id)" aria-hidden="true"></a>
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Name)
@@ -49,16 +44,9 @@
                 </div>
             </td>
             <td>
-                <a href="#" title="Details" onclick="details(@item.Id)" data-toggle="modal" data-target="#myModalDetailsTask">
-                    <i class="fas fa-info-circle"></i>
-                </a>
-                <a href="#" title="Edit" onclick="editTask(@item.Id)" data-toggle="modal" data-target="#myModalEditTask">
-                    <i class="far fa-edit"></i>
-                </a>
-                <a href="#" title="Delete" onclick="deleteTask(@item.Id)">
-                    <i class="fas fa-trash"></i>
-                </a>
-
+                <a href="#" title="Details" class="oi oi-info" onclick="details(@item.Id)" data-toggle="modal" data-target="#myModalDetailsTask" aria-hidden="true"></a>
+                <a href="#" title="Edit" class="oi oi-pencil" onclick="editTask(@item.Id)" data-toggle="modal" data-target="#myModalEditTask" aria-hidden="true"></a>
+                <a href="#" title="Delete" class="oi oi-trash" onclick="deleteTask(@item.Id)" aria-hidden="true"></a>
             </td>
         </tr>
         //add component that will change with partial view???
@@ -66,11 +54,11 @@
 
 </table>
 
-<div id="myModalCreateTask" class="modal fade" role="dialog" style="opacity:initial;">
-    <div class="modal-dialog">
-        <div class="modal-content" style="position:fixed">
+<div id="addTaskModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="addTaskModalTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Create your own task</h5>
+                <h5 id="addTaskModalTitle" class="modal-title">Add Task</h5>
                 <button class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -79,36 +67,33 @@
                 <div class="form-control" id="create-task">
                     <div class="form-group">
                         <label for="task-name">Name:</label>
-                        <input type="text" class="form-control" id="newtask-name" required>
+                        <input id="task-name" type="text" class="form-control">
                     </div>
                     <div class="form-group">
-                        <label for="comment-text">Comment:</label>
-                        <textarea class="form-control" id="comment-text"></textarea>
+                        <label for="task-comment">Comment:</label>
+                        <textarea id="task-comment" class="form-control"></textarea>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-default" data-dismiss="modal">Close</button>
-                <button class="btn btn-primary" type="button" onclick="createMyMainTask()" id="save-created-task" disabled>Save task</button>
+                <button id="add-task" class="btn btn-primary" data-dismiss="modal" onclick="addTask()" disabled>Save task</button>
             </div>
         </div>
     </div>
 </div>
 
-
-<div id="myModalDetailsTask" class="modal fade" role="dialog" style="opacity:initial">
-    <div class="modal-dialog">
-        <div class="modal-content" style="position:fixed">
+<div id="myModalDetailsTask" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="taskDetailsModalTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Details of Task </h5>
+                <h5 id="taskDetailsModalTitle" class="modal-title">Task Details</h5>
                 <button class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body" style="height: 600px; overflow-y: auto;">
-                <div id="detailOfTask">
-
-                </div>
+            <div class="modal-body">
+                <div id="detailOfTask"></div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-default" data-dismiss="modal">Close</button>
@@ -117,12 +102,11 @@
     </div>
 </div>
 
-
-<div id="myModalEditTask" class="modal fade" role="dialog" style="opacity:initial">
-    <div class="modal-dialog">
-        <div class="modal-content" style="position:fixed">
+<div id="myModalEditTask" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="editTaskModalTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Edit Task</h5>
+                <h5 id="editTaskModalTitle" class="modal-title">Edit Task</h5>
                 <button class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -133,59 +117,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-default" data-dismiss="modal">Close</button>
-                <button class="btn btn-primary" type="button" disabled id="save-task" onclick="saveEditTask()">Save task</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-@*<div id="myModalEditSubtask" class="modal fade" role="dialog" style="opacity:initial">
-    <div class="modal-dialog">
-        <div class="modal-content" style="position:fixed">
-            <div class="modal-header">
-                <h5 class="modal-title">Edit Task</h5>
-                <button class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <span id="EditSubtaskId"></span>
-                <div class="form" id="edit-subtask-form">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-default" data-dismiss="modal">Close</button>
-                <button class="btn btn-primary" type="button" disabled id="save-subtask" onclick="saveEditSubtask()">Save task</button>
-            </div>
-        </div>
-    </div>
-</div>*@
-
-<div id="myModalAddSubtask" class="modal fade" role="dialog" style="opacity:initial;">
-    <div class="modal-dialog">
-        <div class="modal-content" style="position:fixed">
-            <div class="modal-header">
-                <h5 class="modal-title">Add subtask</h5>
-                <button class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-control" id="add-subtask">
-                    <div class="form-group">
-                        <label for="newsubtask-name">Name:</label>
-                        <input type="text" class="form-control" id="newsubtask-name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="Subtask-comment-text">Comment:</label>
-                        <textarea class="form-control" id="subtask-comment-text"></textarea>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-default" data-dismiss="modal" id="close-modal">Close</button>
-                <button class="btn btn-primary" type="button" onclick="addSubtask()" id="save-added-task" disabled>Save subtask</button>
+                <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button id="save-task" class="btn btn-primary" data-dismiss="modal" onclick="saveEditTask()" disabled>Save task</button>
             </div>
         </div>
     </div>
@@ -217,34 +150,7 @@
     }
 
     function saveParentTaskId(parentId) {
-        console.log(parentId);
-        $("#save-added-task").data("parentTaskId", parentId);
-       
-    }
-
-    function addSubtask() {
-        var task = {
-            name: $("#newsubtask-name").val(),
-            comment: $("#subtask-comment-text").val()
-        };
-        console.log(task);
-        console.log($("#save-added-task").data("parentTaskId"));
-        $.ajax({
-            url: "@Url.Action("AddSubtask", "Home")",
-            method: "POST",
-            data: {
-                parentId: $("#save-added-task").data("parentTaskId"),
-                templateId: null,
-                newSubtask: task
-            }
-        })
-        .done(function () {
-            alert("Subtask was added");
-            $("#myTasksBtn").click();
-        })
-        .fail(function () {
-            alert("Cannot add the subtask!");
-        });
+        $("#add-task").data("parentTaskId", parentId);
     }
 
     function editTask(taskId) {
@@ -271,18 +177,17 @@
             DueDate: $("#timepicker3").val(),
             Comment: $("#comment").val(),
         };
-        
+
         $.ajax({
             url: "@Url.Action("SaveEditTask", "Home")",
             method: "POST",
             data: { taskForEdit: task },
         })
         .done(function (Msg) {
-            alert(Msg);
             $("#myTasksBtn").click();
         })
         .fail(function () {
-            $("#edit-form").html("<p>Cannot find task</p>");
+            alert("Cannot find task");
         });
     }
 
@@ -323,19 +228,20 @@
         });
     }
 
-    function createMyMainTask() {
-        var task = {
-            name: $("#newtask-name").val(),
-            assigneeId: "",
-            comment: $("#comment-text").val()
-        };
+    function addTask() {
+        console.log($("#add-task").data("parentTaskId"));
         $.ajax({
             url: "@Url.Action("CreateTask", "Home")",
             method: "POST",
-            data: { newTask: task }
+            data: {
+                parentId: $("#add-task").data("parentTaskId"),
+                templateId: null,
+                name: $("#task-name").val(),
+                comment: $("#task-comment").val()
+            }
         })
-        .done(function (Msg) {
-            alert(Msg);
+        .done(function (message) {
+            alert(message);
             $("#myTasksBtn").click();
         })
         .fail(function () {
@@ -373,7 +279,7 @@
 
             getStatuses(function (statuses) {
                 setStatuses(statuses, taskRow.next().find("select"));
-            }); 
+            });
         })
     }
 
@@ -392,29 +298,28 @@
         });
     }
 
-    
-        function showAssignees(managerId) {
-            $.ajax({
-                url: "@Url.Action("GetAssignees", "Home")",
-                method: "GET",
-                data: { managerId: managerId }
-            })
-            .done(function (data) {
-                var assignee = $("#assignee");
-                assignee.html(data);
-                assignee.val(assignee.data("assignee"));
-            });
-        }
-
-        function updateAssignee() {
+    function showAssignees(managerId) {
+        $.ajax({
+            url: "@Url.Action("GetAssignees", "Home")",
+            method: "GET",
+            data: { managerId: managerId }
+        })
+        .done(function (data) {
             var assignee = $("#assignee");
-            assignee.data("assignee", assignee.val());
-        }
+            assignee.html(data);
+            assignee.val(assignee.data("assignee"));
+        });
+    }
+
+    function updateAssignee() {
+        var assignee = $("#assignee");
+        assignee.data("assignee", assignee.val());
+    }
 
     $(document).ready(function () {
         getStatuses(function handler(statuses) {
             setStatuses(statuses, $(".table select"));
-        });     
+        });
 
         $("#edit-form").change(function () {
             $("#save-task").prop("disabled", false);
@@ -424,16 +329,8 @@
             $("#save-task").prop("disabled", true);
         });
 
-        $("#add-subtask").change(function () {
-            $("#save-added-task").prop("disabled", false);
-        });
-
-        $("#myModalAddSubtask").on("hidden.bs.modal", function (e) {
-            $("#save-added-task").prop("disabled", true);
-        });
-
-        $("#newtask-name").change(function () {
-            $("#save-created-task").removeAttr("disabled");
+        $("#task-name").change(function () {
+            $("#add-task").prop("disabled", !this.value);
         })
     });
 </script>
