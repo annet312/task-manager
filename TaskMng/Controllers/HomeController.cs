@@ -46,10 +46,14 @@ namespace TaskMng.Controllers
         [HttpGet]
         public ActionResult GetStatuses()
         {
-            ICollection<StatusView> statuses = mapper.Map<IEnumerable<StatusBLL>, IEnumerable<StatusView>>(serviceTask.GetAllStatuses()).ToList();
+            IEnumerable<StatusView> statuses;
             if (User.IsInRole("Programmer"))
             {
-                statuses.Remove(statuses.Where(s => (s.Name == "Complete")).Single());
+                statuses = mapper.Map<IEnumerable<StatusBLL>, IEnumerable<StatusView>>(serviceTask.GetStatuses());
+            }
+            else
+            {
+                statuses = mapper.Map<IEnumerable<StatusBLL>, IEnumerable<StatusView>>(serviceTask.GetAllStatuses());
             }
             return PartialView("StatusList", statuses);
         }

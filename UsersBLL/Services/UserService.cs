@@ -37,7 +37,14 @@ namespace TaskManagerUsersBLL.Services
                 var person = new Person { UserId = user.Id, Email = userBll.Email, Name = userBll.UserName , Role = userBll.Role};
                 try
                 {
-                    Database.RersonManager.Create(person, userBll.TeamName);
+                    if (userBll.Role == "Manager")
+                    {
+                        Database.RersonManager.Create(person, userBll.TeamName);
+                    }
+                    else
+                    {
+                        Database.RersonManager.Create(person);
+                    }
                 }
                 catch (ArgumentException e)
                 {
@@ -50,7 +57,7 @@ namespace TaskManagerUsersBLL.Services
             }
             else
             {
-                return new IdentityOperation(false, "User with this name is already exist", "Email");
+                return new IdentityOperation(false, "User with this email is already exist", "Email");
             }
         }
 

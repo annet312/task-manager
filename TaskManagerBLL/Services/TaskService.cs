@@ -42,7 +42,10 @@ namespace TaskManagerBLL.Services
             }
             return mapper.Map<IEnumerable<Status>, IEnumerable<StatusBLL>>(statuses);
         }
-
+        public IEnumerable<StatusBLL> GetStatuses()
+        {
+            return GetAllStatuses().Where(s => s.Name != "Closed");
+        }
         public IEnumerable<TaskTemplateBLL> GetAllTemplates()
         {
             var result = db.TaskTemplates.Find(t => (t.TemplateId == null));

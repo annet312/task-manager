@@ -9,6 +9,7 @@ namespace TaskManagerBLL.Interfaces
 {
     public interface ITaskService
     {
+        IEnumerable<StatusBLL> GetStatuses();
         IEnumerable<StatusBLL> GetAllStatuses();
         IEnumerable<TaskTemplateBLL> GetAllTemplates();
         IEnumerable<TaskTemplateBLL> GetSubtasksOfTemplate(int tempplateId);

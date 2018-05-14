@@ -28,6 +28,11 @@ namespace TaskManagerDAL.Repositories
             db.People.Add(person);
             db.SaveChanges();
         }
+        public void Create(Person person)
+        {
+            db.People.Add(person);
+            db.SaveChanges();
+        }
 
         public void Dispose()
         {
