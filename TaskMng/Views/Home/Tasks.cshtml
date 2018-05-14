@@ -89,10 +89,10 @@
                      {
                         <div class="input-group mb-3">
                             <div class="input-group-prepend">
-                                <span class="input-group-text" id="basic-addon3">Assignee</span>
+                                <span class="input-group-text" id="span-assignee">Assignee</span>
                             </div>
-                            <select id="assignee-create-task" aria-describedby="basic-addon3">
-                                <option selected></option>
+                            <select id="assignee-create-task" aria-describedby="span-assignee">
+                                @*<option selected></option>*@
                             </select>
                         </div>
                      }
@@ -172,13 +172,20 @@
             data: { id: taskId, status: statusName }
         })
         .done(function () {
-            $("#myTasksBtn").click();
+             if (@ViewBag.TeamTasksView.ToString().ToLower()) {
+                $("#myTeamTasksBtn").click();
+            }
+            else {
+                $("#myTasksBtn").click();
+            }
         });
     }
 
     function saveParentTaskId(parentId) {
-
         $("#add-task").data("parentTaskId", parentId);
+        $("#assignee-create-task").prop("hidden", parentId);
+        $("#span-assignee").prop("hidden", parentId);
+        $("#span-assignee").data("add-subtask", true);
     }
 
     function editTask(taskId) {
@@ -213,35 +220,18 @@
         })
         .done(function (message) {
             alert(message);
-            $("#myTasksBtn").click();
+              if (@ViewBag.TeamTasksView.ToString().ToLower()) {
+                $("#myTeamTasksBtn").click();
+            }
+            else {
+                $("#myTasksBtn").click();
+            }
         })
         .fail(function () {
             alert("Cannot find task");
         });
     }
 
-    @*function saveEditSubtask() {
-        var subtask = {
-            Id: $("#save-subtask").data('editsubtaskId'),
-            Name: $("#nameEditSubtask").val(),
-            //ETA: $("#timepicker2").val(),
-            //DueDate: $("#timepicker3").val(),
-            Comment: $("#commentsubtask").val(),
-        };
-
-        $.ajax({
-            url: "@Url.Action("SaveEditTask", "Home")",
-            method: "POST",
-            data: { taskForEdit: subtask },
-        })
-        .done(function (Msg) {
-            alert(Msg);
-            $("#myTasksBtn").click();
-        })
-        .fail(function () {
-            $("#edit-form").html("<p>Cannot find task</p>");
-        });
-    }*@
 
     function details(mainId) {
         $.ajax({
@@ -258,7 +248,7 @@
     }
 
     function addTask(selector) {
-        console.log(selector);
+       
         $.ajax({
             url: "@Url.Action("CreateTask", "Home")",
             method: "POST",
@@ -346,13 +336,9 @@
             data: { managerId: managerId }
         })
             .done(function (data) {
-
                 var assignee = $(selector);
-                console.log(assignee);
                 assignee.html(data);
-                console.log(assignee.html());
                 assignee.val(assignee.data("assignee"));
-                console.log(assignee.html());
         });
     }
 
@@ -398,8 +384,8 @@
                     assignee.removeClass("border-danger");
                 }
             }
-
-            if (taskName.val() && (!assignee.length || assignee.val())) {
+            
+            if (taskName.val() && (!assignee.length || assignee.val() || $("#span-assignee").data("add-subtask"))) {
                 addTask(selector);
                 $("#addTaskModal").modal("hide");
             }
