@@ -274,7 +274,7 @@ namespace TaskManagerBLL.Services
                 }
                 num++;
             }
-            sumProgress = sumProgress / num;
+            sumProgress = (num != 0)? (sumProgress / num) : 0;
             return sumProgress;
         }
 

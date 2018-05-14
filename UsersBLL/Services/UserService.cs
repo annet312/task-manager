@@ -8,6 +8,7 @@ using TaskManagerDAL.Entities;
 using TaskManagerUsersBLL.Infrastructure;
 using System.Security.Claims;
 using System.Linq;
+using System;
 
 namespace TaskManagerUsersBLL.Services
 {
@@ -34,8 +35,14 @@ namespace TaskManagerUsersBLL.Services
                 await Database.UserManager.AddToRoleAsync(user.Id, userBll.Role);
 
                 var person = new Person { UserId = user.Id, Email = userBll.Email, Name = userBll.UserName , Role = userBll.Role};
-                //!!!!!TeamName надо находить
-                Database.RersonManager.Create(person, userBll.TeamName);
+                try
+                {
+                    Database.RersonManager.Create(person, userBll.TeamName);
+                }
+                catch (ArgumentException e)
+                {
+                    return new IdentityOperation(false, e.Message, e.ParamName);
+                }
                 await Database.SaveAsync();
 
                 return new IdentityOperation(true, "Sign up is success", "");

@@ -1,6 +1,10 @@
 ﻿using TaskManagerDAL.Interfaces;
 using TaskManagerDAL.Entities;
 using TaskManagerDAL.Context;
+using System.Linq;
+using System.Collections.Generic;
+using System;
+
 
 namespace TaskManagerDAL.Repositories
 {
@@ -12,11 +16,16 @@ namespace TaskManagerDAL.Repositories
             db = context;
         }
         public void Create(Person person, string teamNameStr)
-        {//TODO
-            //var newPerson = new Person { Name = person.Name, EAdress = person.EAdress };
+        {
+            var team = new Team { TeamName = teamNameStr };
+            IEnumerable<Team> checkTeamExists = db.Teams.Where(t => (t.TeamName == teamNameStr)).ToList();
+            if (checkTeamExists.Any())
+            {
+                throw new ArgumentException("This team already exists", teamNameStr);
+            }
+            db.Teams.Add(team);
+            person.TeamId = team.Id;
             db.People.Add(person);
-            //var team = new Team { TeamName = teamNameStr, ManagerId = newPerson.Id };
-            //db.Teams.Add(team);
             db.SaveChanges();
         }
 

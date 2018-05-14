@@ -50,7 +50,7 @@ namespace TaskMng.Models
     {
         [Required]
         [Display(Name = "Name")]
-        //[EmailAddress]
+
         public string Name { get; set; }
 
         [Required]
@@ -79,9 +79,19 @@ namespace TaskMng.Models
         [Display(Name = "Confirm password")]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
+
+        [Required]
+        [StringLength(100, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 3)]
+        [Display(Name = "Name")]
         public string Name { get; set; }
+        
         [Display(Name = "I am a manager")]
         public bool IsManager { get; set; }
+       
+        //[Required]
+        //[StringLength(100, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 5)]
+        [Display(Name = "Team name")]
+        public string TeamName { get; set; }
     }
 
     public class ResetPasswordViewModel
