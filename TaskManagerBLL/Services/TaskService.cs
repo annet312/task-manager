@@ -233,7 +233,7 @@ namespace TaskManagerBLL.Services
                         taskForEdit.Assignee = assignee;
                         if (taskForEdit.ParentId == null)
                         {
-                            IEnumerable<_Task> subtasks = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<_Task>>(GetSubtasksOfTask(taskForEdit.Id));
+                            IEnumerable<_Task> subtasks = db.Tasks.Find(t => (t.ParentId == taskForEdit.Id));
                             //for change assignee for all subtask of edited Task
                             foreach (var subtask in subtasks)
                             {
@@ -377,8 +377,15 @@ namespace TaskManagerBLL.Services
 
         public IEnumerable<TaskBLL> GetTasksOfTeam(string managerId)
         {
-            var manager = db.People.Find(p => p.UserId == managerId).SingleOrDefault();//TODO validation
-            var tasks = db.Tasks.Find(t => ((t.Author.Id == manager.Id) && (t.ParentId == null)));
+            var manager = db.People.Find(p => p.UserId == managerId).SingleOrDefault();
+            if (manager == null)
+            {
+                throw new ArgumentException("Manager is not found","managerId");
+            }
+            var tasks = db.Tasks.Find(t => ((t.Author.Id == manager.Id) && 
+                                            (t.ParentId == null) && 
+                                            (t.Assignee.Id != manager.Id)));
+
             return mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(tasks);
         }
 

@@ -29,7 +29,7 @@
     <div class="input-group-prepend">
         <span class="input-group-text" id="basic-addon3">Assignee</span>
     </div>
-    <select id="assignee" aria-describedby="basic-addon3" data-assignee="@(Model.Assignee.Name)" onclick="showAssignees(@Model.Author.Id)" onchange="updateAssignee()" @(!User.IsInRole("Manager") ? "disabled" : string.Empty)>
+    <select id="assignee-edit" aria-describedby="basic-addon3" data-assignee="@(Model.Assignee.Name)" onclick="showAssignees(@Model.Author.Id,'#assignee-edit')" onchange="updateAssignee('#assignee-edit')" @(!User.IsInRole("Manager") ? "disabled" : string.Empty)>
         <option selected>@(Model.Assignee.Name)</option>
     </select>
 </div>

@@ -111,67 +111,69 @@ namespace TaskMng.Controllers
             {
                 serviceTask.SaveChangeTask(task, assignee);
             }
-            catch (InvalidOperationException e)
-            {
-                return ("Task wasn't changed. Error: " + e.Message);
-            }
             catch (Exception e)
             {
-                return ("Task wasn't changed. Error: " + e.Message);
+                return ("Error: cannot change task!");
             }
-            return ("Task was changed");
+            return ("Task was changed.");
         }
 
         [HttpGet]
         public ActionResult ShowSubtask(int parentId)
         {
             IEnumerable<TaskView> subtasks = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(serviceTask.GetSubtasksOfTask(parentId));
+
             ViewBag.ParentId = parentId;
+
             return PartialView("ShowSubtask", subtasks);
         }
 
         [HttpGet]
         public ActionResult MyTasks()
         {
-            var tasks = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(serviceTask.GetTaskOfAssignee(User.Identity.GetUserId())).ToList();
-            if (!tasks.Any())
-            {
+            IEnumerable<TaskView> tasks = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(serviceTask.GetTaskOfAssignee(User.Identity.GetUserId())).ToList();
 
-                ViewBag.Message = "You haven't tasks";
-            }
-            return PartialView("MyTasks", tasks);
+            ViewBag.TeamTasksView = false;
+
+            return PartialView("Tasks", tasks);
         }
 
         [Authorize(Roles = "Manager")]
         [HttpGet]
         public ActionResult MyTeam()
         {
-            var id = User.Identity.GetUserId();
-            var teamOfCurrentManager = mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(servicePerson.GetTeam(id));
-            var person = servicePerson.GetPerson(id);
-            var team = person.Team;
-            ViewBag.TeamName = (team != null) ? team.TeamName : string.Empty;
-            return PartialView("MyTeam", teamOfCurrentManager.ToList());
+            string id = User.Identity.GetUserId();
+            PersonBLL person = servicePerson.GetPerson(id);
+            TeamBLL team = person.Team;
+            IEnumerable<PersonView> teamOfCurrentManager = mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(servicePerson.GetTeam(id));
 
+            ViewBag.TeamName = (team != null) ? team.TeamName : string.Empty;
+
+            return PartialView("MyTeam", teamOfCurrentManager.ToList());
         }
 
         [Authorize(Roles = "Manager")]
         [HttpGet]
         public ActionResult GetPossibleMembers()
         {
-            var id = User.Identity.GetUserId();
-            var programmers = mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(servicePerson.GetPeopleWithoutTeam());
-            return PartialView("PossibleMembers", programmers.ToList());
+            IEnumerable<PersonView> persons = mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(servicePerson.GetPeopleWithoutTeam());
 
+            return PartialView("PossibleMembers", persons.ToList());
         }
 
         [Authorize(Roles = "Manager")]
         [HttpGet]
         public ActionResult TaskOfMyTeam()
         {
-            var id = User.Identity.GetUserId();
-            var taskOfMyTeam = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(serviceTask.GetTasksOfTeam(id));
-            return PartialView("TaskOfMyTeam", taskOfMyTeam);
+            string id = User.Identity.GetUserId();
+            PersonBLL manager = servicePerson.GetPerson(id);
+
+            IEnumerable<TaskView> tasksOfMyTeam = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(serviceTask.GetTasksOfTeam(id));
+
+            ViewBag.ManagerId = manager.Id;
+            ViewBag.TeamTasksView = true;
+
+            return PartialView("Tasks", tasksOfMyTeam);
         }
 
         [Authorize(Roles = "Manager")]

@@ -2,7 +2,7 @@
 
 <p>
     <br />
-    <a href="#" class="oi oi-plus" title="Create new task" data-toggle="modal" data-target="#addTaskModal" aria-hidden="true">
+    <a href="#" class="oi oi-plus" title="Create new task" data-toggle="modal" data-target="#addTaskModal" aria-hidden="true" onclick="showAssignees(@ViewBag.ManagerId , '#assignee-create-task')">
         Create new task
     </a>
 </p>
@@ -13,6 +13,14 @@
         <th>
             @Html.DisplayNameFor(model => model.Name)
         </th>
+
+        @if (ViewBag.TeamTasksView)
+        {
+            <th>
+                @Html.DisplayNameFor(model => model.Assignee)
+            </th>
+        }
+
         <th>
             @Html.DisplayNameFor(model => model.Status)
         </th>
@@ -24,31 +32,39 @@
 
     @foreach (var item in Model)
     {
-        <tr id="task@(item.Id)" data-task-id="@(item.Id)">
+    <tr id="task@(item.Id)" data-task-id="@(item.Id)">
+        <td>
+            <a id="iconshow-subtask" href="#" class="oi oi-collapse-right" title="Show subtasks" onclick="showSubtasks(@item.Id)" aria-hidden="true"></a>
+            <a id="iconhide-subtask" href="#" class="oi oi-collapse-down collapse" title="Hide subtasks" onclick="hideSubtasks(@item.Id)" aria-hidden="true"></a>
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Name)
+        </td>
+
+        @if (ViewBag.TeamTasksView)
+        {
             <td>
-                <a id="iconshow-subtask" href="#" class="oi oi-collapse-right" title="Show subtasks" onclick="showSubtasks(@item.Id)" aria-hidden="true"></a>
-                <a id="iconhide-subtask" href="#" class="oi oi-collapse-down collapse" title="Hide subtasks" onclick="hideSubtasks(@item.Id)" aria-hidden="true"></a>
+                @Html.DisplayFor(modelItem => item.Assignee.Name)
             </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                <select onchange="setNewStatus(@item.Id)" data-status="@(item.Status.Name)"></select>
-            </td>
-            <td>
-                <div class="progress">
-                    <div class="progress-bar progress-bar-striped active" role="progressbar"
-                         aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width:@item.Progress%">
-                        @item.Progress%
-                    </div>
+        }
+
+        <td>
+            <select onchange="setNewStatus(@item.Id)" data-status="@(item.Status.Name)"></select>
+        </td>
+        <td>
+            <div class="progress">
+                <div class="progress-bar progress-bar-striped active" role="progressbar"
+                     aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width:@item.Progress%">
+                    @item.Progress%
                 </div>
-            </td>
-            <td>
-                <a href="#" title="Details" class="oi oi-info" onclick="details(@item.Id)" data-toggle="modal" data-target="#myModalDetailsTask" aria-hidden="true"></a>
-                <a href="#" title="Edit" class="oi oi-pencil" onclick="editTask(@item.Id)" data-toggle="modal" data-target="#myModalEditTask" aria-hidden="true"></a>
-                <a href="#" title="Delete" class="oi oi-trash" onclick="deleteTask(@item.Id)" aria-hidden="true"></a>
-            </td>
-        </tr>
+            </div>
+        </td>
+        <td>
+            <a href="#" title="Details" class="oi oi-info" onclick="details(@item.Id)" data-toggle="modal" data-target="#myModalDetailsTask" aria-hidden="true"></a>
+            <a href="#" title="Edit" class="oi oi-pencil" onclick="editTask(@item.Id)" data-toggle="modal" data-target="#myModalEditTask" aria-hidden="true"></a>
+            <a href="#" title="Delete" class="oi oi-trash" onclick="deleteTask(@item.Id)" aria-hidden="true"></a>
+        </td>
+    </tr>
         //add component that will change with partial view???
     }
 
@@ -69,6 +85,17 @@
                         <label for="task-name">Name:</label>
                         <input id="task-name" type="text" class="form-control">
                     </div>
+                    @if (ViewBag.TeamTasksView)
+                     {
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon3">Assignee</span>
+                            </div>
+                            <select id="assignee-create-task" aria-describedby="basic-addon3">
+                                <option selected></option>
+                            </select>
+                        </div>
+                     }
                     <div class="form-group">
                         <label for="task-comment">Comment:</label>
                         <textarea id="task-comment" class="form-control"></textarea>
@@ -77,7 +104,7 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-default" data-dismiss="modal">Close</button>
-                <button id="add-task" class="btn btn-primary" data-dismiss="modal" onclick="addTask()" disabled>Save task</button>
+                <button id="add-task" class="btn btn-primary">Save task</button>
             </div>
         </div>
     </div>
@@ -118,7 +145,7 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button id="save-task" class="btn btn-primary" data-dismiss="modal" onclick="saveEditTask()" disabled>Save task</button>
+                <button id="save-task" class="btn btn-primary" data-dismiss="modal" onclick="saveEditTask('#assignee-edit')" disabled>Save task</button>
             </div>
         </div>
     </div>
@@ -150,6 +177,7 @@
     }
 
     function saveParentTaskId(parentId) {
+
         $("#add-task").data("parentTaskId", parentId);
     }
 
@@ -168,11 +196,11 @@
         });
     }
 
-    function saveEditTask() {
+    function saveEditTask(selector) {
         var task = {
-            Id: $("#save-task").data('editTaskId'),
+            Id: $("#save-task").data("editTaskId"),
             Name: $("#nameEditTask").val(),
-            Assignee: $("select#assignee").val(),
+            Assignee: $(selector).val(),
             ETA: $("#timepicker2").val(),
             DueDate: $("#timepicker3").val(),
             Comment: $("#comment").val(),
@@ -183,7 +211,8 @@
             method: "POST",
             data: { taskForEdit: task },
         })
-        .done(function (Msg) {
+        .done(function (message) {
+            alert(message);
             $("#myTasksBtn").click();
         })
         .fail(function () {
@@ -228,21 +257,29 @@
         });
     }
 
-    function addTask() {
-        console.log($("#add-task").data("parentTaskId"));
+    function addTask(selector) {
+        console.log(selector);
         $.ajax({
             url: "@Url.Action("CreateTask", "Home")",
             method: "POST",
             data: {
                 parentId: $("#add-task").data("parentTaskId"),
                 templateId: null,
+                assignee: $(selector).val(),
                 name: $("#task-name").val(),
                 comment: $("#task-comment").val()
             }
         })
         .done(function (message) {
+            
             alert(message);
-            $("#myTasksBtn").click();
+            
+            if (@ViewBag.TeamTasksView.ToString().ToLower()) {
+                $("#myTeamTasksBtn").click();
+            }
+            else {
+                $("#myTasksBtn").click();
+            }
         })
         .fail(function () {
             alert("Cannot add the task!");
@@ -298,26 +335,34 @@
         });
     }
 
-    function showAssignees(managerId) {
+    function showAssignees(managerId, selector) {
+        if (!managerId) {
+            return;
+        }
+
         $.ajax({
             url: "@Url.Action("GetAssignees", "Home")",
             method: "GET",
             data: { managerId: managerId }
         })
-        .done(function (data) {
-            var assignee = $("#assignee");
-            assignee.html(data);
-            assignee.val(assignee.data("assignee"));
+            .done(function (data) {
+
+                var assignee = $(selector);
+                console.log(assignee);
+                assignee.html(data);
+                console.log(assignee.html());
+                assignee.val(assignee.data("assignee"));
+                console.log(assignee.html());
         });
     }
 
-    function updateAssignee() {
-        var assignee = $("#assignee");
+    function updateAssignee(selector) {
+        var assignee = $(selector);
         assignee.data("assignee", assignee.val());
     }
 
     $(document).ready(function () {
-        getStatuses(function handler(statuses) {
+        getStatuses(function (statuses) {
             setStatuses(statuses, $(".table select"));
         });
 
@@ -330,7 +375,34 @@
         });
 
         $("#task-name").change(function () {
+
             $("#add-task").prop("disabled", !this.value);
-        })
+        });
+
+        $("#add-task").on("click", function () {
+            var taskName = $("#task-name"),
+                assignee = $("#assignee-create-task");
+            var selector = "#assignee-create-task";
+            if (!taskName.val()) {
+                taskName.addClass("border-danger");
+            }
+            else {
+                taskName.removeClass("border-danger");
+            }
+
+            if (assignee.length) {
+                if (!assignee.val()) {
+                    assignee.addClass("border-danger");
+                }
+                else {
+                    assignee.removeClass("border-danger");
+                }
+            }
+
+            if (taskName.val() && (!assignee.length || assignee.val())) {
+                addTask(selector);
+                $("#addTaskModal").modal("hide");
+            }
+        });
     });
 </script>

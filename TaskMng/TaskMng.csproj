@@ -317,7 +317,7 @@
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
     <Content Include="Views\Home\Details.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
-    <Content Include="Views\Home\MyTasks.cshtml" />
+    <Content Include="Views\Home\Tasks.cshtml" />
     <Content Include="Views\Home\MyTeam.cshtml" />
     <Content Include="Views\Home\TaskOfMyTeam.cshtml" />
     <Content Include="Views\Home\ShowSubtask.cshtml" />
