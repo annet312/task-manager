@@ -57,7 +57,7 @@ namespace TaskMng.Controllers
         [HttpGet]
         public ActionResult GetAssignees(int managerId)
         {
-            IEnumerable<PersonView> assignees = mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(servicePerson.GetPeopleInTeam(managerId));
+            IEnumerable<PersonView> assignees = mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(servicePerson.GetAssignees(managerId));
             return PartialView("AssigneeList", assignees);
         }
         public ActionResult About()
@@ -72,11 +72,6 @@ namespace TaskMng.Controllers
             ViewBag.Message = "Your contact page.";
             return View();
         }
-        //public ActionResult CreateTask()
-        //{
-        //    ViewBag.Message = "New task";
-        //    return View();
-        //}
 
         [HttpGet]
         public ActionResult Details(int id)
@@ -118,11 +113,11 @@ namespace TaskMng.Controllers
             }
             catch (InvalidOperationException e)
             {
-                return ("Task wasn't changed because " + e.Message);
+                return ("Task wasn't changed. Error: " + e.Message);
             }
             catch (Exception e)
             {
-                return ("Task wasn't changed because " + e.Message);
+                return ("Task wasn't changed. Error: " + e.Message);
             }
             return ("Task was changed");
         }
@@ -152,11 +147,21 @@ namespace TaskMng.Controllers
         public ActionResult MyTeam()
         {
             var id = User.Identity.GetUserId();
-            var teamOfCurrentManager = mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(servicePerson.GetPeopleInTeam(id));
+            var teamOfCurrentManager = mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(servicePerson.GetTeam(id));
             var person = servicePerson.GetPerson(id);
             var team = person.Team;
             ViewBag.TeamName = (team != null) ? team.TeamName : string.Empty;
             return PartialView("MyTeam", teamOfCurrentManager.ToList());
+
+        }
+
+        [Authorize(Roles = "Manager")]
+        [HttpGet]
+        public ActionResult GetPossibleMembers()
+        {
+            var id = User.Identity.GetUserId();
+            var programmers = mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(servicePerson.GetPeopleWithoutTeam());
+            return PartialView("PossibleMembers", programmers.ToList());
 
         }
 
@@ -169,8 +174,39 @@ namespace TaskMng.Controllers
             return PartialView("TaskOfMyTeam", taskOfMyTeam);
         }
 
+        [Authorize(Roles = "Manager")]
         [HttpPost]
-        public HttpStatusCode DeleteTask(int id)
+        public string DeleteFromTeam (int id)
+        {
+            try
+            {
+                servicePerson.DeletePersonFromTeam(id);
+            }
+            catch (Exception e)
+            {
+                return ("Members wasn't deleted. Errors: " + e.Message);
+            }
+            return ("Members was deleted from your team");
+        }
+
+        [Authorize(Roles = "Manager")]
+        [HttpPost]
+        public string AddMembersToTeam(int[] persons)
+        {
+            var managerId = User.Identity.GetUserId();
+            try
+            {
+                servicePerson.AddPersonsToTeam(persons, managerId);
+            }
+            catch(Exception e)
+            {
+                return ("Members wasn't added. Error: " + e.Message);
+            }
+            return ("Members was added to your team");
+        }
+
+        [HttpPost]
+        public string DeleteTask(int id)
         {
             try
             {
@@ -178,10 +214,11 @@ namespace TaskMng.Controllers
                 //because deleting task is available only for author of task 
                 serviceTask.DeleteTask(id, User.Identity.Name);
             }
-            catch
+            catch (Exception e)
             {
+                return ("Task wasn't deleted. Error: " + e.Message);
             }
-            return HttpStatusCode.OK;
+            return ("Task was deleted");
         }
         [HttpPost]
         public HttpStatusCode SetNewStatus(int id, string status)

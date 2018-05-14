@@ -334,6 +334,7 @@
     <Content Include="Views\Home\StatusList.cshtml" />
     <Content Include="Views\Home\AssigneeList.cshtml" />
     <Content Include="Views\Account\Register - Copy.cshtml" />
+    <Content Include="Views\Home\PossibleMembers.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

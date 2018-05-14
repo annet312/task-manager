@@ -1,7 +1,9 @@
 ﻿@model IEnumerable<TaskMng.Models.PersonView>
 
 <p>
-    @Html.ActionLink("Add new member", "AddMember")
+    <a href="#" class="oi oi-plus" title="Add new member" data-toggle="modal" data-target="#addMemberModal" aria-hidden="true" onclick="getPossibleMembers()">
+        Add new member
+    </a>
 </p>
 <table class="table">
     <tr>
@@ -9,25 +11,103 @@
             @Html.DisplayNameFor(model => model.Name)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.EAdress)
+            @Html.DisplayNameFor(model => model.Email)
         </th>
         <th></th>
     </tr>
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.Name)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.EAdress)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
-            @Html.ActionLink("Details", "Details", new { id=item.Id }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.Id })
-        </td>
-    </tr>
-}
+    @foreach (var item in Model)
+    {
+        <tr id="person@(item.Id)">
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Email)
+            </td>
+            <td>
+                <a href="#" title="Delete" class="oi oi-trash" onclick="deleteFromTeam(@item.Id)" aria-hidden="true"></a>
+            </td>
+        </tr>
+    }
 
 </table>
+
+<div id="addMemberModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="addMemberModalTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="addMemberModalTitle" class="modal-title">Add member</h5>
+                <button class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="list-programmers">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal">Close</button>
+                <button id="add-member" class="btn btn-primary" data-dismiss="modal" onclick="addMember()" disabled>Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+
+    function getPossibleMembers() {
+        $.ajax({
+            url: "@Url.Action("GetPossibleMembers", "Home")",
+            method: "GET"
+        })
+        .done(function (data) {
+            $("#list-programmers").html(data);
+        })
+        .fail(function () {
+            alert("Cannot do it");
+        })
+    }
+
+    function SetAddedMembers() {
+        $("#add-member").prop("disabled", ($("input:checkbox:checked").length == 0));
+    }
+
+    function addMember() {
+        var members = [];
+        $("input:checkbox:checked").each(function () {
+            
+            var checkEl = $(this);
+            if (checkEl.prop("checked")) {
+                members.push(checkEl.val());
+            }
+        })
+        $.ajax({
+            url: "@Url.Action("AddMembersToTeam","Home")",
+            method: "POST",
+            data: { persons: members }
+        })
+            .done( function(Msg){
+                alert(Msg);
+                $("#myTeamBtn").click();
+            })
+    }
+
+        function deleteFromTeam(personId) {
+        $.ajax({
+            url: "@Url.Action("DeleteFromTeam", "Home")",
+            method: "POST",
+            data: { id: personId }
+        })
+        .done(function (Msg) {
+            alert(Msg);
+            $("#person" + personId).remove();
+
+        })
+        .fail(function () {
+            alert("Cannot delete this member!");
+        });
+    }
+</script>

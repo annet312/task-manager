@@ -39,7 +39,7 @@
                                               OnBegin = "onAjaxBegin",
                                               OnComplete = "onAjaxComplete"
                                           },
-                                           new { @class = "btn btn-primary" }
+                                           new {id = "myTeamBtn", @class = "btn btn-primary" }
                                           )
         <i></i>
         @Ajax.ActionLink(
@@ -55,7 +55,7 @@
                      OnBegin = "onAjaxBegin",
                      OnComplete = "onAjaxComplete"
                  },
-                 new { @class = "btn btn-primary" }
+                 new {id = "myTeamTasksBtn", @class = "btn btn-primary" }
              )
     }
 </div>

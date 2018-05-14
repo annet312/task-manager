@@ -11,7 +11,7 @@ namespace TaskMng.Models
        // public string UserId { get; set; } //foreign key to AspNetuser
         public string Name { get; set; }
         //public string Role { get; set; }//?????????
-        public string EAdress { get; set; }
+        public string Email { get; set; }
         public TeamView Team { get; set; }
     }
 } 

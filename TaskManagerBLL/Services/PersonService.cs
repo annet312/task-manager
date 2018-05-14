@@ -94,60 +94,69 @@ namespace TaskManagerBLL.Services
 
         //    return mapper.Map<IEnumerable<Person>, IEnumerable<PersonBLL>>(people);
         //}
-        public void DeletePersonFromTeam(PersonBLL programmer)
+        public void DeletePersonFromTeam(int id)
         {
-            //if programmer isn't a manager then can be delete from team
-            //var teammate = db.Teams.Find(t=>(t.ManagerId == programmer.Id));
-            //if (teammate.Any())
-            //{
-            //    throw new ArgumentException("Cannot delete manager from team","programmer");
-            //}
-            var person = mapper.Map<PersonBLL, Person>(programmer);
-            var res = db.People.Find(p => (p.Name == person.Name));
-            if (!res.Any())
+            Person person = db.People.Get(id);
+            if (person == null)
             {
                 throw new ArgumentException("Person is not exist");
             }
-            var personWithoutTeam = res.FirstOrDefault();
-            db.People.Delete(personWithoutTeam.Id);
-            personWithoutTeam.Team = null;
-            db.People.Create(personWithoutTeam);
+            person.TeamId = null;
+            db.People.Update(person);
+            db.Save();
         }
 
-        public void AddPersonToTeam(PersonBLL programmer, TeamBLL team)
+        public void AddPersonsToTeam(int[] persons, string managerId)
         {
-            //var teammate = db.Teams.Find(t => (t.ManagerId == programmer.Id));
-            //if (teammate.Any())
-            //{
-            //    throw new ArgumentException("Cannot add manager to team", "programmer");
-            //}
-            var person = mapper.Map<PersonBLL, Person>(programmer);
-            var res = db.People.Find(p => (p.Name == person.Name));
-            if (!res.Any())
+            if((persons == null) || (persons.Length == 0))
             {
-                throw new ArgumentException("Person is not exist");
+                throw new ArgumentException("No persons to adding", "persons");
             }
-            var personWithNewTeam = res.FirstOrDefault();
-            db.People.Delete(personWithNewTeam.Id);
-            personWithNewTeam.Team = mapper.Map<TeamBLL,Team>( team);
-            db.People.Create(personWithNewTeam);
+            if(string.IsNullOrWhiteSpace(managerId))
+            {
+                throw new ArgumentException("Unknown manager", "managerId");
+            }
+            Person manager = db.People.Find(m => (m.UserId == managerId)).SingleOrDefault();
+            if(manager == null)
+            {
+                throw new ArgumentException("Unknown manager", "managerId");
+            }
+            IEnumerable<Person> newTeamMembers = db.People.Find(p => (persons.Contains(p.Id)));
+     
+            if(newTeamMembers.Count() != persons.Length)
+            {
+                throw new ArgumentException("Not all members was founded");
+            }
+
+            foreach(var member in newTeamMembers)
+            {
+                member.TeamId = manager.TeamId;
+                db.People.Update(member);
+            }
+            db.Save();
         }
         public IEnumerable<PersonBLL> GetPeopleWithoutTeam()
         {
-            var people = db.People.Find(p => (p.Team == null));
+            var people = db.People.Find(p => (p.TeamId == null));
             return mapper.Map<IEnumerable<Person>, IEnumerable<PersonBLL>>(people);
         }
 
-        public IEnumerable<PersonBLL> GetPeopleInTeam(string managerId)
+        public IEnumerable<PersonBLL> GetAssignees(string managerId)
         {
             var manager = db.People.Find(p => p.UserId == managerId).SingleOrDefault();
             var people = GetPeopleInTeam(manager);
             return people;
         }
-        public IEnumerable<PersonBLL> GetPeopleInTeam(int managerId)
+        public IEnumerable<PersonBLL> GetAssignees(int managerId)
         {
             var manager = db.People.Find(p => p.Id == managerId).SingleOrDefault();
             var people = GetPeopleInTeam(manager);
+            return people;
+        }
+        public IEnumerable<PersonBLL> GetTeam(string managerId)
+        {
+            var manager = db.People.Find(p =>( p.UserId == managerId)).SingleOrDefault();
+            var people = GetPeopleInTeam(manager).Where(p => (p.Id != manager.Id));
             return people;
         }
         private IEnumerable<PersonBLL> GetPeopleInTeam(Person manager)
