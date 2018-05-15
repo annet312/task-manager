@@ -5,9 +5,6 @@ using System.Net;
 using System.Web.Mvc;
 using AutoMapper;
 using Microsoft.AspNet.Identity;
-using Ninject;
-
-using TaskManagerBLL.Infrastructure;
 using TaskManagerBLL.Interfaces;
 using TaskManagerBLL.Models;
 using TaskMng.Models;
@@ -17,29 +14,26 @@ namespace TaskMng.Controllers
     [Authorize]
     public class HomeController : Controller
     {
-        private ITaskService serviceTask { get; set; }
-        private IPersonService servicePerson { get; set; }
+        private readonly ITaskService taskService;
+        private readonly IPersonService personService;
         private IMapper mapper { get; set; }
 
-        public HomeController()
+        public HomeController(ITaskService taskService, IPersonService personService)
         {
-            var f = new ServiceModule();
-            IKernel ninjectKernel = new StandardKernel(f);
-            serviceTask = ninjectKernel.Get<ITaskService>();
-            servicePerson = ninjectKernel.Get<IPersonService>();
+            this.taskService = taskService;
+            this.personService = personService;
 
             var config = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<TeamBLL, TeamView>();
-                cfg.CreateMap<StatusBLL, StatusView>();
-                cfg.CreateMap<TaskBLL, TaskView>();
-                cfg.CreateMap<PersonBLL, PersonView>();
-            });
+                {
+                    cfg.CreateMap<TeamBLL, TeamView>();
+                    cfg.CreateMap<StatusBLL, StatusView>();
+                    cfg.CreateMap<TaskBLL, TaskView>();
+                    cfg.CreateMap<PersonBLL, PersonView>();
+                });
 
             mapper = config.CreateMapper();
         }
 
-        [Authorize]
         public ActionResult Index()
         {
             return View();
@@ -54,15 +48,15 @@ namespace TaskMng.Controllers
         [AllowAnonymous]
         public ActionResult Contact()
         {
-            ViewBag.Message = "Your contact page.";
             return View();
         }
         
         #region Tasks
+
         [HttpGet]
         public ActionResult MyTasks()
         {
-            IEnumerable<TaskView> tasks = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(serviceTask.GetTaskOfAssignee(User.Identity.GetUserId())).ToList();
+            IEnumerable<TaskView> tasks = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(taskService.GetTaskOfAssignee(User.Identity.GetUserId())).ToList();
 
             ViewBag.TeamTasksView = false;
 
@@ -76,7 +70,7 @@ namespace TaskMng.Controllers
             {
                 //Try to delete this task and check task id and current user Name if he can delete it
                 //because deleting task is available only for author of task 
-                serviceTask.DeleteTask(id, User.Identity.Name);
+                taskService.DeleteTask(id, User.Identity.Name);
             }
             catch (Exception e)
             {
@@ -96,7 +90,7 @@ namespace TaskMng.Controllers
                 {
                     try
                     {
-                        serviceTask.AddSubtasksFromTemplate(newTask.ParentId.Value, newTask.TemplateId.Value, author);
+                        taskService.AddSubtasksFromTemplate(newTask.ParentId.Value, newTask.TemplateId.Value, author);
                     }
                     catch (Exception e)
                     {
@@ -116,11 +110,11 @@ namespace TaskMng.Controllers
                 {
                     if (!newTask.ParentId.HasValue)
                     {
-                        serviceTask.CreateTask(mapper.Map<TaskView, TaskBLL>(task), author, newTask.Assignee);
+                        taskService.CreateTask(mapper.Map<TaskView, TaskBLL>(task), author, newTask.Assignee);
                     }
                     else
                     {
-                        serviceTask.AddSubtask(mapper.Map<TaskView, TaskBLL>(task), task.ParentId.Value);
+                        taskService.AddSubtask(mapper.Map<TaskView, TaskBLL>(task), task.ParentId.Value);
                     }
                 }
                 catch (Exception e)
@@ -134,8 +128,8 @@ namespace TaskMng.Controllers
         [HttpGet]
         public ActionResult Details(int id)
         {
-            TaskView task = mapper.Map<TaskBLL, TaskView>(serviceTask.GetTask(id));
-            IEnumerable<TaskView> subtasks = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(serviceTask.GetSubtasksOfTask(id));
+            TaskView task = mapper.Map<TaskBLL, TaskView>(taskService.GetTask(id));
+            IEnumerable<TaskView> subtasks = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(taskService.GetSubtasksOfTask(id));
             DetailsTaskView tasks = new DetailsTaskView
             {
                 MainTask = task,
@@ -147,7 +141,7 @@ namespace TaskMng.Controllers
         [HttpPost]
         public ActionResult EditTask(int id)
         {
-            TaskView task = mapper.Map<TaskBLL, TaskView>(serviceTask.GetTask(id));
+            TaskView task = mapper.Map<TaskBLL, TaskView>(taskService.GetTask(id));
             return PartialView("EditTask", task);
         }
 
@@ -167,7 +161,7 @@ namespace TaskMng.Controllers
             string assignee = taskForEdit.Assignee ?? author;
             try
             {
-                serviceTask.SaveChangeTask(task, assignee);
+                taskService.SaveChangeTask(task, assignee);
             }
             catch
             {
@@ -179,7 +173,7 @@ namespace TaskMng.Controllers
         [HttpGet]
         public ActionResult ShowSubtask(int parentId)
         {
-            IEnumerable<TaskView> subtasks = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(serviceTask.GetSubtasksOfTask(parentId));
+            IEnumerable<TaskView> subtasks = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(taskService.GetSubtasksOfTask(parentId));
             
             ViewBag.ParentId = parentId;
 
@@ -191,9 +185,9 @@ namespace TaskMng.Controllers
         public ActionResult TaskOfMyTeam()
         {
             string id = User.Identity.GetUserId();
-            PersonBLL manager = servicePerson.GetPerson(id);
+            PersonBLL manager = personService.GetPerson(id);
 
-            IEnumerable<TaskView> tasksOfMyTeam = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(serviceTask.GetTasksOfTeam(id));
+            IEnumerable<TaskView> tasksOfMyTeam = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(taskService.GetTasksOfTeam(id));
 
             ViewBag.ManagerId = manager.Id;
             ViewBag.TeamTasksView = true;
@@ -206,11 +200,11 @@ namespace TaskMng.Controllers
             IEnumerable<StatusView> statuses;
             if (User.IsInRole("Programmer"))
             {
-                statuses = mapper.Map<IEnumerable<StatusBLL>, IEnumerable<StatusView>>(serviceTask.GetStatuses());
+                statuses = mapper.Map<IEnumerable<StatusBLL>, IEnumerable<StatusView>>(taskService.GetStatuses());
             }
             else
             {
-                statuses = mapper.Map<IEnumerable<StatusBLL>, IEnumerable<StatusView>>(serviceTask.GetAllStatuses());
+                statuses = mapper.Map<IEnumerable<StatusBLL>, IEnumerable<StatusView>>(taskService.GetAllStatuses());
             }
             return PartialView("StatusList", statuses);
         }
@@ -218,7 +212,7 @@ namespace TaskMng.Controllers
         [HttpGet]
         public ActionResult GetAssignees(int managerId)
         {
-            IEnumerable<PersonView> assignees = mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(servicePerson.GetAssignees(managerId));
+            IEnumerable<PersonView> assignees = mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(personService.GetAssignees(managerId));
             return PartialView("AssigneeList", assignees);
         }
 
@@ -227,21 +221,23 @@ namespace TaskMng.Controllers
         {
             if (status != null)
             {
-                serviceTask.SetNewStatus(id, status);
+                taskService.SetNewStatus(id, status);
             }
             return HttpStatusCode.OK;
         }
-    #endregion
+        
+        #endregion
 
         #region Team
+
         [Authorize(Roles = "Manager")]
         [HttpGet]
         public ActionResult MyTeam()
         {
             string id = User.Identity.GetUserId();
-            PersonBLL person = servicePerson.GetPerson(id);
+            PersonBLL person = personService.GetPerson(id);
             TeamBLL team = person.Team;
-            IEnumerable<PersonView> teamOfCurrentManager = mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(servicePerson.GetTeam(id));
+            IEnumerable<PersonView> teamOfCurrentManager = mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(personService.GetTeam(id));
 
             ViewBag.TeamName = (team != null) ? team.TeamName : string.Empty;
 
@@ -252,7 +248,7 @@ namespace TaskMng.Controllers
         [HttpGet]
         public ActionResult GetPossibleMembers()
         {
-            IEnumerable<PersonView> persons = mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(servicePerson.GetPeopleWithoutTeam());
+            IEnumerable<PersonView> persons = mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(personService.GetPeopleWithoutTeam());
 
             return PartialView("PossibleMembers", persons.ToList());
         }
@@ -263,7 +259,7 @@ namespace TaskMng.Controllers
         {
             try
             {
-                servicePerson.DeletePersonFromTeam(id);
+                personService.DeletePersonFromTeam(id);
             }
             catch (Exception e)
             {
@@ -279,7 +275,7 @@ namespace TaskMng.Controllers
             var managerId = User.Identity.GetUserId();
             try
             {
-                servicePerson.AddPersonsToTeam(persons, managerId);
+                personService.AddPersonsToTeam(persons, managerId);
             }
             catch (Exception e)
             {
@@ -287,7 +283,8 @@ namespace TaskMng.Controllers
             }
             return ("Members was added to your team");
         }
-    #endregion
+        
+        #endregion
         
     }
 }

@@ -12,7 +12,7 @@ namespace TaskMng.App_Start
 {
     public class Startup
     {
-        ICreateService serviceCreator = new CreateService();
+        private ICreateService serviceCreator = new CreateService();
 
         public void Configuration(IAppBuilder app)
         {

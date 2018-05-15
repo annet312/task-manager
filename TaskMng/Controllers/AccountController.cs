@@ -15,6 +15,7 @@ namespace TaskMng.Controllers
         public AccountController()
         {
         }
+
         private IUserService UserService
         {
             get

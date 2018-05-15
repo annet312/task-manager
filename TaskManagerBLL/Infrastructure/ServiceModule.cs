@@ -4,7 +4,6 @@ using TaskManagerDAL.Repositories;
 using TaskManagerBLL.Interfaces;
 using TaskManagerBLL.Services;
 
-
 namespace TaskManagerBLL.Infrastructure
 {
     public class ServiceModule : NinjectModule
@@ -19,7 +18,7 @@ namespace TaskManagerBLL.Infrastructure
             Bind<IUnitOfWork>().To<UnitOfWork>().WithConstructorArgument(connectionString);
             Bind<ITaskService>().To<TaskService>().InSingletonScope();
             Bind<IPersonService>().To<PersonService>().InSingletonScope();
-
+            Bind<IEmailService>().To<EmailService>().InSingletonScope();
         }
     }
 }

@@ -16,16 +16,20 @@ namespace TaskManagerBLL.Services
     /// </summary>
     public class PersonService : IPersonService
     {
-        private IUnitOfWork db { get; set; }
+        private readonly IUnitOfWork db;
+
+        private readonly IEmailService emailService;
+
         private IMapper mapper { get; set; }
         
         /// <summary>
         /// DI to  database repository
         /// </summary>
         /// <param name="uow">point to context of DataBase</param>
-        public PersonService(IUnitOfWork uow)
+        public PersonService(IUnitOfWork uow, IEmailService emailService)
         {
             db = uow;
+            this.emailService = emailService;
 
             var config = new MapperConfiguration(cfg => {
                 cfg.CreateMap<Person, PersonBLL>();
@@ -74,32 +78,41 @@ namespace TaskManagerBLL.Services
 
         public void AddPersonsToTeam(int[] persons, string managerId)
         {
-            if((persons == null) || (persons.Length == 0))
+            if ((persons == null) || (persons.Length == 0))
             {
                 throw new ArgumentException("No persons to adding", "persons");
             }
-            if(string.IsNullOrWhiteSpace(managerId))
+
+            if (string.IsNullOrWhiteSpace(managerId))
             {
                 throw new ArgumentException("Unknown manager", "managerId");
             }
+
             Person manager = db.People.Find(m => (m.UserId == managerId)).SingleOrDefault();
-            if(manager == null)
+            if (manager == null)
             {
                 throw new ArgumentException("Unknown manager", "managerId");
             }
-            IEnumerable<Person> newTeamMembers = db.People.Find(p => (persons.Contains(p.Id)));
-     
-            if(newTeamMembers.Count() != persons.Length)
+
+            IEnumerable<Person> newTeamMembers = db.People.Find(p => persons.Contains(p.Id));
+            if (newTeamMembers.Count() != persons.Length)
             {
                 throw new ArgumentException("Not all members was founded");
             }
 
-            foreach(var member in newTeamMembers)
+            foreach (var member in newTeamMembers)
             {
                 member.TeamId = manager.TeamId;
                 db.People.Update(member);
             }
             db.Save();
+
+            foreach (var member in newTeamMembers)
+            {
+                string emailBody = string.Format(EmailService.BODY_NEW_TEAM_MEMBER,
+                                                 member.Name, manager.Team.TeamName, manager.Name);
+                emailService.Send(manager.Email, member.Email, EmailService.SUBJECT_NEW_TEAM_MEMBER, emailBody);
+            }
         }
 
         public IEnumerable<PersonBLL> GetPeopleWithoutTeam()
