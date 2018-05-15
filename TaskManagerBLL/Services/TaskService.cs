@@ -36,10 +36,7 @@ namespace TaskManagerBLL.Services
         public IEnumerable<StatusBLL> GetAllStatuses()
         {
             var statuses = db.Statuses.GetAll();
-            if (!statuses.Any())
-            {
-                throw new Exception("test"); //for debug
-            }
+
             return mapper.Map<IEnumerable<Status>, IEnumerable<StatusBLL>>(statuses);
         }
         public IEnumerable<StatusBLL> GetStatuses()
@@ -51,10 +48,10 @@ namespace TaskManagerBLL.Services
             var result = db.TaskTemplates.Find(t => (t.TemplateId == null));
             return mapper.Map<IEnumerable<TaskTemplate>, IEnumerable<TaskTemplateBLL>>(result);
         }
-
-        public IEnumerable<TaskTemplateBLL> GetSubtasksOfTemplate(int tempplateId)
+     
+        private IEnumerable<TaskTemplateBLL> GetSubtasksOfTemplate(int templateId)
         {
-            var result = db.TaskTemplates.Find(t => (t.TemplateId == tempplateId));
+            IEnumerable<TaskTemplate> result = db.TaskTemplates.Find(t => (t.TemplateId == templateId));
             return mapper.Map<IEnumerable<TaskTemplate>, IEnumerable<TaskTemplateBLL>>(result);
         }
 
@@ -72,10 +69,6 @@ namespace TaskManagerBLL.Services
             if (task == null)
             {
                 throw new ArgumentException("Task with this id not found", "taskId");
-            }
-            if (string.IsNullOrEmpty(currentUserName))
-            {
-                throw new ArgumentException("Initiator of deleting task is undefined", "currentUserName");
             }
             if (task.Author.Name == currentUserName)
             {
@@ -106,6 +99,10 @@ namespace TaskManagerBLL.Services
         public void AddSubtask(TaskBLL subtask, int taskId, bool forceToSave = true)
         {
             var task = mapper.Map<_Task, TaskBLL>(db.Tasks.Get(taskId));
+            if (task == null)
+            {
+                throw new ArgumentException("Parent task wasn't found", "taskId");
+            }
             var status = mapper.Map<Status, StatusBLL>(db.Statuses.Find(s => (s.Name == "New")).Single());
             var newSubtask = new TaskBLL { ParentId = task.Id,
                 Author = task.Author,
@@ -127,21 +124,23 @@ namespace TaskManagerBLL.Services
                 db.Save();//??
             }
         }
-        public void AddSubtask(TaskBLL subtask, int taskId,  string authorName, bool forceToSave = true)
-        { 
-            //TO DO Exception
-            PersonBLL author = mapper.Map<Person, PersonBLL>(db.People.Find(p => (p.Name == authorName)).Single());
-            subtask.Author = author;
-
-            AddSubtask(subtask, taskId);
-        }
 
         public void AddSubtasksFromTemplate(int taskId, int templateId , string authorName)
         {
             IEnumerable<TaskTemplateBLL> subtaskNames = GetSubtasksOfTemplate(templateId);
-            //TO DO EXCEPTIONS
-            PersonBLL author = mapper.Map<Person, PersonBLL>(db.People.Find(p => (p.Name == authorName)).Single());
-            
+            if(!subtaskNames.Any())
+            {
+                throw new ArgumentException("subtasks from template with this Id wasn't found", "templateId");
+            }
+            if (string.IsNullOrWhiteSpace(authorName))
+            {
+                throw new ArgumentNullException("Name of author is null or empty","authorName");
+            }
+            PersonBLL author = mapper.Map<Person, PersonBLL>(db.People.Find(p => (p.Name == authorName)).SingleOrDefault());
+            if(author == null)
+            {
+                throw new ArgumentException("Author with tis name wasn't found", "authorName");
+            }
             foreach (var subtaskName in subtaskNames)
             {
                 var subtask = new TaskBLL
@@ -151,7 +150,6 @@ namespace TaskManagerBLL.Services
                     ETA = null,
                     DueDate = null,
                     Comment = null,
-                  //  Assignee = mapper.Map<_Task, TaskBLL>(parentTask).Assignee,
                     Author = author
                 };
                 AddSubtask(subtask, taskId, false);
@@ -162,34 +160,28 @@ namespace TaskManagerBLL.Services
             db.Save();
         }
         
-        public void CreateTask(TaskBLL task, string author,string assignee )
+        public void CreateTask(TaskBLL task, string authorName,string assigneeName )
         {
-            PersonBLL authorBLL = mapper.Map<Person,PersonBLL>(db.People.Find(p => p.Name == author).Single());
+            if(string.IsNullOrWhiteSpace(authorName))
+            {
+                throw new ArgumentNullException("Author is not shown", "authorName");
+            }
+            PersonBLL authorBLL = mapper.Map<Person,PersonBLL>(db.People.Find(p => p.Name == authorName).Single());
             
             PersonBLL assigneeBLL;
-            if (string.IsNullOrEmpty(assignee))
+            if (string.IsNullOrEmpty(assigneeName))
             {
                 assigneeBLL = authorBLL;
             }
             else
             {
-                try
-                {
-                    assigneeBLL = mapper.Map<Person, PersonBLL>(db.People.Find(p => p.Name == assignee).Single());
-                }
-                catch (InvalidOperationException e)
-                {
-                    throw new InvalidOperationException( "Name of assignee not single in DataBase", e);
-                }
+                assigneeBLL = mapper.Map<Person, PersonBLL>(db.People.Find(p => p.Name == assigneeName).Single());
             }
             StatusBLL status;
-            try
+            status = mapper.Map<Status, StatusBLL>(db.Statuses.Find(s => (s.Name == "New")).SingleOrDefault());
+            if(status == null)
             {
-                status = mapper.Map<Status, StatusBLL>(db.Statuses.Find(s => (s.Name == "New")).Single());
-            }
-            catch (ArgumentNullException e)
-            {
-                throw new ArgumentNullException("Name of status 'new' not single in DataBase", e);
+                throw new Exception("Status \"New\" wasn't found in database");
             }
             var newTask = new TaskBLL
             {
@@ -225,14 +217,7 @@ namespace TaskManagerBLL.Services
                     if (taskForEdit.Assignee.Name != assigneeName)
                     {
                         Person assignee;
-                        try
-                        {
-                            assignee = db.People.Find(p => (p.Name == assigneeName)).Single();
-                        }
-                        catch (InvalidOperationException e)
-                        {
-                            throw new InvalidOperationException("Assignee is not single in DataBase", e);
-                        }
+                        assignee = db.People.Find(p => (p.Name == assigneeName)).Single();
                         taskForEdit.Assignee = assignee;
                         if (taskForEdit.ParentId == null)
                         {
@@ -256,9 +241,9 @@ namespace TaskManagerBLL.Services
             }
         }
 
-        public IEnumerable<TaskBLL> GetSubtasksOfTask(int Id)
+        public IEnumerable<TaskBLL> GetSubtasksOfTask(int parentId)
         {
-            var subtasks = db.Tasks.Find(t => (t.ParentId == Id));
+            var subtasks = db.Tasks.Find(t => (t.ParentId == parentId));
             return mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(subtasks);
         }
 
@@ -302,11 +287,12 @@ namespace TaskManagerBLL.Services
         private int CalculateProgressOfSubtask(int mainTaskId, int deletedSubtaskId, bool deleting)
         {
             var MainTask = db.Tasks.Get(mainTaskId);
-            var subtasks = GetSubtasksOfTask(mainTaskId).Where(s => s.Id != deletedSubtaskId);
+            IEnumerable<TaskBLL> subtasks = GetSubtasksOfTask(mainTaskId);
+            var subtasksWithoutDeleted = subtasks.Where(s => (s.Id != deletedSubtaskId));
             int sumProgress = 0;
-            int num = -1;
+            int num = 0;
 
-            foreach (var subtask in subtasks)
+            foreach (var subtask in subtasksWithoutDeleted)
             {
                 if (subtask.Progress.HasValue)
                 {
@@ -314,31 +300,33 @@ namespace TaskManagerBLL.Services
                 }
                 num++;
             }
-            if (num == -1)
+            if (num == 0)
             {
-                if (MainTask.Status.Name != "Closed")
+                if (MainTask.Status.Name == "Closed")
                 {
-                    return 0;
+                    return 100;
                 }
                 else
                 {
-                    return (100);
-                }
+                    return 0;
+                } 
             }
-            sumProgress = (num != 0) ? (sumProgress / num) : sumProgress ;
+                      
+            sumProgress = (sumProgress / num) ;
             return sumProgress;
         }
         public void SetNewStatus(int taskId, string statusName)
         {
-            Status status;
-            try
+            if(string.IsNullOrWhiteSpace(statusName))
             {
-                status = db.Statuses.Find(s => (s.Name == statusName)).Single();
+                throw new ArgumentNullException("Name of status is null or empty", "statusName");
             }
-            catch (InvalidOperationException e)
+            Status status = db.Statuses.Find(s => (s.Name == statusName)).SingleOrDefault();
+            if(status == null)
             {
-                throw new InvalidOperationException("Status name isn't single in DataBase",e);
+                throw new ArgumentException("Status with this name wasn't found","statusName");
             }
+            
             _Task task = db.Tasks.Get(taskId);
             if (task == null)
             {
@@ -433,7 +421,7 @@ namespace TaskManagerBLL.Services
         {
             var manager = db.Teams.Get(teamId);
             var tasks = db.Tasks.Find(t => ((t.Author.Id == manager.Id) && (t.ParentId == null)
-                                        && (t.Status.Name == "Complete")));
+                                        && (t.Status.Name == "Closed")));
             return mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(tasks);
         }
 

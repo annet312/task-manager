@@ -11,10 +11,18 @@ using TaskManagerDAL.Entities;
 
 namespace TaskManagerBLL.Services
 {
+    /// <summary>
+    /// Service for operation with task 
+    /// </summary>
     public class PersonService : IPersonService
     {
         private IUnitOfWork db { get; set; }
         private IMapper mapper { get; set; }
+        
+        /// <summary>
+        /// DI to  database repository
+        /// </summary>
+        /// <param name="uow">point to context of DataBase</param>
         public PersonService(IUnitOfWork uow)
         {
             db = uow;
@@ -43,35 +51,35 @@ namespace TaskManagerBLL.Services
                 db.Teams.Create(team);
             }
         }
-        public int CreateNewTeam(string ManagerName, string TeamName)
-        {
-            if (ManagerName == "")
-            {
-                throw new ArgumentException("Manager name is empty", ManagerName);
-            }
-            if (TeamName == "")
-            {
-                throw new ArgumentException("Team name is empty", TeamName);
-            }
+        //public int CreateNewTeam(string ManagerName, string TeamName)
+        //{
+        //    if (ManagerName == "")
+        //    {
+        //        throw new ArgumentException("Manager name is empty", ManagerName);
+        //    }
+        //    if (TeamName == "")
+        //    {
+        //        throw new ArgumentException("Team name is empty", TeamName);
+        //    }
 
-            var teams = db.Teams.Find(p => (p.TeamName == TeamName));
-            var person = db.People.Find(p => (p.Name == ManagerName)).FirstOrDefault();
-           // var managers = db.Teams.Find(p => (p.ManagerId == person.Id));
-            if (teams.Any())
-            {
-                throw new ArgumentException("Team with this name is already exist", TeamName);
-            }
-            //if (managers.Any())
-            //{
-            //    //TO DO change Name of Team!!
-            //    throw new ArgumentException("This Manager has already had a team", TeamName);
-            //}
-            var team = new Team();
-            team.TeamName = TeamName;
-            //team.ManagerId = person.Id;
-            db.Teams.Create(team);
-            return team.Id;
-        }
+        //    var teams = db.Teams.Find(p => (p.TeamName == TeamName));
+        //    var person = db.People.Find(p => (p.Name == ManagerName)).FirstOrDefault();
+        //   // var managers = db.Teams.Find(p => (p.ManagerId == person.Id));
+        //    if (teams.Any())
+        //    {
+        //        throw new ArgumentException("Team with this name is already exist", TeamName);
+        //    }
+        //    //if (managers.Any())
+        //    //{
+        //    //    //TO DO change Name of Team!!
+        //    //    throw new ArgumentException("This Manager has already had a team", TeamName);
+        //    //}
+        //    var team = new Team();
+        //    team.TeamName = TeamName;
+        //    //team.ManagerId = person.Id;
+        //    db.Teams.Create(team);
+        //    return team.Id;
+        //}
 
         public IEnumerable<TeamBLL> GetAllTeams()
         {
@@ -79,21 +87,6 @@ namespace TaskManagerBLL.Services
             return mapper.Map<IEnumerable<Team>, IEnumerable<TeamBLL>>(result);
         }
 
-        //public IEnumerable<PersonBLL> GetManagerTeam(PersonBLL manager)
-        //{//???TOCHECK
-        //    if (manager == null)
-        //    {
-        //        throw new ArgumentNullException("manager","Manager is null");
-        //    }
-        //    var team = db.Teams.Find(t => (t.ManagerId == manager.Id)).FirstOrDefault();
-        //    if (team == null)
-        //    {
-        //        throw new ArgumentException("Unknown team");
-        //    }
-        //    var people = db.People.Find(p => (p.Team == team));
-
-        //    return mapper.Map<IEnumerable<Person>, IEnumerable<PersonBLL>>(people);
-        //}
         public void DeletePersonFromTeam(int id)
         {
             Person person = db.People.Get(id);

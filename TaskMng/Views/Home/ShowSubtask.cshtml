@@ -1,14 +1,14 @@
 ﻿@model IEnumerable<TaskMng.Models.TaskView>
 
 <tr>
-    <td colspan="6">
+    <td colspan="4">
         @if (Model.Any())
         {
-            <table class="table">
+            <table class="table"style="width:100%">
             @foreach (var item in Model)
             {
-                <tr id="task@(item.Id)">
-                    <td>
+                <tr id="task@(item.Id)" >
+                    <td style="width:500px">
                         <ul style="margin: 0;">
                             <li>@Html.DisplayFor(modelItem => item.Name)</li>
                         </ul>
