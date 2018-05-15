@@ -91,7 +91,7 @@ namespace TaskManagerBLL.Services
                 {
                     //then need to calculate new progress for parent task
                     _Task parrentTask = db.Tasks.Get(task.ParentId.Value);
-                    parrentTask.Progress = CalculateProgressOfSubtask(task.ParentId.Value, task.Id, 100);
+                    parrentTask.Progress = CalculateProgressOfSubtask(task.ParentId.Value, task.Id, deleting : true);
                     db.Tasks.Update(parrentTask);
                 }
                 db.Tasks.Delete(task.Id);
@@ -296,7 +296,36 @@ namespace TaskManagerBLL.Services
                 }
                 num++;
             }
-            sumProgress = sumProgress / num;
+            sumProgress = (num != 0) ? (sumProgress / num) : 0; ;
+            return sumProgress;
+        }
+        private int CalculateProgressOfSubtask(int mainTaskId, int deletedSubtaskId, bool deleting)
+        {
+            var MainTask = db.Tasks.Get(mainTaskId);
+            var subtasks = GetSubtasksOfTask(mainTaskId).Where(s => s.Id != deletedSubtaskId);
+            int sumProgress = 0;
+            int num = -1;
+
+            foreach (var subtask in subtasks)
+            {
+                if (subtask.Progress.HasValue)
+                {
+                    sumProgress += subtask.Progress.Value;
+                }
+                num++;
+            }
+            if (num == -1)
+            {
+                if (MainTask.Status.Name != "Closed")
+                {
+                    return 0;
+                }
+                else
+                {
+                    return (100);
+                }
+            }
+            sumProgress = (num != 0) ? (sumProgress / num) : sumProgress ;
             return sumProgress;
         }
         public void SetNewStatus(int taskId, string statusName)
