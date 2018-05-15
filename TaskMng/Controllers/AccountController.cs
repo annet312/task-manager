@@ -1,22 +1,15 @@
 ﻿using System;
-using System.Globalization;
-using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
-using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using TaskManagerUsersBLL.Interfaces;
 using TaskMng.Models;
-using TaskManagerUsersBLL.Services;
 using TaskManagerUsersBLL.Models;
-using TaskManagerUsersBLL.Infrastructure;
 
 namespace TaskMng.Controllers
-{
-    //[Authorize]
+{  
     public class AccountController : Controller
     {
         public AccountController()
@@ -37,13 +30,13 @@ namespace TaskMng.Controllers
                 return HttpContext.GetOwinContext().Authentication;
             }
         }
+
         public ActionResult Login(string returnUrl)
         {
             ViewBag.returnUrl = returnUrl;
             return View();
         }
-        //
-        // POST: /Account/Login
+
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -75,15 +68,18 @@ namespace TaskMng.Controllers
             ViewBag.returnUrl = returnUrl;
             return View(model);
         }
+
         public ActionResult LogOut()
         {
             AuthenticationManager.SignOut();
             return RedirectToAction("Login", "Account");
         }
+
         public ActionResult Register()
         {
             return View();
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Register(RegisterViewModel model)
@@ -100,12 +96,19 @@ namespace TaskMng.Controllers
                         Password = model.Password,
                         TeamName = model.TeamName,
                         UserName = model.Name,
-                        Role = role//!!TODO
+                        Role = role
                     };
                     var operationDetails = await UserService.Create(userBll);
                     if (operationDetails.Succedeed)
                     {
-                        return RedirectToAction("Index", "Home"); ;
+                        LoginViewModel loginModel = new LoginViewModel
+                        {
+                            Name = model.Name,
+                            Password = model.Password,
+                            RememberMe = false
+                        };
+                        ActionResult x = await Login(loginModel, "/Index/Home");
+                        return RedirectToAction("Index", "Home"); 
                     }
                     else
                     {

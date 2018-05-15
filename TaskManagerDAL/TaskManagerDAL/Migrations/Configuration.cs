@@ -23,8 +23,6 @@ namespace TaskManagerDAL.Migrations
             IdentityInitialSetup(context);
             TaskManagerInitialSetup(context);
             context.SaveChanges();
-           
-  //          base.Seed(context);
         }
         public void IdentityInitialSetup(TaskManagerContext context)
         {
@@ -64,11 +62,11 @@ namespace TaskManagerDAL.Migrations
             var statuses = new List<Status>
             {
                 new Status { Name = "New" },
-                new Status { Name = "Underway" },
-                new Status { Name = "Executed" },
-                new Status { Name = "Completed" },
+                new Status { Name = "In progress" },
+                new Status { Name = "Done" },
+                new Status { Name = "Closed" },
                 new Status { Name = "Canceled" },
-                new Status { Name = "Postpone" },
+                new Status { Name = "Postponed" },
                 new Status { Name = "Draft" }
             };
             statuses.ForEach(status => context.Statuses.AddOrUpdate(s => s.Name, status));

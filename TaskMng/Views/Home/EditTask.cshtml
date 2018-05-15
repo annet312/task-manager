@@ -1,39 +1,44 @@
 ﻿@model TaskMng.Models.TaskView
 
 @Html.AntiForgeryToken()
-
-<div class="form-row">
-    <div class="col-md-7">
-        <div class="input-group mb-3">
-            <div class="input-group-prepend">
-                <span class="input-group-text" id="basic-addon1">Name</span>
-            </div>
-            <input name="name" type="text" class="form-control" placeholder="Name of task" value="@Model.Name" aria-describedby="basic-addon1" id="nameEditTask" required>
-        </div>
-    </div>
-    <div class="col-md-5">
-        <div class="input-group mb-3">
-            <div class="input-group-prepend">
-                <span class="input-group-text" id="basic-addon2">Status</span>
-            </div>
-            
-            <select aria-describedby="basic-addon2" disabled>
-                <option selected>@Model.Status.Name</option>
-           </select>
-        </div>
-    </div>
-</div>
-@if (!Model.ParentId.HasValue)
+@if(Model == null)
 {
-<div class="input-group mb-3">
-    <div class="input-group-prepend">
-        <span class="input-group-text" id="basic-addon3">Assignee</span>
-    </div>
-    <select id="assignee-edit" aria-describedby="basic-addon3" data-assignee="@(Model.Assignee.Name)" onclick="showAssignees(@Model.Author.Id,'#assignee-edit')" onchange="updateAssignee('#assignee-edit')" @(!User.IsInRole("Manager") ? "disabled" : string.Empty)>
-        <option selected>@(Model.Assignee.Name)</option>
-    </select>
-</div>
+    <p>Task wasn't found</p>
 }
+else
+{
+    <div class="form-row">
+        <div class="col-md-7">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">Name</span>
+                </div>
+                <input name="name" type="text" class="form-control" placeholder="Name of task" value="@Model.Name" aria-describedby="basic-addon1" id="nameEditTask" required>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon2">Status</span>
+                </div>
+            
+                <select aria-describedby="basic-addon2" disabled>
+                    <option selected>@Model.Status.Name</option>
+               </select>
+            </div>
+        </div>
+    </div>
+    if (!Model.ParentId.HasValue)
+    {
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text" id="basic-addon3">Assignee</span>
+        </div>
+        <select id="assignee-edit" aria-describedby="basic-addon3" data-assignee="@(Model.Assignee.Name)" onclick="showAssignees(@Model.Author.Id,'#assignee-edit')" onchange="updateAssignee('#assignee-edit')" @(!User.IsInRole("Manager") ? "disabled" : string.Empty)>
+            <option selected>@(Model.Assignee.Name)</option>
+        </select>
+    </div>
+    }
     <div class="form-row">
         <div class="col-md-6">
             <label for="eta">ETA</label>
@@ -61,22 +66,4 @@
         </div>
         <textarea name="comment" class="form-control" aria-label="Comment" id="comment">@Model.Comment</textarea>
     </div>
-
-
-    <script>
-       // $('#timepicker2').timepicker({
-       //     minuteStep: 1,
-       //         template: 'modal',
-       //         appendWidgetTo: 'body',
-       //         showSeconds: true,
-       //         showMeridian: false,
-       //         defaultTime: false
-    //});
-    //$(document).ready(function () {
-    //    if (isManager == "True") {
-    //        $("#assignee").prop('disabled', false);
-    //    }
-
-    //});
-
-    </script>
+}    

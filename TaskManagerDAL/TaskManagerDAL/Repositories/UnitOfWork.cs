@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data.Entity;
 using TaskManagerDAL.Interfaces;
 using TaskManagerDAL.Context;
 using TaskManagerDAL.Entities;
@@ -13,6 +12,7 @@ namespace TaskManagerDAL.Repositories
         private TaskRepository taskRepository;
         private TaskTemplateRepository taskTemplateRepository;
         private TeamRepository teamRepository;
+
         private TaskManagerContext db;
 
         public IRepository<Person> People {
@@ -25,6 +25,7 @@ namespace TaskManagerDAL.Repositories
                 return personRepository;
             }
         }
+
         public IRepository<Status> Statuses
         {
             get
@@ -36,6 +37,7 @@ namespace TaskManagerDAL.Repositories
                 return statusRepository;
             }
         }
+
         public IRepository<_Task> Tasks
         {
             get
@@ -47,6 +49,7 @@ namespace TaskManagerDAL.Repositories
                 return taskRepository;
             }
         }
+
         public IRepository<TaskTemplate> TaskTemplates
         {
             get
@@ -58,6 +61,7 @@ namespace TaskManagerDAL.Repositories
                 return taskTemplateRepository;
             }
         }
+
         public IRepository<Team> Teams
         {
             get
@@ -69,12 +73,12 @@ namespace TaskManagerDAL.Repositories
                 return teamRepository;
             }
         }
-        
 
         public UnitOfWork(string connectionString)
         {
             db = new TaskManagerContext(connectionString);
         }
+
         public void Save()
         {
             db.SaveChanges();

@@ -1,12 +1,17 @@
 ﻿@model TaskMng.Models.DetailsTaskView
-
+@if (Model.MainTask == null)
+{
+    <p>task wasn't found</p>
+}
+else
+{
 <div>
     <div class="form-row">
-        <div class="col-md-10">
+        <div class="col-md-8">
             <label for="name-main-task">Name</label>
             <h4 id="name-main-task">@Model.MainTask.Name</h4>
         </div>
-        <div class="col-md-2">
+        <div class="col-md-4">
             <label for="status">Status</label>
             <span id="status" class="form-control">@Model.MainTask.Status.Name</span>
         </div>
@@ -68,7 +73,7 @@
                 </div>
             </div>
             <div class="form-row">
-                <div class="col-md-10">
+                <div class="col-md-8">
                     <div class="progress">
                         <div class="progress-bar progress-bar-striped active" role="progressbar"
                              aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width:@Model.Subtasks.ElementAt(i).Progress%">
@@ -76,14 +81,14 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-4">
                     <p id="status-subtask">@Model.Subtasks.ElementAt(i).Status.Name</p>
                 </div>
             </div>
             <div class="form-row">
                 <div class="col-md-4">                 
                     <label for="date-start-subtask">Date start</label>
-                    <span class="form-control" id="date-start-subtask">@(Model.Subtasks.ElementAt(i).DateStart.HasValue ?  Model.Subtasks.ElementAt(i).DateStart.Value.ToString() : "N/A")</span>
+                    <span class="form-control" id="date-start-subtask">@(Model.Subtasks.ElementAt(i).DateStart.HasValue ? Model.Subtasks.ElementAt(i).DateStart.Value.ToString() : "N/A")</span>
                 </div>
                 <div class="col-md-4">
                      <label for="eta-subtask">ETA</label>
@@ -107,3 +112,4 @@
     </div>
     }
 </div>
+}

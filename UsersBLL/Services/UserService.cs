@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
 using TaskManagerUsersBLL.Interfaces;
 using TaskManagerDAL.Interfaces;
@@ -15,6 +14,7 @@ namespace TaskManagerUsersBLL.Services
     public class UserService : IUserService
     {
         IIdentityUnitOfWork Database { get; set; }
+
         public UserService(IIdentityUnitOfWork uow)
         {
             Database = uow;
@@ -39,7 +39,14 @@ namespace TaskManagerUsersBLL.Services
                 {
                     if (userBll.Role == "Manager")
                     {
-                        Database.RersonManager.Create(person, userBll.TeamName);
+                        try
+                        {
+                            Database.RersonManager.Create(person, userBll.TeamName);
+                        }
+                        catch (ArgumentException e)
+                        {
+                            return new IdentityOperation(false, e.Message, e.ParamName);
+                        }
                     }
                     else
                     {
@@ -64,21 +71,14 @@ namespace TaskManagerUsersBLL.Services
         public async Task<ClaimsIdentity> Authenticate(UserBLL userBll)
         {
             ClaimsIdentity claim = null;
-            // находим пользователя
+            // Find  user
             var user = await Database.UserManager.FindAsync(userBll.UserName, userBll.Password);
-            // авторизуем его и возвращаем объект ClaimsIdentity
+            // authenticate him and return ClaimsIdentity
             if (user != null)
                 claim = await Database.UserManager.CreateIdentityAsync(user,
                                             DefaultAuthenticationTypes.ApplicationCookie);
             return claim;
         }
-
-        public async Task SetInitialData(UserBLL adminBll/*, List<string> roles*/)
-        {
-         
-            await Create(adminBll);
-        }
-
 
         public void Dispose()
         {

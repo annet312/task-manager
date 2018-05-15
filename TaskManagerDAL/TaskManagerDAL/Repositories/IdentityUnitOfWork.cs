@@ -23,6 +23,7 @@ namespace TaskManagerDAL.Repositories
             roleManager = new ApplicationRoleManager(new RoleStore<ApplicationRole>(db));
             personManager = new PersonManager(db);
         }
+
         public ApplicationUserManager UserManager
         {
             get
@@ -57,6 +58,7 @@ namespace TaskManagerDAL.Repositories
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
         private bool disposed = false;
 
         public virtual void Dispose(bool disposing)

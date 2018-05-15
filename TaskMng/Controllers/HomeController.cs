@@ -1,11 +1,12 @@
-﻿using AutoMapper;
-using Microsoft.AspNet.Identity;
-using Ninject;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Web.Mvc;
+using AutoMapper;
+using Microsoft.AspNet.Identity;
+using Ninject;
+
 using TaskManagerBLL.Infrastructure;
 using TaskManagerBLL.Interfaces;
 using TaskManagerBLL.Models;
@@ -38,45 +39,98 @@ namespace TaskMng.Controllers
             mapper = config.CreateMapper();
         }
 
+        [Authorize]
         public ActionResult Index()
         {
             return View();
-
-        }
-        [HttpGet]
-        public ActionResult GetStatuses()
-        {
-            IEnumerable<StatusView> statuses;
-            if (User.IsInRole("Programmer"))
-            {
-                statuses = mapper.Map<IEnumerable<StatusBLL>, IEnumerable<StatusView>>(serviceTask.GetStatuses());
-            }
-            else
-            {
-                statuses = mapper.Map<IEnumerable<StatusBLL>, IEnumerable<StatusView>>(serviceTask.GetAllStatuses());
-            }
-            return PartialView("StatusList", statuses);
         }
 
-        [HttpGet]
-        public ActionResult GetAssignees(int managerId)
-        {
-            IEnumerable<PersonView> assignees = mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(servicePerson.GetAssignees(managerId));
-            return PartialView("AssigneeList", assignees);
-        }
+        [AllowAnonymous]
         public ActionResult About()
         {
-            ViewBag.Message = "Statuses";
-            var statuses = mapper.Map<IEnumerable<StatusBLL>, IEnumerable<StatusView>>(serviceTask.GetAllStatuses());
-            return View(statuses.ToList());
+            return View();
         }
 
+        [AllowAnonymous]
         public ActionResult Contact()
         {
             ViewBag.Message = "Your contact page.";
             return View();
         }
+        
+        #region Tasks
+        [HttpGet]
+        public ActionResult MyTasks()
+        {
+            IEnumerable<TaskView> tasks = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(serviceTask.GetTaskOfAssignee(User.Identity.GetUserId())).ToList();
 
+            ViewBag.TeamTasksView = false;
+
+            return PartialView("Tasks", tasks);
+        }
+
+        [HttpPost]
+        public string DeleteTask(int id)
+        {
+            try
+            {
+                //Try to delete this task and check task id and current user Name if he can delete it
+                //because deleting task is available only for author of task 
+                serviceTask.DeleteTask(id, User.Identity.Name);
+            }
+            catch (Exception e)
+            {
+                return ("Task wasn't deleted. Error: " + e.Message);
+            }
+            return ("Task was deleted");
+        }
+
+        [HttpPost]
+        public string CreateTask(CreateTaskView newTask)
+        {
+            if (ModelState.IsValid)
+            {
+                string author = User.Identity.Name;
+
+                if (newTask.TemplateId.HasValue)
+                {
+                    try
+                    {
+                        serviceTask.AddSubtasksFromTemplate(newTask.ParentId.Value, newTask.TemplateId.Value, author);
+                    }
+                    catch (Exception e)
+                    {
+                        return "Error. Task wasn't created" + e.Message;
+                    }
+                    return "Task was created";
+                }
+
+                var task = new TaskView
+                {
+                    ParentId = newTask.ParentId,
+                    Name = newTask.Name,
+                    Comment = newTask.Comment
+                };
+
+                try
+                {
+                    if (!newTask.ParentId.HasValue)
+                    {
+                        serviceTask.CreateTask(mapper.Map<TaskView, TaskBLL>(task), author, newTask.Assignee);
+                    }
+                    else
+                    {
+                        serviceTask.AddSubtask(mapper.Map<TaskView, TaskBLL>(task), task.ParentId.Value);
+                    }
+                }
+                catch (Exception e)
+                {
+                    return ("Task wasn't created. Error: " + e.Message);
+                }
+            }
+
+            return "Task was created";
+        }
         [HttpGet]
         public ActionResult Details(int id)
         {
@@ -115,7 +169,7 @@ namespace TaskMng.Controllers
             {
                 serviceTask.SaveChangeTask(task, assignee);
             }
-            catch (Exception e)
+            catch
             {
                 return ("Error: cannot change task!");
             }
@@ -126,22 +180,60 @@ namespace TaskMng.Controllers
         public ActionResult ShowSubtask(int parentId)
         {
             IEnumerable<TaskView> subtasks = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(serviceTask.GetSubtasksOfTask(parentId));
-
+            
             ViewBag.ParentId = parentId;
 
             return PartialView("ShowSubtask", subtasks);
         }
 
+        [Authorize(Roles = "Manager")]
         [HttpGet]
-        public ActionResult MyTasks()
+        public ActionResult TaskOfMyTeam()
         {
-            IEnumerable<TaskView> tasks = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(serviceTask.GetTaskOfAssignee(User.Identity.GetUserId())).ToList();
+            string id = User.Identity.GetUserId();
+            PersonBLL manager = servicePerson.GetPerson(id);
 
-            ViewBag.TeamTasksView = false;
+            IEnumerable<TaskView> tasksOfMyTeam = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(serviceTask.GetTasksOfTeam(id));
 
-            return PartialView("Tasks", tasks);
+            ViewBag.ManagerId = manager.Id;
+            ViewBag.TeamTasksView = true;
+
+            return PartialView("Tasks", tasksOfMyTeam);
+        }
+        [HttpGet]
+        public ActionResult GetStatuses()
+        {
+            IEnumerable<StatusView> statuses;
+            if (User.IsInRole("Programmer"))
+            {
+                statuses = mapper.Map<IEnumerable<StatusBLL>, IEnumerable<StatusView>>(serviceTask.GetStatuses());
+            }
+            else
+            {
+                statuses = mapper.Map<IEnumerable<StatusBLL>, IEnumerable<StatusView>>(serviceTask.GetAllStatuses());
+            }
+            return PartialView("StatusList", statuses);
         }
 
+        [HttpGet]
+        public ActionResult GetAssignees(int managerId)
+        {
+            IEnumerable<PersonView> assignees = mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(servicePerson.GetAssignees(managerId));
+            return PartialView("AssigneeList", assignees);
+        }
+
+        [HttpPost]
+        public HttpStatusCode SetNewStatus(int id, string status)
+        {
+            if (status != null)
+            {
+                serviceTask.SetNewStatus(id, status);
+            }
+            return HttpStatusCode.OK;
+        }
+    #endregion
+
+        #region Team
         [Authorize(Roles = "Manager")]
         [HttpGet]
         public ActionResult MyTeam()
@@ -166,23 +258,8 @@ namespace TaskMng.Controllers
         }
 
         [Authorize(Roles = "Manager")]
-        [HttpGet]
-        public ActionResult TaskOfMyTeam()
-        {
-            string id = User.Identity.GetUserId();
-            PersonBLL manager = servicePerson.GetPerson(id);
-
-            IEnumerable<TaskView> tasksOfMyTeam = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(serviceTask.GetTasksOfTeam(id));
-
-            ViewBag.ManagerId = manager.Id;
-            ViewBag.TeamTasksView = true;
-
-            return PartialView("Tasks", tasksOfMyTeam);
-        }
-
-        [Authorize(Roles = "Manager")]
         [HttpPost]
-        public string DeleteFromTeam (int id)
+        public string DeleteFromTeam(int id)
         {
             try
             {
@@ -204,81 +281,13 @@ namespace TaskMng.Controllers
             {
                 servicePerson.AddPersonsToTeam(persons, managerId);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 return ("Members wasn't added. Error: " + e.Message);
             }
             return ("Members was added to your team");
         }
-
-        [HttpPost]
-        public string DeleteTask(int id)
-        {
-            try
-            {
-                //Try to delete this task and send task id and current user Name for check if he can delete it
-                //because deleting task is available only for author of task 
-                serviceTask.DeleteTask(id, User.Identity.Name);
-            }
-            catch (Exception e)
-            {
-                return ("Task wasn't deleted. Error: " + e.Message);
-            }
-            return ("Task was deleted");
-        }
-        [HttpPost]
-        public HttpStatusCode SetNewStatus(int id, string status)
-        {
-            if (status != null)
-            {
-                serviceTask.SetNewStatus(id, status);
-            }
-            return HttpStatusCode.OK;
-        }
-        [HttpPost]
-        public string CreateTask(CreateTaskView newTask)
-        {
-            if (ModelState.IsValid)
-            {
-                //PersonView author = mapper.Map<PersonBLL, PersonView>(servicePerson.GetPerson(User.Identity.GetUserId()));
-                string author = User.Identity.Name;
-
-                if (newTask.TemplateId.HasValue)
-                {
-                    serviceTask.AddSubtasksFromTemplate(newTask.ParentId.Value, newTask.TemplateId.Value, author);
-                    // TO DO exceptions
-                    return "Task was created";
-                }
-
-                var task = new TaskView
-                           {
-                               ParentId = newTask.ParentId,
-                               Name = newTask.Name,
-                               Comment = newTask.Comment
-                           };
-            
-                try
-                {
-                    if (!newTask.ParentId.HasValue)
-                    {
-                        serviceTask.CreateTask(mapper.Map<TaskView, TaskBLL>(task), author, newTask.Assignee);
-                    }
-                    else
-                    {
-                        serviceTask.AddSubtask(mapper.Map<TaskView, TaskBLL>(task), task.ParentId.Value);
-                    }
-                }
-                catch (InvalidOperationException e)
-                {
-                    return ("Task wasn't created. Error: " + e.Message);
-                }
-                catch (Exception e)
-                {
-                    return ("Task wasn't created. Error: " + e.Message);
-                }
-            }
-
-            return "Task was created";
-        }
+    #endregion
+        
     }
 }

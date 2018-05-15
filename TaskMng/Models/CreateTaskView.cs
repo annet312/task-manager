@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace TaskMng.Models
 {
     public class CreateTaskView

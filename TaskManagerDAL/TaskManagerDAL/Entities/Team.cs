@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TaskManagerDAL.Entities
 {
@@ -8,6 +7,7 @@ namespace TaskManagerDAL.Entities
     {
         [Key]
         public int Id { get; set; }
+
         public string TeamName { get; set; }
 
         public virtual IEnumerable<Person> TeamMates { get; set; }

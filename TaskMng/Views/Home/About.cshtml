@@ -1,40 +1,18 @@
-﻿@{
-    ViewBag.Title = "About";
-}
-@*<h2>@ViewBag.Title.</h2>
-<h3>@ViewBag.Message</h3>*@
+﻿<Title>About</Title>
 
+<h2>Task</h2>
 
-@model IEnumerable<TaskMng.Models.StatusView>
+<h3 style="color:brown">
+    Система отслеживания заданий. Выдача задания
+    менеджером. Статус задания, согласно рабочему процессу.
+    Процент выполнения. Почтовые уведомления клиентам
+    системы. Управление пользователями и их ролями.
+</h3>
 
+<h5>If you are not manager</h5>
+<p> This application allow you to create tasks for you personally, set properties of this tasks, add/delete subtask and then see progress of your tasks or change status of its</p>
 
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.Id)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Name)
-        </th>
-        <th></th>
-    </tr>
-
-    @foreach (var item in Model)
-    {
-           <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Id)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Name)
-                </td>
-                <td>
-                    @*@Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
-                    @Html.ActionLink("Details", "Details", new { id=item.Id }) |
-                    @Html.ActionLink("Delete", "Delete", new { id=item.Id }) |
-                    @Html.ActionLink("Buy", "MakePurchase", new { id = item.Id })*@
-                </td>
-            </tr>
-    }
-    </table>
-    <p>Use this area to provide additional information.</p>
+<h5>If you are manager</h5>
+<p> This application allow you to create tasks for you personally or choose assignee for tasks from your team, set properties of this tasks, add/delete subtask and then see progress of your tasks or change status of its.</p>
+<p>You can edit tasks and change assignees</p>
+<p> Also you can see who are in your team and add or delete members. After each changing members will receive letter on e-mail</p>

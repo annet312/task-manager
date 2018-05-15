@@ -11,27 +11,38 @@ namespace TaskManagerDAL.Repositories
     public class TaskRepository : IRepository<_Task>
     {
         private TaskManagerContext dataBase;
+
         public TaskRepository(TaskManagerContext context)
         {
             dataBase = context;
         }
+
         public IEnumerable<_Task> GetAll()
         {
-            return dataBase.Tasks.Include(p => p.Author).Include(p=>p.Assignee).Include(p => p.Status).ToList();
+            return dataBase.Tasks.Include(p => p.Author)
+                                 .Include(p => p.Assignee)
+                                 .Include(p => p.Status).ToList();
         }
+
         public _Task Get(int id)
         {
-            _Task result = dataBase.Tasks.Include(p => p.Assignee).Include(p => p.Author).Include(p => p.Status).SingleOrDefault(p => p.Id == id);
-            return result;
+           
+            return dataBase.Tasks.Include(p => p.Assignee)
+                                 .Include(p => p.Author)
+                                 .Include(p => p.Status)
+                                 .SingleOrDefault(p => p.Id == id);
         }
+
         public IEnumerable<_Task> Find(Func<_Task, Boolean> predicate)
         {
-            var tasks = dataBase.Tasks.Include(p => p.Author).Include(p => p.Assignee).Include(p => p.Status).Where(predicate).ToList();
-            return tasks;
+            return dataBase.Tasks.Include(p => p.Author)
+                                 .Include(p => p.Assignee)
+                                 .Include(p => p.Status)
+                                 .Where(predicate).ToList();
         }
+
         public void Create(_Task task)
         {
-            
             var taskForCreate = new _Task
             {
                 Name = task.Name,
@@ -45,8 +56,10 @@ namespace TaskManagerDAL.Repositories
                 DueDate = task.DueDate,
                 Comment = task.Comment
             };
+
             dataBase.Tasks.Add(taskForCreate);
         }
+
         public void Update(_Task task)
         {
             dataBase.Entry(task).State = EntityState.Modified;

@@ -1,6 +1,4 @@
 ﻿using System.Data.Entity;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using TaskManagerDAL.Entities;
@@ -16,20 +14,13 @@ namespace TaskManagerDAL.Context
         public DbSet<_Task> Tasks { get; set; }
         public DbSet<Team> Teams { get; set; }
         public DbSet<TaskTemplate> TaskTemplates { get; set; }
-       // public DbSet<UserProfile> UserProfiles { get; set; }
 
-        //static TaskManagerContext()
-        //{
-        //    Database.SetInitializer<TaskManagerContext>(new IdentityDbInit());           
-        //}
         public TaskManagerContext()
         {
-
         }
         public TaskManagerContext(string connectionString)
         : base(connectionString)
         {
-           
         }
     }
 
@@ -75,6 +66,7 @@ namespace TaskManagerDAL.Context
         }
         public void TaskManagerInitialSetup(TaskManagerContext context)
         {
+            //Initializing Statuses table
             context.Statuses.Add(new Status {Name = "New" });
             context.Statuses.Add(new Status { Name = "Underway" });
             context.Statuses.Add(new Status { Name = "Executed" });// was finished by Assignee
@@ -83,6 +75,7 @@ namespace TaskManagerDAL.Context
             context.Statuses.Add(new Status { Name = "Procrastinated" });
             context.Statuses.Add(new Status { Name = "Draft" });
 
+            //Initializing Templates table
             context.TaskTemplates.Add(new TaskTemplate { Name = "Default Template", TemplateId = null });
             context.TaskTemplates.Add(new TaskTemplate { Name = "Lead Up", TemplateId = 1 });
             context.TaskTemplates.Add(new TaskTemplate { Name = "Developing", TemplateId = 1 });

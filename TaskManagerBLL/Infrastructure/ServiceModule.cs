@@ -1,5 +1,4 @@
-﻿
-using Ninject.Modules;
+﻿using Ninject.Modules;
 using TaskManagerDAL.Interfaces;
 using TaskManagerDAL.Repositories;
 using TaskManagerBLL.Interfaces;
@@ -14,7 +13,7 @@ namespace TaskManagerBLL.Infrastructure
        
         public override void Load()
         {
-            //"DefaultConnection";
+            //"DefaultConnection";TODO
             connectionString = "Data Source = (LocalDB)\\MSSQLLocalDB; AttachDbFilename = C:\\Users\\Anna\\Documents\\LabsEpam\\task-manager\\TaskMng\\App_Data\\TaskMng.mdf; Integrated Security = True";
 
             Bind<IUnitOfWork>().To<UnitOfWork>().WithConstructorArgument(connectionString);
