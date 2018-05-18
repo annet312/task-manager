@@ -1,4 +1,6 @@
 ﻿
+using System.ComponentModel.DataAnnotations;
+
 namespace TaskMng.Models
 {
     public class CreateTaskView

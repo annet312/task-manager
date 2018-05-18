@@ -59,17 +59,13 @@ namespace TaskManagerBLL.Services
                 throw new ArgumentNullException("Name of status is null or empty", "statusName");
             }
             Status status = db.Statuses.Find(s => (s.Name == statusName)).SingleOrDefault();
-            if (status == null)
-            {
-                throw new ArgumentException("Status with this name wasn't found", "statusName");
-            }
 
             _Task task = db.Tasks.Get(taskId);
             if (task == null)
             {
                 throw new ArgumentException("Task wasn't found", "id");
             }
-            task.Status = status;
+            task.Status = status ?? throw new ArgumentException("Status with this name wasn't found", "statusName");
             switch (statusName)
             {
                 case "New":
@@ -432,11 +428,12 @@ namespace TaskManagerBLL.Services
             {
                 throw new ArgumentException("Manager is not found","managerId");
             }
-            var tasks = db.Tasks.Find(t => ((t.Author.Id == manager.Id) && 
+            IEnumerable<_Task> tasks = db.Tasks.Find(t => ((t.Author.Id == manager.Id) && 
                                             (t.ParentId == null) && 
-                                            (t.Assignee.Id != manager.Id)));
+                                            (t.Assignee.Id != manager.Id))).OrderBy(tsk => tsk.Assignee.Name).ToList();
 
-            return mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(tasks);
+            IEnumerable<TaskBLL> resulttasks = mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(tasks);
+            return resulttasks;
         }
 
         public IEnumerable<TaskBLL> GetOverDueTasks(int teamId)
@@ -459,9 +456,11 @@ namespace TaskManagerBLL.Services
 
         public IEnumerable<TaskBLL> GetTaskOfAssignee(string id)
         {
-            var tasks = db.Tasks.Find(t => ((t.Assignee.UserId == id) && (t.ParentId == null)));
+            var tasks = mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(
+                                    db.Tasks.Find(t => ((t.Assignee.UserId == id) && (t.ParentId == null)))
+                                    .OrderByDescending(tsk => tsk.Author.Name));
 
-            return mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(tasks);
+            return tasks;
         }
         #endregion
 

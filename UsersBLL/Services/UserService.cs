@@ -13,26 +13,26 @@ namespace TaskManagerUsersBLL.Services
 {
     public class UserService : IUserService
     {
-        IIdentityUnitOfWork Database { get; set; }
+        private IIdentityUnitOfWork database { get; set; }
 
         public UserService(IIdentityUnitOfWork uow)
         {
-            Database = uow;
+            database = uow;
         }
 
         public async Task<IdentityOperation> Create(UserBLL userBll)
         {
-            ApplicationUser user = await Database.UserManager.FindByEmailAsync(userBll.Email);
+            ApplicationUser user = await database.UserManager.FindByEmailAsync(userBll.Email);
             if (user == null)
             {
                 user = new ApplicationUser { Email = userBll.Email, UserName = userBll.UserName };
 
-                var result = await Database.UserManager.CreateAsync(user, userBll.Password);
+                var result = await database.UserManager.CreateAsync(user, userBll.Password);
                 if (result.Errors.Count() > 0)
                 {
                     return new IdentityOperation(false, result.Errors.FirstOrDefault(), "");
                 }
-                await Database.UserManager.AddToRoleAsync(user.Id, userBll.Role);
+                await database.UserManager.AddToRoleAsync(user.Id, userBll.Role);
 
                 var person = new Person { UserId = user.Id, Email = userBll.Email, Name = userBll.UserName , Role = userBll.Role};
                 try
@@ -41,7 +41,7 @@ namespace TaskManagerUsersBLL.Services
                     {
                         try
                         {
-                            Database.RersonManager.Create(person, userBll.TeamName);
+                            database.RersonManager.Create(person, userBll.TeamName);
                         }
                         catch (ArgumentException e)
                         {
@@ -50,14 +50,14 @@ namespace TaskManagerUsersBLL.Services
                     }
                     else
                     {
-                        Database.RersonManager.Create(person);
+                        database.RersonManager.Create(person);
                     }
                 }
                 catch (ArgumentException e)
                 {
                     return new IdentityOperation(false, e.Message, e.ParamName);
                 }
-                await Database.SaveAsync();
+                await database.SaveAsync();
 
                 return new IdentityOperation(true, "Sign up is success", "");
 
@@ -72,17 +72,17 @@ namespace TaskManagerUsersBLL.Services
         {
             ClaimsIdentity claim = null;
             // Find  user
-            var user = await Database.UserManager.FindAsync(userBll.UserName, userBll.Password);
+            var user = await database.UserManager.FindAsync(userBll.UserName, userBll.Password);
             // authenticate him and return ClaimsIdentity
             if (user != null)
-                claim = await Database.UserManager.CreateIdentityAsync(user,
+                claim = await database.UserManager.CreateIdentityAsync(user,
                                             DefaultAuthenticationTypes.ApplicationCookie);
             return claim;
         }
 
         public void Dispose()
         {
-            Database.Dispose();
+            database.Dispose();
         }
     }
 }

@@ -3,10 +3,10 @@
 <h2>Task</h2>
 
 <h3 style="color:brown">
-    Система отслеживания заданий. Выдача задания
-    менеджером. Статус задания, согласно рабочему процессу.
-    Процент выполнения. Почтовые уведомления клиентам
-    системы. Управление пользователями и их ролями.
+    System of tracking tasks. Issue assignment
+    manager. The status of the job, according to the workflow.
+    Percent completion. Email notifications to customers
+    system. Managing users and their roles.
 </h3>
 
 <h5>If you are not manager</h5>
@@ -16,3 +16,12 @@
 <p> This application allow you to create tasks for you personally or choose assignee for tasks from your team, set properties of this tasks, add/delete subtask and then see progress of your tasks or change status of its.</p>
 <p>You can edit tasks and change assignees</p>
 <p> Also you can see who are in your team and add or delete members. After each changing members will receive letter on e-mail</p>
+
+@if (User.Identity.IsAuthenticated)
+{
+    <a href="/Home/Index">Start work</a>
+}
+else
+{
+    <a href="/Account/Login">Login/Register</a>
+}

@@ -115,6 +115,9 @@
     <Reference Include="Microsoft.Owin.Security.Twitter, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\TaskManagerDAL\packages\Microsoft.Owin.Security.Twitter.4.0.0\lib\net451\Microsoft.Owin.Security.Twitter.dll</HintPath>
     </Reference>
+    <Reference Include="Moveax.Mvc.ErrorHandler, Version=1.2.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\TaskManagerDAL\packages\Moveax.Mvc.ErrorHandler.1.2.3.0\lib\net40\Moveax.Mvc.ErrorHandler.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\TaskManagerDAL\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -209,6 +212,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\ErrorController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -348,6 +352,9 @@
     <Content Include="Views\Home\AssigneeList.cshtml" />
     <Content Include="Views\Account\Register - Copy.cshtml" />
     <Content Include="Views\Home\PossibleMembers.cshtml" />
+    <Content Include="Views\Home\Error.cshtml" />
+    <Content Include="Views\Error\Http404.cshtml" />
+    <Content Include="Views\Error\Default.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

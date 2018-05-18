@@ -12,6 +12,7 @@ using TaskMng.Models;
 namespace TaskMng.Controllers
 {
     [Authorize]
+    [HandleError(View = "Error")]
     public class HomeController : Controller
     {
         private readonly ITaskService taskService;
@@ -50,7 +51,12 @@ namespace TaskMng.Controllers
         {
             return View();
         }
-        
+
+        //public ActionResult Error(Error e)
+        //{
+        //    return View("ExceptionFound", e);
+        //}
+
         #region Tasks
 
         [HttpGet]
@@ -82,47 +88,43 @@ namespace TaskMng.Controllers
         [HttpPost]
         public string CreateTask(CreateTaskView newTask)
         {
-            if (ModelState.IsValid)
+            string author = User.Identity.Name;
+
+            if (newTask.TemplateId.HasValue)
             {
-                string author = User.Identity.Name;
-
-                if (newTask.TemplateId.HasValue)
-                {
-                    try
-                    {
-                        taskService.AddSubtasksFromTemplate(newTask.ParentId.Value, newTask.TemplateId.Value, author);
-                    }
-                    catch (Exception e)
-                    {
-                        return "Error. Task wasn't created" + e.Message;
-                    }
-                    return "Task was created";
-                }
-
-                var task = new TaskView
-                {
-                    ParentId = newTask.ParentId,
-                    Name = newTask.Name,
-                    Comment = newTask.Comment
-                };
-
                 try
                 {
-                    if (!newTask.ParentId.HasValue)
-                    {
-                        taskService.CreateTask(mapper.Map<TaskView, TaskBLL>(task), author, newTask.Assignee);
-                    }
-                    else
-                    {
-                        taskService.AddSubtask(mapper.Map<TaskView, TaskBLL>(task), task.ParentId.Value);
-                    }
+                    taskService.AddSubtasksFromTemplate(newTask.ParentId.Value, newTask.TemplateId.Value, author);
                 }
                 catch (Exception e)
                 {
-                    return ("Task wasn't created. Error: " + e.Message);
+                    return "Error. Task wasn't created" + e.Message;
                 }
+                return "Task was created";
             }
 
+            var task = new TaskView
+            {
+                ParentId = newTask.ParentId,
+                Name = newTask.Name,
+                Comment = newTask.Comment
+            };
+
+            try
+            {
+                if (!newTask.ParentId.HasValue)
+                {
+                    taskService.CreateTask(mapper.Map<TaskView, TaskBLL>(task), author, newTask.Assignee);
+                }
+                else
+                {
+                    taskService.AddSubtask(mapper.Map<TaskView, TaskBLL>(task), task.ParentId.Value);
+                }
+            }
+            catch (Exception e)
+            {
+                return ("Task wasn't created. Error: " + e.Message);
+            }
             return "Task was created";
         }
         [HttpGet]
@@ -187,7 +189,8 @@ namespace TaskMng.Controllers
             string id = User.Identity.GetUserId();
             PersonBLL manager = personService.GetPerson(id);
 
-            IEnumerable<TaskView> tasksOfMyTeam = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(taskService.GetTasksOfTeam(id));
+            IEnumerable<TaskView> tasksOfMyTeam;
+            tasksOfMyTeam = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(taskService.GetTasksOfTeam(id));
 
             ViewBag.ManagerId = manager.Id;
             ViewBag.TeamTasksView = true;

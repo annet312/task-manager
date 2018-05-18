@@ -20,6 +20,12 @@
                 @Html.DisplayNameFor(model => model.Assignee)
             </th>
         }
+        else
+        {
+            <th>
+                @Html.DisplayNameFor(model => model.Author)
+            </th>
+        }
 
         <th>
             @Html.DisplayNameFor(model => model.Status)
@@ -45,6 +51,12 @@
         {
             <td>
                 @Html.DisplayFor(modelItem => item.Assignee.Name)
+            </td>
+        }
+        else
+        {
+            <td>
+                @Html.DisplayFor(modelItem => item.Author.Name)
             </td>
         }
 
@@ -353,7 +365,9 @@
         });
 
         $("#edit-form").change(function () {
-            $("#save-task").prop("disabled", false);
+            if ($("#nameEditTask").val().length > 2) {
+                $("#save-task").prop("disabled", false);
+            }
         });
 
         $("#myModalEditMainTask").on("hidden.bs.modal", function (e) {
@@ -369,7 +383,7 @@
             var taskName = $("#task-name"),
                 assignee = $("#assignee-create-task");
             var selector = "#assignee-create-task";
-            if (!taskName.val()) {
+            if (taskName.val().length<3) {
                 taskName.addClass("border-danger");
             }
             else {
@@ -384,8 +398,8 @@
                     assignee.removeClass("border-danger");
                 }
             }
-            
-            if (taskName.val() && (!assignee.length || assignee.val() || $("#span-assignee").data("add-subtask"))) {
+
+            if ((taskName.val().length > 2) && (!assignee.length || assignee.val() || $("#span-assignee").data("add-subtask"))) {
                 addTask(selector);
                 $("#addTaskModal").modal("hide");
             }

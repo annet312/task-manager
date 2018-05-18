@@ -15,6 +15,11 @@ namespace TaskManagerDAL.Repositories
 
         private TaskManagerContext db;
 
+        public UnitOfWork(string connectionString)
+        {
+            db = new TaskManagerContext(connectionString);
+        }
+
         public IRepository<Person> People {
             get
             {
@@ -72,11 +77,6 @@ namespace TaskManagerDAL.Repositories
                 }
                 return teamRepository;
             }
-        }
-
-        public UnitOfWork(string connectionString)
-        {
-            db = new TaskManagerContext(connectionString);
         }
 
         public void Save()

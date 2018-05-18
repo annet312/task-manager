@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<TaskMng.Models.TaskView>
 
 <tr>
-    <td colspan="4">
+    <td colspan="5">
         @if (Model.Any())
         {
             <table class="table"style="width:100%">
@@ -12,6 +12,9 @@
                         <ul style="margin: 0;">
                             <li>@Html.DisplayFor(modelItem => item.Name)</li>
                         </ul>
+                    </td>
+                    <td  style="width:150px">
+                    
                     </td>
                     <td>
                         <select id="status@(item.Id)" aria-describedby="basic-addon3" data-status="@(item.Status.Name)" onchange="setNewStatus(@item.Id)">
