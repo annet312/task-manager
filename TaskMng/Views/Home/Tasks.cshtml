@@ -163,76 +163,44 @@
     </div>
 </div>
 
+
 <script>
-    function showStatuses(id) {
-        $.ajax({
-            url: "@Url.Action("GetStatuses", "Home")",
-            method: "GET"
-        })
-        .done(function (data) {
-            var status = $("#status" + id);
-            status.html(data);
-            status.val(status.data("status"));
-        });
-    }
 
     function setNewStatus(taskId) {
-        var statusName = $("#task" + taskId + " select").val();
-        $.ajax({
-            url: "@Url.Action("SetNewStatus", "Home")",
-            method: "POST",
-            data: { id: taskId, status: statusName }
-        })
+    var statusName = $("#task" + taskId + " select").val();
+    $.ajax({
+        url: "/Home/SetNewStatus",
+        method: "POST",
+        data: { id: taskId, status: statusName }
+    })
         .done(function () {
-             if (@ViewBag.TeamTasksView.ToString().ToLower()) {
+            if (@ViewBag.TeamTasksView.ToString().ToLower()) {
                 $("#myTeamTasksBtn").click();
             }
             else {
                 $("#myTasksBtn").click();
-            }
-        });
+        }
+    });
     }
 
-    function saveParentTaskId(parentId) {
-        $("#add-task").data("parentTaskId", parentId);
-        $("#assignee-create-task").prop("hidden", parentId);
-        $("#span-assignee").prop("hidden", parentId);
-        $("#span-assignee").data("add-subtask", true);
-    }
+function saveEditTask(selector) {
+    var task = {
+        Id: $("#save-task").data("editTaskId"),
+        Name: $("#nameEditTask").val(),
+        Assignee: $(selector).val(),
+        ETA: $("#timepicker2").val(),
+        DueDate: $("#timepicker3").val(),
+        Comment: $("#comment").val(),
+    };
 
-    function editTask(taskId) {
-        $.ajax({
-            url: "@Url.Action("EditTask", "Home")",
-            method: "POST",
-            data: { id: taskId }
-        })
-        .done(function (data) {
-            $("#edit-form").html(data);
-            $("#save-task").data("editTaskId", taskId);
-        })
-        .fail(function () {
-            $("#edit-form").html("<p>Cannot find task</p>");
-        });
-    }
-
-    function saveEditTask(selector) {
-        var task = {
-            Id: $("#save-task").data("editTaskId"),
-            Name: $("#nameEditTask").val(),
-            Assignee: $(selector).val(),
-            ETA: $("#timepicker2").val(),
-            DueDate: $("#timepicker3").val(),
-            Comment: $("#comment").val(),
-        };
-
-        $.ajax({
-            url: "@Url.Action("SaveEditTask", "Home")",
-            method: "POST",
-            data: { taskForEdit: task },
-        })
+    $.ajax({
+        url: "/Home/SaveEditTask",
+        method: "POST",
+        data: { taskForEdit: task },
+    })
         .done(function (message) {
             alert(message);
-              if (@ViewBag.TeamTasksView.ToString().ToLower()) {
+            if (@ViewBag.TeamTasksView.ToString().ToLower()) {
                 $("#myTeamTasksBtn").click();
             }
             else {
@@ -244,38 +212,20 @@
         });
     }
 
-
-    function details(mainId) {
-        $.ajax({
-            url: "@Url.Action("Details", "Home")",
-            method: "GET",
-            data: { id: mainId },
-        })
-        .done(function (data) {
-            $("#detailOfTask").html(data);
-        })
-        .fail(function () {
-            alert("Cannot find the task");
-        });
-    }
-
-    function addTask(selector) {
-       
-        $.ajax({
-            url: "@Url.Action("CreateTask", "Home")",
-            method: "POST",
-            data: {
-                parentId: $("#add-task").data("parentTaskId"),
-                templateId: null,
-                assignee: $(selector).val(),
-                name: $("#task-name").val(),
-                comment: $("#task-comment").val()
-            }
-        })
+function addTask(selector) {
+    $.ajax({
+        url: "@Url.Action("CreateTask", "Home")",
+        method: "POST",
+        data: {
+            parentId: $("#add-task").data("parentTaskId"),
+            templateId: null,
+            assignee: $(selector).val(),
+            name: $("#task-name").val(),
+            comment: $("#task-comment").val()
+        }
+    })
         .done(function (message) {
-            
             alert(message);
-            
             if (@ViewBag.TeamTasksView.ToString().ToLower()) {
                 $("#myTeamTasksBtn").click();
             }
@@ -286,80 +236,9 @@
         .fail(function () {
             alert("Cannot add the task!");
         });
-    }
+}
 
-    function deleteTask(taskId) {
-        $.ajax({
-            url: "@Url.Action("DeleteTask", "Home")",
-            method: "POST",
-            data: { id: taskId }
-        })
-        .done(function () {
-            alert("Task has been deleted.");
-            $("#task" + taskId).remove();
-        })
-        .fail(function () {
-            alert("Cannot delete the task!");
-        });
-    }
-
-    function showSubtasks(taskId) {
-        $.ajax({
-            url: "@Url.Action("ShowSubtask", "Home")",
-            method: "GET",
-            data: { parentId: taskId }
-        })
-        .done(function (data) {
-            var taskRow = $("#task" + taskId);
-            taskRow.after(data);
-
-            $("#iconshow-subtask", taskRow).hide();
-            $("#iconhide-subtask", taskRow).show();
-
-            getStatuses(function (statuses) {
-                setStatuses(statuses, taskRow.next().find("select"));
-            });
-        })
-    }
-
-    function hideSubtasks(taskId) {
-        var taskRow = $('#task' + taskId);
-        taskRow.next().remove();
-        $("#iconhide-subtask", taskRow).hide();
-        $("#iconshow-subtask", taskRow).show();
-    }
-
-    function setStatuses(statuses, selects) {
-        selects.html(statuses);
-        $.each(selects, function () {
-            var $this = $(this);
-            $this.val($this.data("status"));
-        });
-    }
-
-    function showAssignees(managerId, selector) {
-        if (!managerId) {
-            return;
-        }
-
-        $.ajax({
-            url: "@Url.Action("GetAssignees", "Home")",
-            method: "GET",
-            data: { managerId: managerId }
-        })
-            .done(function (data) {
-                var assignee = $(selector);
-                assignee.html(data);
-                assignee.val(assignee.data("assignee"));
-        });
-    }
-
-    function updateAssignee(selector) {
-        var assignee = $(selector);
-        assignee.data("assignee", assignee.val());
-    }
-
-    $(document).ready(function () {
+$(document).ready(function () {
         getStatuses(function (statuses) {
             setStatuses(statuses, $(".table select"));
         });
@@ -375,7 +254,6 @@
         });
 
         $("#task-name").change(function () {
-
             $("#add-task").prop("disabled", !this.value);
         });
 
@@ -383,7 +261,7 @@
             var taskName = $("#task-name"),
                 assignee = $("#assignee-create-task");
             var selector = "#assignee-create-task";
-            if (taskName.val().length<3) {
+            if (taskName.val().length < 3) {
                 taskName.addClass("border-danger");
             }
             else {
@@ -405,4 +283,5 @@
             }
         });
     });
+
 </script>

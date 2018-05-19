@@ -9,5 +9,10 @@ namespace TaskManagerDAL.Entities
         public string Name { get; set; }
 
         public virtual IEnumerable<_Task> Tasks { get; set; }
+
+        public Status()
+        {
+            Tasks = new List<_Task>();
+        }
     }
 }

@@ -11,5 +11,10 @@ namespace TaskManagerDAL.Entities
         public string TeamName { get; set; }
 
         public virtual IEnumerable<Person> TeamMates { get; set; }
+
+        public Team()
+        {
+            TeamMates = new List<Person>();
+        }
     }
 }

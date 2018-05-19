@@ -19,9 +19,7 @@ namespace TaskManagerDAL.Repositories
 
         public IEnumerable<_Task> GetAll()
         {
-            return dataBase.Tasks.Include(p => p.Author)
-                                 .Include(p => p.Assignee)
-                                 .Include(p => p.Status).ToList();
+            return dataBase.Tasks;
         }
 
         public _Task Get(int id)

@@ -17,3 +17,5 @@
 /UsersBLL/bin
 /UsersBLL/obj
 /TaskManagerBLLTests/bin/Debug
+/packages
+/TaskMng/.vs/config

@@ -69,38 +69,41 @@
 </div>
 
 @section scripts{
-    <script>
-        function onAjaxBegin() {
-            $("#divLoading").removeAttr("hidden");
-        }
+<script>
+    function onAjaxBegin() {
+        $("#divLoading").removeAttr("hidden");
+    }
 
-        function onAjaxComplete() {
-            $("#divLoading").attr("hidden");
-        }
-        $("#myTasksBtn").click(function () {
-            $("#myTasksBtn").removeClass("btn-sm");
-            $("#myTasksBtn").addClass("btn-lg");
-            $("#myTeamBtn").removeClass("btn-lg");
-            $("#myTeamBtn").addClass("btn-sm");
-            $("#myTeamTasksBtn").removeClass("btn-lg");
-            $("#myTeamTasksBtn").addClass("btn-sm");
-        })
-        $("#myTeamBtn").click(function () {
-            $("#myTasksBtn").removeClass("btn-lg");
-            $("#myTasksBtn").addClass("btn-sm");
-            $("#myTeamBtn").removeClass("btn-sm");
-            $("#myTeamBtn").addClass("btn-lg");
-            $("#myTeamTasksBtn").removeClass("btn-lg");
-            $("#myTeamTasksBtn").addClass("btn-sm");
-        })
-        $("#myTeamTasksBtn").click(function () {
-            $("#myTasksBtn").removeClass("btn-lg");
-            $("#myTasksBtn").addClass("btn-sm");
-            $("#myTeamBtn").removeClass("btn-sm");
-            $("#myTeamBtn").addClass("btn-sm");
-            $("#myTeamTasksBtn").removeClass("btn-sm");
-            $("#myTeamTasksBtn").addClass("btn-lg");
-        })
-    </script>
+    function onAjaxComplete() {
+        $("#divLoading").attr("hidden");
+    }
 
+    $("#myTasksBtn").click(function () {
+        $("#myTasksBtn").removeClass("btn-sm");
+        $("#myTasksBtn").addClass("btn-lg");
+        $("#myTeamBtn").removeClass("btn-lg");
+        $("#myTeamBtn").addClass("btn-sm");
+        $("#myTeamTasksBtn").removeClass("btn-lg");
+        $("#myTeamTasksBtn").addClass("btn-sm");
+    })
+
+    $("#myTeamBtn").click(function () {
+        $("#myTasksBtn").removeClass("btn-lg");
+        $("#myTasksBtn").addClass("btn-sm");
+        $("#myTeamBtn").removeClass("btn-sm");
+        $("#myTeamBtn").addClass("btn-lg");
+        $("#myTeamTasksBtn").removeClass("btn-lg");
+        $("#myTeamTasksBtn").addClass("btn-sm");
+    })
+
+    $("#myTeamTasksBtn").click(function () {
+        $("#myTasksBtn").removeClass("btn-lg");
+        $("#myTasksBtn").addClass("btn-sm");
+        $("#myTeamBtn").removeClass("btn-sm");
+        $("#myTeamBtn").addClass("btn-sm");
+        $("#myTeamTasksBtn").removeClass("btn-sm");
+        $("#myTeamTasksBtn").addClass("btn-lg");
+    })
+
+</script>
 }
