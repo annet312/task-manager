@@ -19,7 +19,7 @@ namespace TaskManagerDAL.Repositories
 
         public IEnumerable<Team> GetAll()
         {
-            return db.Teams.ToList();
+            return db.Teams;
         }
 
         public Team Get(int id)
@@ -29,7 +29,7 @@ namespace TaskManagerDAL.Repositories
 
         public IEnumerable<Team> Find(Func<Team, Boolean> predicate)
         {
-            return db.Teams.Where(predicate).ToList();
+            return db.Teams.Where(predicate);
         }
 
         public void Create(Team team)

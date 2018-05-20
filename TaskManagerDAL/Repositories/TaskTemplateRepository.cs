@@ -20,7 +20,7 @@ namespace TaskManagerDAL.Repositories
 
         public IEnumerable<TaskTemplate> GetAll()
         {
-            return db.TaskTemplates.ToList();
+            return db.TaskTemplates;
         }
 
         public TaskTemplate Get(int id)
@@ -30,7 +30,7 @@ namespace TaskManagerDAL.Repositories
 
         public IEnumerable<TaskTemplate> Find(Func<TaskTemplate, Boolean> predicate)
         {
-            return db.TaskTemplates.Where(predicate).ToList();
+            return db.TaskTemplates.Where(predicate);
         }
 
         public void Create(TaskTemplate taskTemplate)

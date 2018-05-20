@@ -19,7 +19,7 @@ namespace TaskManagerDAL.Repositories
 
         public IEnumerable<Status> GetAll()
         {
-            return db.Statuses.ToList();
+            return db.Statuses;
         }
 
         public Status Get(int id)
@@ -29,7 +29,7 @@ namespace TaskManagerDAL.Repositories
 
         public IEnumerable<Status> Find(Func<Status, Boolean> predicate)
         {
-            return db.Statuses.Where(predicate).ToList();
+            return db.Statuses.Where(predicate)/*.ToList()*/;
         }
 
         public void Create(Status status)

@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27428.2015
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskMng", "TaskMng\TaskMng.csproj", "{90973723-EC1B-4380-82AA-B92EE25FD344}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskManagerDAL", "TaskManagerDAL\TaskManagerDAL\TaskManagerDAL.csproj", "{1FFCC720-747D-4FCE-B370-884E6F532428}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskManagerDAL", "TaskManagerDAL\TaskManagerDAL.csproj", "{1FFCC720-747D-4FCE-B370-884E6F532428}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UsersBLL", "UsersBLL\UsersBLL.csproj", "{23854555-4881-4A34-BE79-B9C2DBC24686}"
 EndProject

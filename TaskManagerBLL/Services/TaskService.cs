@@ -248,7 +248,7 @@ namespace TaskManagerBLL.Services
             var MainTask = db.Tasks.Get(mainTaskId);
 
             var subtasks = GetSubtasksOfTask(mainTaskId).Where(s => s.Id != changedSubtaskId);
-            int sumProgress = changedSubtaskProgress.HasValue ? changedSubtaskProgress.Value : 0;
+            int sumProgress = changedSubtaskProgress ?? 0;
             int num = 1;
 
             foreach (var subtask in subtasks)
@@ -456,13 +456,12 @@ namespace TaskManagerBLL.Services
 
         public IEnumerable<TaskBLL> GetTaskOfAssignee(string id)
         {
-            var tasks = mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(
-                                    db.Tasks.Find(t => ((t.Assignee.UserId == id) && (t.ParentId == null)))
-                                    .OrderByDescending(tsk => tsk.Author.Name));
+            IEnumerable<_Task> tasks = db.Tasks.Find(t => ((t.Assignee.UserId == id) && (t.ParentId == null)))
+                                               .OrderByDescending(t => t.Progress);
+            IEnumerable<TaskBLL> result = mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(tasks);
 
-            return tasks;
+            return result;
         }
         #endregion
-
     }
 }

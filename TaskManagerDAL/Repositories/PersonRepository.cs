@@ -19,17 +19,17 @@ namespace TaskManagerDAL.Repositories
 
         public IEnumerable<Person> GetAll()
         {
-            return dataBase.People.Include(p => p.Team).Include(p => p.ApplicationUser).ToList();
+            return dataBase.People;
         }
 
         public Person Get(int id)
         {
-            return dataBase.People.Include(p => p.Team).Include(p => p.ApplicationUser).SingleOrDefault(p => p.Id == id);
+            return dataBase.People.Find(id);
         }
 
         public IEnumerable<Person> Find(Func<Person, Boolean> predicate)
         {
-            return dataBase.People.Include(p => p.ApplicationUser).Include(p => p.Team).Where(predicate).ToList();
+            return dataBase.People.Where(predicate);
         }
 
         public void Create(Person person)

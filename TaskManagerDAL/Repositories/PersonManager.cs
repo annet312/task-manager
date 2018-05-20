@@ -19,7 +19,7 @@ namespace TaskManagerDAL.Repositories
         public void Create(Person person, string teamNameStr)
         {
             var team = new Team { TeamName = teamNameStr };
-            IEnumerable<Team> checkTeamExists = db.Teams.Where(t => (t.TeamName == teamNameStr)).ToList();
+            IEnumerable<Team> checkTeamExists = db.Teams.Where(t => (t.TeamName == teamNameStr));
 
             if (checkTeamExists.Any())
             {
