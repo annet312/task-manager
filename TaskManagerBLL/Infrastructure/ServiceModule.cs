@@ -17,6 +17,10 @@ namespace TaskManagerBLL.Infrastructure
             Bind<ITaskService>().To<TaskService>().InSingletonScope();
             Bind<IPersonService>().To<PersonService>().InSingletonScope();
             Bind<IEmailService>().To<EmailService>().InSingletonScope();
+            Bind<IFilterTasks>().To<FilterTasksService>().InSingletonScope();
+            Bind<ISubtaskService>().To<SubtaskService>().InSingletonScope();
+            Bind<ITemplateSubtasksService>().To<TemplateSubtasksService>().InSingletonScope();
+            Bind<IStatusService>().To<StatusService>().InSingletonScope();
         }
     }
 }
