@@ -14,21 +14,11 @@ namespace TaskMng.Controllers
     public class TeamController : Controller
     {
         private readonly IPersonService personService;
-        private IMapper mapper { get; set; }
         // GET: Team
         public TeamController(ITaskService taskService, IPersonService personService)
         {
 
             this.personService = personService;
-            var config = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<TeamBLL, TeamView>();
-                cfg.CreateMap<StatusBLL, StatusView>();
-                cfg.CreateMap<TaskBLL, TaskView>();
-                cfg.CreateMap<PersonBLL, PersonView>();
-            });
-
-            mapper = config.CreateMapper();
         }
           #region Team
 
@@ -38,7 +28,7 @@ namespace TaskMng.Controllers
             string id = User.Identity.GetUserId();
             PersonBLL person = personService.GetPerson(id);
             TeamBLL team = person.Team;
-            IEnumerable<PersonView> teamOfCurrentManager = mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(personService.GetTeam(id));
+            IEnumerable<PersonView> teamOfCurrentManager = Mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(personService.GetTeam(id));
 
             ViewBag.TeamName = (team != null) ? team.TeamName : string.Empty;
 
@@ -48,7 +38,7 @@ namespace TaskMng.Controllers
         [HttpGet]
         public ActionResult GetPossibleMembers()
         {
-            IEnumerable<PersonView> persons = mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(personService.GetPeopleWithoutTeam());
+            IEnumerable<PersonView> persons = Mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(personService.GetPeopleWithoutTeam());
 
             return PartialView("PossibleMembers", persons.ToList());
         }

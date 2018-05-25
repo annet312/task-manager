@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
 
 using TaskManagerBLL.Interfaces;
@@ -16,27 +15,16 @@ namespace TaskManagerBLL.Services
     {
         private IUnitOfWork db { get; set; }
 
-        private IMapper mapper { get; set; }
 
         public TaskService(IUnitOfWork uow)
         {
             db = uow;
-
-            var config = new MapperConfiguration(cfg => {
-                cfg.CreateMap<Person, PersonBLL>();
-                cfg.CreateMap<Status, StatusBLL>();
-                cfg.CreateMap<TaskTemplate, TaskTemplateBLL>();
-                cfg.CreateMap<Team, TeamBLL>();
-                cfg.CreateMap<Task, TaskBLL>();
-            });
-
-            mapper = config.CreateMapper();
         }
 
         public TaskBLL GetTask(int id)
         {
             var result = db.Tasks.Get(id);
-            return mapper.Map<_Task, TaskBLL>(result);
+            return Mapper.Map<_Task, TaskBLL>(result);
         }
 
         #region Status
@@ -44,7 +32,7 @@ namespace TaskManagerBLL.Services
         {
             var statuses = db.Statuses.GetAll();
 
-            return mapper.Map<IEnumerable<Status>, IEnumerable<StatusBLL>>(statuses);
+            return Mapper.Map<IEnumerable<Status>, IEnumerable<StatusBLL>>(statuses);
         }
 
         public IEnumerable<StatusBLL> GetStatuses()
@@ -133,13 +121,13 @@ namespace TaskManagerBLL.Services
         public IEnumerable<TaskTemplateBLL> GetAllTemplates()
         {
             var result = db.TaskTemplates.Find(t => (t.TemplateId == null));
-            return mapper.Map<IEnumerable<TaskTemplate>, IEnumerable<TaskTemplateBLL>>(result);
+            return Mapper.Map<IEnumerable<TaskTemplate>, IEnumerable<TaskTemplateBLL>>(result);
         }
      
         private IEnumerable<TaskTemplateBLL> GetSubtasksOfTemplate(int templateId)
         {
             IEnumerable<TaskTemplate> result = db.TaskTemplates.Find(t => (t.TemplateId == templateId));
-            return mapper.Map<IEnumerable<TaskTemplate>, IEnumerable<TaskTemplateBLL>>(result);
+            return Mapper.Map<IEnumerable<TaskTemplate>, IEnumerable<TaskTemplateBLL>>(result);
         }
 
         public void AddSubtasksFromTemplate(int taskId, int templateId, string authorName)
@@ -154,7 +142,7 @@ namespace TaskManagerBLL.Services
             {
                 throw new ArgumentNullException("Name of author is null or empty", "authorName");
             }
-            PersonBLL author = mapper.Map<Person, PersonBLL>(db.People.Find(p => (p.Name == authorName)).SingleOrDefault());
+            PersonBLL author = Mapper.Map<Person, PersonBLL>(db.People.Find(p => (p.Name == authorName)).SingleOrDefault());
             if (author == null)
             {
                 throw new ArgumentException("Author with tis name wasn't found", "authorName");
@@ -185,18 +173,18 @@ namespace TaskManagerBLL.Services
         public IEnumerable<TaskBLL> GetSubtasksOfTask(int parentId)
         {
             var subtasks = db.Tasks.Find(t => (t.ParentId == parentId));
-            return mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(subtasks);
+            return Mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(subtasks);
         }
 
         public void AddSubtask(TaskBLL subtask, int taskId, bool forceToSave = true)
         {
-            var task = mapper.Map<_Task, TaskBLL>(db.Tasks.Get(taskId));
+            var task = Mapper.Map<_Task, TaskBLL>(db.Tasks.Get(taskId));
             if (task == null)
             {
                 throw new ArgumentException("Parent task wasn't found", "taskId");
             }
 
-            var status = mapper.Map<Status, StatusBLL>(db.Statuses.Find(s => (s.Name == "New")).Single());
+            var status = Mapper.Map<Status, StatusBLL>(db.Statuses.Find(s => (s.Name == "New")).Single());
 
             var newSubtask = new TaskBLL { ParentId = task.Id,
                 Author = task.Author,
@@ -209,7 +197,7 @@ namespace TaskManagerBLL.Services
                 DueDate = subtask.DueDate,
                 Comment = subtask.Comment
             };
-            db.Tasks.Create(mapper.Map<TaskBLL, _Task>(newSubtask));
+            db.Tasks.Create(Mapper.Map<TaskBLL, _Task>(newSubtask));
 
             if (forceToSave)
             {
@@ -304,7 +292,7 @@ namespace TaskManagerBLL.Services
         #region Task 
         public void DeleteTask(int taskId, string currentUserName)
         {
-            TaskBLL task = mapper.Map<_Task, TaskBLL>(db.Tasks.Get(taskId));
+            TaskBLL task = Mapper.Map<_Task, TaskBLL>(db.Tasks.Get(taskId));
             if (task == null)
             {
                 throw new ArgumentException("Task with this id not found", "taskId");
@@ -342,7 +330,7 @@ namespace TaskManagerBLL.Services
             {
                 throw new ArgumentNullException("Author is not shown", "authorName");
             }
-            PersonBLL authorBLL = mapper.Map<Person,PersonBLL>(db.People.Find(p => p.Name == authorName).Single());
+            PersonBLL authorBLL = Mapper.Map<Person,PersonBLL>(db.People.Find(p => p.Name == authorName).Single());
             
             PersonBLL assigneeBLL;
             if (string.IsNullOrEmpty(assigneeName))
@@ -351,10 +339,10 @@ namespace TaskManagerBLL.Services
             }
             else
             {
-                assigneeBLL = mapper.Map<Person, PersonBLL>(db.People.Find(p => p.Name == assigneeName).Single());
+                assigneeBLL = Mapper.Map<Person, PersonBLL>(db.People.Find(p => p.Name == assigneeName).Single());
             }
 
-            StatusBLL status = mapper.Map<Status, StatusBLL>(db.Statuses.Find(s => (s.Name == "New")).SingleOrDefault());
+            StatusBLL status = Mapper.Map<Status, StatusBLL>(db.Statuses.Find(s => (s.Name == "New")).SingleOrDefault());
             if(status == null)
             {
                 throw new Exception("Status \"New\" wasn't found in database");
@@ -373,7 +361,7 @@ namespace TaskManagerBLL.Services
                 Comment = task.Comment
             };
 
-            db.Tasks.Create(mapper.Map<TaskBLL, _Task>(newTask));
+            db.Tasks.Create(Mapper.Map<TaskBLL, _Task>(newTask));
             db.Save();
         }
 
@@ -432,7 +420,7 @@ namespace TaskManagerBLL.Services
                                             (t.ParentId == null) && 
                                             (t.Assignee.Id != manager.Id))).OrderBy(tsk => tsk.Assignee.Name).ToList();
 
-            IEnumerable<TaskBLL> resulttasks = mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(tasks);
+            IEnumerable<TaskBLL> resulttasks = Mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(tasks);
             return resulttasks;
         }
 
@@ -442,7 +430,7 @@ namespace TaskManagerBLL.Services
             var tasks = db.Tasks.Find(t => ((t.Author.Id == manager.Id) && (t.ParentId == null)
                                         && ((t.DueDate < DateTime.Now) || (t.DueDate == null))));
 
-            return mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(tasks);
+            return Mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(tasks);
         }
 
         public IEnumerable<TaskBLL> GetCompleteTasks(int teamId)
@@ -451,14 +439,14 @@ namespace TaskManagerBLL.Services
             var tasks = db.Tasks.Find(t => ((t.Author.Id == manager.Id) && (t.ParentId == null)
                                         && (t.Status.Name == "Closed")));
 
-            return mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(tasks);
+            return Mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(tasks);
         }
 
         public IEnumerable<TaskBLL> GetTaskOfAssignee(string id)
         {
             IEnumerable<_Task> tasks = db.Tasks.Find(t => ((t.Assignee.UserId == id) && (t.ParentId == null)))
                                                .OrderByDescending(t => t.Progress);
-            IEnumerable<TaskBLL> result = mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(tasks);
+            IEnumerable<TaskBLL> result = Mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(tasks);
 
             return result;
         }

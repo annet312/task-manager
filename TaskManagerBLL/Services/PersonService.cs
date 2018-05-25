@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
-using System.Threading.Tasks;
 
 using TaskManagerBLL.Interfaces;
 using TaskManagerBLL.Models;
@@ -20,7 +19,6 @@ namespace TaskManagerBLL.Services
 
         private readonly IEmailService emailService;
 
-        private IMapper mapper { get; set; }
         
         /// <summary>
         /// DI to  database repository
@@ -31,15 +29,6 @@ namespace TaskManagerBLL.Services
             db = uow;
             this.emailService = emailService;
 
-            var config = new MapperConfiguration(cfg => {
-                cfg.CreateMap<Person, PersonBLL>();
-                cfg.CreateMap<Status, StatusBLL>();
-                cfg.CreateMap<TaskTemplate, TaskTemplateBLL>();
-                cfg.CreateMap<Team, TeamBLL>();
-                cfg.CreateMap<Task, TaskBLL>();
-            });
-
-            mapper = config.CreateMapper();
         }
 
         #region Team
@@ -61,7 +50,7 @@ namespace TaskManagerBLL.Services
         public IEnumerable<TeamBLL> GetAllTeams()
         {
             var result = db.Teams.GetAll();
-            return mapper.Map<IEnumerable<Team>, IEnumerable<TeamBLL>>(result);
+            return Mapper.Map<IEnumerable<Team>, IEnumerable<TeamBLL>>(result);
         }
 
         public void DeletePersonFromTeam(int id)
@@ -118,7 +107,7 @@ namespace TaskManagerBLL.Services
         public IEnumerable<PersonBLL> GetPeopleWithoutTeam()
         {
             var people = db.People.Find(p => (p.TeamId == null));
-            return mapper.Map<IEnumerable<Person>, IEnumerable<PersonBLL>>(people);
+            return Mapper.Map<IEnumerable<Person>, IEnumerable<PersonBLL>>(people);
         }
 
         public IEnumerable<PersonBLL> GetTeam(string managerId)
@@ -139,7 +128,7 @@ namespace TaskManagerBLL.Services
             {
                 return people;
             }
-            people = mapper.Map<IEnumerable<Person>, IEnumerable<PersonBLL>>(db.People.Find(p => ((p.Team != null) && (p.Team.Id == manager.Team.Id))));
+            people = Mapper.Map<IEnumerable<Person>, IEnumerable<PersonBLL>>(db.People.Find(p => ((p.Team != null) && (p.Team.Id == manager.Team.Id))));
             return people;
         }
         #endregion
@@ -148,13 +137,13 @@ namespace TaskManagerBLL.Services
         public PersonBLL GetPerson(int id)
         {
             var person = db.People.Get(id);
-            return mapper.Map<Person, PersonBLL>(person);
+            return Mapper.Map<Person, PersonBLL>(person);
         }
 
         public PersonBLL GetPerson(string id)
         {
             var person = db.People.Find(p => p.UserId == id).SingleOrDefault();
-            return mapper.Map<Person, PersonBLL>(person);
+            return Mapper.Map<Person, PersonBLL>(person);
         }
         #endregion
 

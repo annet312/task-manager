@@ -368,6 +368,10 @@
       <Project>{03f6a1db-500c-4188-9cc3-c9847fc16345}</Project>
       <Name>TaskManagerBLL</Name>
     </ProjectReference>
+    <ProjectReference Include="..\TaskManagerDAL\TaskManagerDAL.csproj">
+      <Project>{1FFCC720-747D-4FCE-B370-884E6F532428}</Project>
+      <Name>TaskManagerDAL</Name>
+    </ProjectReference>
     <ProjectReference Include="..\UsersBLL\UsersBLL.csproj">
       <Project>{23854555-4881-4a34-be79-b9c2dbc24686}</Project>
       <Name>UsersBLL</Name>
