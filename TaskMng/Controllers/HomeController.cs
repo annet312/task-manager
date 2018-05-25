@@ -231,63 +231,63 @@ namespace TaskMng.Controllers
         
         #endregion
 
-        #region Team
+        //#region Team
 
-        [Authorize(Roles = "Manager")]
-        [HttpGet]
-        public ActionResult MyTeam()
-        {
-            string id = User.Identity.GetUserId();
-            PersonBLL person = personService.GetPerson(id);
-            TeamBLL team = person.Team;
-            IEnumerable<PersonView> teamOfCurrentManager = mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(personService.GetTeam(id));
+        //[Authorize(Roles = "Manager")]
+        //[HttpGet]
+        //public ActionResult MyTeam()
+        //{
+        //    string id = User.Identity.GetUserId();
+        //    PersonBLL person = personService.GetPerson(id);
+        //    TeamBLL team = person.Team;
+        //    IEnumerable<PersonView> teamOfCurrentManager = mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(personService.GetTeam(id));
 
-            ViewBag.TeamName = (team != null) ? team.TeamName : string.Empty;
+        //    ViewBag.TeamName = (team != null) ? team.TeamName : string.Empty;
 
-            return PartialView("MyTeam", teamOfCurrentManager.ToList());
-        }
+        //    return PartialView("MyTeam", teamOfCurrentManager.ToList());
+        //}
 
-        [Authorize(Roles = "Manager")]
-        [HttpGet]
-        public ActionResult GetPossibleMembers()
-        {
-            IEnumerable<PersonView> persons = mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(personService.GetPeopleWithoutTeam());
+        //[Authorize(Roles = "Manager")]
+        //[HttpGet]
+        //public ActionResult GetPossibleMembers()
+        //{
+        //    IEnumerable<PersonView> persons = mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(personService.GetPeopleWithoutTeam());
 
-            return PartialView("PossibleMembers", persons.ToList());
-        }
+        //    return PartialView("PossibleMembers", persons.ToList());
+        //}
 
-        [Authorize(Roles = "Manager")]
-        [HttpPost]
-        public string DeleteFromTeam(int id)
-        {
-            try
-            {
-                personService.DeletePersonFromTeam(id);
-            }
-            catch (Exception e)
-            {
-                return ("Members wasn't deleted. Errors: " + e.Message);
-            }
-            return ("Members was deleted from your team");
-        }
+        //[Authorize(Roles = "Manager")]
+        //[HttpPost]
+        //public string DeleteFromTeam(int id)
+        //{
+        //    try
+        //    {
+        //        personService.DeletePersonFromTeam(id);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        return ("Members wasn't deleted. Errors: " + e.Message);
+        //    }
+        //    return ("Members was deleted from your team");
+        //}
 
-        [Authorize(Roles = "Manager")]
-        [HttpPost]
-        public string AddMembersToTeam(int[] persons)
-        {
-            var managerId = User.Identity.GetUserId();
-            try
-            {
-                personService.AddPersonsToTeam(persons, managerId);
-            }
-            catch (Exception e)
-            {
-                return ("Members wasn't added. Error: " + e.Message);
-            }
-            return ("Members was added to your team");
-        }
+        //[Authorize(Roles = "Manager")]
+        //[HttpPost]
+        //public string AddMembersToTeam(int[] persons)
+        //{
+        //    var managerId = User.Identity.GetUserId();
+        //    try
+        //    {
+        //        personService.AddPersonsToTeam(persons, managerId);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        return ("Members wasn't added. Error: " + e.Message);
+        //    }
+        //    return ("Members was added to your team");
+        //}
         
-        #endregion
+        //#endregion
         
     }
 }

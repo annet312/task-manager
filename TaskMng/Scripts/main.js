@@ -11,7 +11,7 @@
 
 function getPossibleMembers() {
     $.ajax({
-        url: "/Home/GetPossibleMembers",
+        url: "/Team/GetPossibleMembers",
         method: "GET"
     })
         .done(function (data) {
@@ -35,7 +35,7 @@ function addMember() {
         }
     })
     $.ajax({
-        url: "/Home/AddMembersToTeam",
+        url: "/Team/AddMembersToTeam",
         method: "POST",
         data: { persons: members }
     })
@@ -47,7 +47,7 @@ function addMember() {
 
 function deleteFromTeam(personId) {
     $.ajax({
-        url: "/Home/DeleteFromTeam",
+        url: "/Team/DeleteFromTeam",
         method: "POST",
         data: { id: personId }
     })
