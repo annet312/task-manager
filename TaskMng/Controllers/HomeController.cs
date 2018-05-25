@@ -17,11 +17,18 @@ namespace TaskMng.Controllers
     {
         private readonly ITaskService taskService;
         private readonly IPersonService personService;
+        private readonly IFilterTaskService filterTaskService;
+        private readonly IStatusService statusService;
 
-        public HomeController(ITaskService taskService, IPersonService personService)
+        public HomeController(ITaskService taskService, 
+                              IPersonService personService,
+                              IFilterTaskService filterTaskService,
+                              IStatusService statusService)
         {
             this.taskService = taskService;
             this.personService = personService;
+            this.filterTaskService = filterTaskService;
+            this.statusService = statusService;
         }
 
         public ActionResult Index()
@@ -41,13 +48,11 @@ namespace TaskMng.Controllers
             return View();
         }
 
-
         #region Tasks
-
         [HttpGet]
         public ActionResult MyTasks()
         {
-            IEnumerable<TaskView> tasks = Mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(taskService.GetTaskOfAssignee(User.Identity.GetUserId())).ToList();
+            IEnumerable<TaskView> tasks = Mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(filterTaskService.GetTaskOfAssignee(User.Identity.GetUserId())).ToList();
 
             ViewBag.TeamTasksView = false;
 
@@ -175,7 +180,7 @@ namespace TaskMng.Controllers
             PersonBLL manager = personService.GetPerson(id);
 
             IEnumerable<TaskView> tasksOfMyTeam;
-            tasksOfMyTeam = Mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(taskService.GetTasksOfTeam(id));
+            tasksOfMyTeam = Mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(filterTaskService.GetTasksOfTeam(id));
 
             ViewBag.ManagerId = manager.Id;
             ViewBag.TeamTasksView = true;
@@ -188,11 +193,11 @@ namespace TaskMng.Controllers
             IEnumerable<StatusView> statuses;
             if (User.IsInRole("Programmer"))
             {
-                statuses = Mapper.Map<IEnumerable<StatusBLL>, IEnumerable<StatusView>>(taskService.GetStatuses());
+                statuses = Mapper.Map<IEnumerable<StatusBLL>, IEnumerable<StatusView>>(statusService.GetStatuses());
             }
             else
             {
-                statuses = Mapper.Map<IEnumerable<StatusBLL>, IEnumerable<StatusView>>(taskService.GetAllStatuses());
+                statuses = Mapper.Map<IEnumerable<StatusBLL>, IEnumerable<StatusView>>(statusService.GetAllStatuses());
             }
             return PartialView("StatusList", statuses);
         }
@@ -209,7 +214,7 @@ namespace TaskMng.Controllers
         {
             if (status != null)
             {
-                taskService.SetNewStatus(id, status);
+                statusService.SetNewStatus(id, status);
             }
             return HttpStatusCode.OK;
         }

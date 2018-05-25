@@ -15,7 +15,6 @@ namespace TaskManagerBLL.Services
     {
         private IUnitOfWork db { get; set; }
 
-
         public TaskService(IUnitOfWork uow)
         {
             db = uow;
@@ -26,96 +25,6 @@ namespace TaskManagerBLL.Services
             var result = db.Tasks.Get(id);
             return Mapper.Map<_Task, TaskBLL>(result);
         }
-
-        #region Status
-        public IEnumerable<StatusBLL> GetAllStatuses()
-        {
-            var statuses = db.Statuses.GetAll();
-
-            return Mapper.Map<IEnumerable<Status>, IEnumerable<StatusBLL>>(statuses);
-        }
-
-        public IEnumerable<StatusBLL> GetStatuses()
-        {
-            return GetAllStatuses().Where(s => s.Name != "Closed");
-        }
-
-        public void SetNewStatus(int taskId, string statusName)
-        {
-            if (string.IsNullOrWhiteSpace(statusName))
-            {
-                throw new ArgumentNullException("Name of status is null or empty", "statusName");
-            }
-            Status status = db.Statuses.Find(s => (s.Name == statusName)).SingleOrDefault();
-
-            _Task task = db.Tasks.Get(taskId);
-            if (task == null)
-            {
-                throw new ArgumentException("Task wasn't found", "id");
-            }
-            task.Status = status ?? throw new ArgumentException("Status with this name wasn't found", "statusName");
-            switch (statusName)
-            {
-                case "New":
-                    {
-                        task.DateStart = null;
-                        task.Progress = 0;
-                        break;
-                    }
-                case "In progress":
-                    {
-                        task.DateStart = DateTime.Now;
-                        task.Progress = 0;
-                        if (!task.ParentId.HasValue)
-                        {
-                            task.Progress = CalculateProgressOfSubtask(task.Id, 0);
-                        }
-                        break;
-                    }
-                case "Done":
-                    {
-                        task.Progress = 100;
-                        if (!task.ParentId.HasValue)
-                        {
-                            IEnumerable<_Task> subtasks = db.Tasks.Find(t => t.ParentId == task.Id);
-                            foreach (var subtask in subtasks)
-                            {
-                                subtask.StatusId = status.Id;
-                                subtask.Progress = 100;
-                                db.Tasks.Update(subtask);
-                            }
-                        }
-                        break;
-                    }
-                case "Closed":
-                    {
-                        task.Progress = 100;
-                        break;
-                    }
-                default:
-                    break;
-            }
-
-            if (task.ParentId.HasValue)
-            {
-                int progress = CalculateProgressOfSubtask(task.ParentId.Value, task.Id, task.Progress);
-                _Task mainTask = db.Tasks.Get(task.ParentId.Value);
-                if (mainTask.Status.Name == "New")
-                {
-                    var underwayStatusList = new string[3] { "Executed", "Underway", "Completed" };
-                    if (underwayStatusList.Contains(task.Status.Name))
-                    {
-                        mainTask.StatusId = db.Statuses.Find(s => (s.Name == "Underway")).Single().Id;
-                    }
-                }
-                mainTask.Progress = progress;
-                db.Tasks.Update(mainTask);
-            }
-
-            db.Tasks.Update(task);
-            db.Save();
-        }
-        #endregion
 
         #region Templates
         public IEnumerable<TaskTemplateBLL> GetAllTemplates()
@@ -228,31 +137,6 @@ namespace TaskManagerBLL.Services
                 return 100;
             }
             sumProgress = (num != 0) ? (sumProgress / num) : 0;
-            return sumProgress;
-        }
-
-        private int CalculateProgressOfSubtask(int mainTaskId, int changedSubtaskId, int? changedSubtaskProgress)
-        {
-            var MainTask = db.Tasks.Get(mainTaskId);
-
-            var subtasks = GetSubtasksOfTask(mainTaskId).Where(s => s.Id != changedSubtaskId);
-            int sumProgress = changedSubtaskProgress ?? 0;
-            int num = 1;
-
-            foreach (var subtask in subtasks)
-            {
-                if (subtask.Progress.HasValue)
-                {
-                    sumProgress += subtask.Progress.Value;
-                }
-                num++;
-            }
-
-            if (MainTask.Status.Name == "Closed")
-            {
-                return 100;
-            }
-            sumProgress = (num != 0) ? (sumProgress / num) : 0; ;
             return sumProgress;
         }
 
@@ -405,50 +289,6 @@ namespace TaskManagerBLL.Services
                 db.Tasks.Update(taskForEdit);
                 db.Save();
             }
-        }
-        #endregion
-
-        #region FilterTask
-        public IEnumerable<TaskBLL> GetTasksOfTeam(string managerId)
-        {
-            var manager = db.People.Find(p => p.UserId == managerId).SingleOrDefault();
-            if (manager == null)
-            {
-                throw new ArgumentException("Manager is not found","managerId");
-            }
-            IEnumerable<_Task> tasks = db.Tasks.Find(t => ((t.Author.Id == manager.Id) && 
-                                            (t.ParentId == null) && 
-                                            (t.Assignee.Id != manager.Id))).OrderBy(tsk => tsk.Assignee.Name).ToList();
-
-            IEnumerable<TaskBLL> resulttasks = Mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(tasks);
-            return resulttasks;
-        }
-
-        public IEnumerable<TaskBLL> GetOverDueTasks(int teamId)
-        {
-            var manager = db.Teams.Get(teamId);
-            var tasks = db.Tasks.Find(t => ((t.Author.Id == manager.Id) && (t.ParentId == null)
-                                        && ((t.DueDate < DateTime.Now) || (t.DueDate == null))));
-
-            return Mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(tasks);
-        }
-
-        public IEnumerable<TaskBLL> GetCompleteTasks(int teamId)
-        {
-            var manager = db.Teams.Get(teamId);
-            var tasks = db.Tasks.Find(t => ((t.Author.Id == manager.Id) && (t.ParentId == null)
-                                        && (t.Status.Name == "Closed")));
-
-            return Mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(tasks);
-        }
-
-        public IEnumerable<TaskBLL> GetTaskOfAssignee(string id)
-        {
-            IEnumerable<_Task> tasks = db.Tasks.Find(t => ((t.Assignee.UserId == id) && (t.ParentId == null)))
-                                               .OrderByDescending(t => t.Progress);
-            IEnumerable<TaskBLL> result = Mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(tasks);
-
-            return result;
         }
         #endregion
     }

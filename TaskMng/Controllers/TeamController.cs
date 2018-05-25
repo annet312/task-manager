@@ -17,7 +17,6 @@ namespace TaskMng.Controllers
         // GET: Team
         public TeamController(ITaskService taskService, IPersonService personService)
         {
-
             this.personService = personService;
         }
           #region Team
