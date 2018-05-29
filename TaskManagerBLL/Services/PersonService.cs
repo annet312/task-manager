@@ -18,17 +18,18 @@ namespace TaskManagerBLL.Services
         private readonly IUnitOfWork db;
 
         private readonly IEmailService emailService;
+        private readonly IMapper mapper;
 
         
         /// <summary>
         /// DI to  database repository
         /// </summary>
         /// <param name="uow">point to context of DataBase</param>
-        public PersonService(IUnitOfWork uow, IEmailService emailService)
+        public PersonService(IUnitOfWork uow, IEmailService emailService, IMapper mapper)
         {
             db = uow;
             this.emailService = emailService;
-
+            this.mapper = mapper;
         }
 
         #region Team
@@ -49,8 +50,8 @@ namespace TaskManagerBLL.Services
 
         public IEnumerable<TeamBLL> GetAllTeams()
         {
-            var result = db.Teams.GetAll();
-            return Mapper.Map<IEnumerable<Team>, IEnumerable<TeamBLL>>(result);
+            IEnumerable<Team> result = db.Teams.GetAll();
+            return mapper.Map<IEnumerable<Team>, IEnumerable<TeamBLL>>(result);
         }
 
         public void DeletePersonFromTeam(int id)
@@ -106,14 +107,14 @@ namespace TaskManagerBLL.Services
 
         public IEnumerable<PersonBLL> GetPeopleWithoutTeam()
         {
-            var people = db.People.Find(p => (p.TeamId == null));
-            return Mapper.Map<IEnumerable<Person>, IEnumerable<PersonBLL>>(people);
+            IEnumerable<Person> people = db.People.Find(p => (p.TeamId == null));
+            return mapper.Map<IEnumerable<Person>, IEnumerable<PersonBLL>>(people);
         }
 
         public IEnumerable<PersonBLL> GetTeam(string managerId)
         {
-            var manager = db.People.Find(p =>( p.UserId == managerId)).SingleOrDefault();
-            var people = GetPeopleInTeam(manager).Where(p => (p.Id != manager.Id));
+            Person manager = db.People.Find(p =>( p.UserId == managerId)).SingleOrDefault();
+            IEnumerable<PersonBLL> people = GetPeopleInTeam(manager).Where(p => (p.Id != manager.Id));
             return people;
         }
 
@@ -128,7 +129,7 @@ namespace TaskManagerBLL.Services
             {
                 return people;
             }
-            people = Mapper.Map<IEnumerable<Person>, IEnumerable<PersonBLL>>(db.People.Find(p => ((p.Team != null) && (p.Team.Id == manager.Team.Id))));
+            people = mapper.Map<IEnumerable<Person>, IEnumerable<PersonBLL>>(db.People.Find(p => ((p.Team != null) && (p.Team.Id == manager.Team.Id))));
             return people;
         }
         #endregion
@@ -136,29 +137,29 @@ namespace TaskManagerBLL.Services
         #region GetPerson
         public PersonBLL GetPerson(int id)
         {
-            var person = db.People.Get(id);
-            return Mapper.Map<Person, PersonBLL>(person);
+            Person person = db.People.Get(id);
+            return mapper.Map<Person, PersonBLL>(person);
         }
 
         public PersonBLL GetPerson(string id)
         {
-            var person = db.People.Find(p => p.UserId == id).SingleOrDefault();
-            return Mapper.Map<Person, PersonBLL>(person);
+            Person person = db.People.Find(p => p.UserId == id).SingleOrDefault();
+            return mapper.Map<Person, PersonBLL>(person);
         }
         #endregion
 
         #region GetAssignee
         public IEnumerable<PersonBLL> GetAssignees(string managerId)
         {
-            var manager = db.People.Find(p => p.UserId == managerId).SingleOrDefault();
-            var people = GetPeopleInTeam(manager);
+            Person manager = db.People.Find(p => p.UserId == managerId).SingleOrDefault();
+            IEnumerable<PersonBLL> people = GetPeopleInTeam(manager);
             return people;
         }
 
         public IEnumerable<PersonBLL> GetAssignees(int managerId)
         {
-            var manager = db.People.Find(p => p.Id == managerId).SingleOrDefault();
-            var people = GetPeopleInTeam(manager);
+            Person manager = db.People.Find(p => p.Id == managerId).SingleOrDefault();
+            IEnumerable<PersonBLL> people = GetPeopleInTeam(manager);
             return people;
         }
         #endregion

@@ -218,6 +218,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Mapping\Profiles.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\CreateTaskView.cs" />
     <Compile Include="Models\DetailsTaskView.cs" />
@@ -367,10 +368,6 @@
     <ProjectReference Include="..\TaskManagerBLL\TaskManagerBLL.csproj">
       <Project>{03f6a1db-500c-4188-9cc3-c9847fc16345}</Project>
       <Name>TaskManagerBLL</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TaskManagerDAL\TaskManagerDAL.csproj">
-      <Project>{1FFCC720-747D-4FCE-B370-884E6F532428}</Project>
-      <Name>TaskManagerDAL</Name>
     </ProjectReference>
     <ProjectReference Include="..\UsersBLL\UsersBLL.csproj">
       <Project>{23854555-4881-4a34-be79-b9c2dbc24686}</Project>

@@ -12,10 +12,12 @@ namespace TaskManagerBLL.Services
     public class FilterTaskService : IFilterTaskService
     {
         private IUnitOfWork db { get; set; }
+        private readonly IMapper mapper;
 
-        public FilterTaskService(IUnitOfWork uow)
+        public FilterTaskService(IUnitOfWork uow, IMapper mapper)
         {
             db = uow;
+            this.mapper = mapper;
         }
 
         #region FilterTask
@@ -30,7 +32,7 @@ namespace TaskManagerBLL.Services
                                             (t.ParentId == null) &&
                                             (t.Assignee.Id != manager.Id))).OrderBy(tsk => tsk.Assignee.Name).ToList();
 
-            IEnumerable<TaskBLL> resulttasks = Mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(tasks);
+            IEnumerable<TaskBLL> resulttasks = mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(tasks);
             return resulttasks;
         }
 
@@ -40,7 +42,7 @@ namespace TaskManagerBLL.Services
             var tasks = db.Tasks.Find(t => ((t.Author.Id == manager.Id) && (t.ParentId == null)
                                         && ((t.DueDate < DateTime.Now) || (t.DueDate == null))));
 
-            return Mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(tasks);
+            return mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(tasks);
         }
 
         public IEnumerable<TaskBLL> GetCompleteTasks(int teamId)
@@ -49,14 +51,14 @@ namespace TaskManagerBLL.Services
             var tasks = db.Tasks.Find(t => ((t.Author.Id == manager.Id) && (t.ParentId == null)
                                         && (t.Status.Name == "Closed")));
 
-            return Mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(tasks);
+            return mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(tasks);
         }
 
         public IEnumerable<TaskBLL> GetTaskOfAssignee(string id)
         {
             IEnumerable<_Task> tasks = db.Tasks.Find(t => ((t.Assignee.UserId == id) && (t.ParentId == null)))
                                                .OrderByDescending(t => t.Progress);
-            IEnumerable<TaskBLL> result = Mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(tasks);
+            IEnumerable<TaskBLL> result = mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(tasks);
 
             return result;
         }

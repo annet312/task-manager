@@ -1,4 +1,5 @@
-﻿using Microsoft.Web.Infrastructure.DynamicModuleHelper;
+﻿using AutoMapper;
+using Microsoft.Web.Infrastructure.DynamicModuleHelper;
 using Ninject;
 using Ninject.Modules;
 using Ninject.Web.Common;
@@ -6,7 +7,9 @@ using Ninject.Web.Common.WebHost;
 using System;
 using System.Web;
 using TaskManagerBLL.Infrastructure;
+using TaskManagerBLL.Models;
 using TaskMng.App_Start;
+using TaskMng.Models;
 
 [assembly: WebActivatorEx.PreApplicationStartMethod(typeof(NinjectWebCommon), "Start")]
 [assembly: WebActivatorEx.ApplicationShutdownMethodAttribute(typeof(NinjectWebCommon), "Stop")]
@@ -25,6 +28,13 @@ namespace TaskMng.App_Start
             DynamicModuleUtility.RegisterModule(typeof(OnePerRequestHttpModule));
             DynamicModuleUtility.RegisterModule(typeof(NinjectHttpModule));
             bootstrapper.Initialize(CreateKernel);
+            Mapper.Initialize(config =>
+            {
+                config.CreateMap<TaskBLL, TaskView>();
+                config.CreateMap<TeamBLL, TeamView>();
+                config.CreateMap<StatusBLL, StatusView>();
+                config.CreateMap<PersonBLL, PersonView>();
+            });
         }
 
         /// <summary>

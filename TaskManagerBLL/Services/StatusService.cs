@@ -11,12 +11,14 @@ namespace TaskManagerBLL.Services
 {
     public class StatusService : IStatusService
     {
-        private IUnitOfWork db { get; set; }
-        private readonly ITaskService taskService;
+        private readonly IUnitOfWork db;
+        private readonly IMapper mapper;
+        //private readonly ITaskService taskService;
 
-        public StatusService(IUnitOfWork uow/*, ITaskService taskService*/)
+        public StatusService(IUnitOfWork uow, IMapper mapper/*, ITaskService taskService*/)
         {
             db = uow;
+            this.mapper = mapper;
             //this.taskService = taskService;
         }
         #region Status
@@ -24,7 +26,7 @@ namespace TaskManagerBLL.Services
         {
             var statuses = db.Statuses.GetAll();
 
-            return Mapper.Map<IEnumerable<Status>, IEnumerable<StatusBLL>>(statuses);
+            return mapper.Map<IEnumerable<Status>, IEnumerable<StatusBLL>>(statuses);
         }
 
         public IEnumerable<StatusBLL> GetStatuses()

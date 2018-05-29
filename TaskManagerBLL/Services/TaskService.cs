@@ -14,29 +14,31 @@ namespace TaskManagerBLL.Services
     public class TaskService : ITaskService
     {
         private IUnitOfWork db { get; set; }
+        private readonly IMapper mapper;
 
-        public TaskService(IUnitOfWork uow)
+        public TaskService(IUnitOfWork uow, IMapper mapper)
         {
             db = uow;
+            this.mapper = mapper;
         }
 
         public TaskBLL GetTask(int id)
         {
             var result = db.Tasks.Get(id);
-            return Mapper.Map<_Task, TaskBLL>(result);
+            return mapper.Map<_Task, TaskBLL>(result);
         }
 
         #region Templates
         public IEnumerable<TaskTemplateBLL> GetAllTemplates()
         {
             var result = db.TaskTemplates.Find(t => (t.TemplateId == null));
-            return Mapper.Map<IEnumerable<TaskTemplate>, IEnumerable<TaskTemplateBLL>>(result);
+            return mapper.Map<IEnumerable<TaskTemplate>, IEnumerable<TaskTemplateBLL>>(result);
         }
      
         private IEnumerable<TaskTemplateBLL> GetSubtasksOfTemplate(int templateId)
         {
             IEnumerable<TaskTemplate> result = db.TaskTemplates.Find(t => (t.TemplateId == templateId));
-            return Mapper.Map<IEnumerable<TaskTemplate>, IEnumerable<TaskTemplateBLL>>(result);
+            return mapper.Map<IEnumerable<TaskTemplate>, IEnumerable<TaskTemplateBLL>>(result);
         }
 
         public void AddSubtasksFromTemplate(int taskId, int templateId, string authorName)
@@ -51,7 +53,7 @@ namespace TaskManagerBLL.Services
             {
                 throw new ArgumentNullException("Name of author is null or empty", "authorName");
             }
-            PersonBLL author = Mapper.Map<Person, PersonBLL>(db.People.Find(p => (p.Name == authorName)).SingleOrDefault());
+            PersonBLL author = mapper.Map<Person, PersonBLL>(db.People.Find(p => (p.Name == authorName)).SingleOrDefault());
             if (author == null)
             {
                 throw new ArgumentException("Author with tis name wasn't found", "authorName");
@@ -82,18 +84,18 @@ namespace TaskManagerBLL.Services
         public IEnumerable<TaskBLL> GetSubtasksOfTask(int parentId)
         {
             var subtasks = db.Tasks.Find(t => (t.ParentId == parentId));
-            return Mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(subtasks);
+            return mapper.Map<IEnumerable<_Task>, IEnumerable<TaskBLL>>(subtasks);
         }
 
         public void AddSubtask(TaskBLL subtask, int taskId, bool forceToSave = true)
         {
-            var task = Mapper.Map<_Task, TaskBLL>(db.Tasks.Get(taskId));
+            var task = mapper.Map<_Task, TaskBLL>(db.Tasks.Get(taskId));
             if (task == null)
             {
                 throw new ArgumentException("Parent task wasn't found", "taskId");
             }
 
-            var status = Mapper.Map<Status, StatusBLL>(db.Statuses.Find(s => (s.Name == "New")).Single());
+            var status = mapper.Map<Status, StatusBLL>(db.Statuses.Find(s => (s.Name == "New")).Single());
 
             var newSubtask = new TaskBLL { ParentId = task.Id,
                 Author = task.Author,
@@ -106,7 +108,7 @@ namespace TaskManagerBLL.Services
                 DueDate = subtask.DueDate,
                 Comment = subtask.Comment
             };
-            db.Tasks.Create(Mapper.Map<TaskBLL, _Task>(newSubtask));
+            db.Tasks.Create(mapper.Map<TaskBLL, _Task>(newSubtask));
 
             if (forceToSave)
             {
@@ -176,7 +178,7 @@ namespace TaskManagerBLL.Services
         #region Task 
         public void DeleteTask(int taskId, string currentUserName)
         {
-            TaskBLL task = Mapper.Map<_Task, TaskBLL>(db.Tasks.Get(taskId));
+            TaskBLL task = mapper.Map<_Task, TaskBLL>(db.Tasks.Get(taskId));
             if (task == null)
             {
                 throw new ArgumentException("Task with this id not found", "taskId");
@@ -214,7 +216,7 @@ namespace TaskManagerBLL.Services
             {
                 throw new ArgumentNullException("Author is not shown", "authorName");
             }
-            PersonBLL authorBLL = Mapper.Map<Person,PersonBLL>(db.People.Find(p => p.Name == authorName).Single());
+            PersonBLL authorBLL = mapper.Map<Person,PersonBLL>(db.People.Find(p => p.Name == authorName).Single());
             
             PersonBLL assigneeBLL;
             if (string.IsNullOrEmpty(assigneeName))
@@ -223,10 +225,10 @@ namespace TaskManagerBLL.Services
             }
             else
             {
-                assigneeBLL = Mapper.Map<Person, PersonBLL>(db.People.Find(p => p.Name == assigneeName).Single());
+                assigneeBLL = mapper.Map<Person, PersonBLL>(db.People.Find(p => p.Name == assigneeName).Single());
             }
 
-            StatusBLL status = Mapper.Map<Status, StatusBLL>(db.Statuses.Find(s => (s.Name == "New")).SingleOrDefault());
+            StatusBLL status = mapper.Map<Status, StatusBLL>(db.Statuses.Find(s => (s.Name == "New")).SingleOrDefault());
             if(status == null)
             {
                 throw new Exception("Status \"New\" wasn't found in database");
@@ -245,7 +247,7 @@ namespace TaskManagerBLL.Services
                 Comment = task.Comment
             };
 
-            db.Tasks.Create(Mapper.Map<TaskBLL, _Task>(newTask));
+            db.Tasks.Create(mapper.Map<TaskBLL, _Task>(newTask));
             db.Save();
         }
 
