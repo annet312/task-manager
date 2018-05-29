@@ -14,10 +14,12 @@ namespace TaskMng.Controllers
     public class TeamController : Controller
     {
         private readonly IPersonService personService;
+        private readonly IMapper mapper;
         // GET: Team
-        public TeamController(ITaskService taskService, IPersonService personService)
+        public TeamController(ITaskService taskService, IPersonService personService, IMapper mapper)
         {
             this.personService = personService;
+            this.mapper = mapper;
         }
           #region Team
 
@@ -27,7 +29,7 @@ namespace TaskMng.Controllers
             string id = User.Identity.GetUserId();
             PersonBLL person = personService.GetPerson(id);
             TeamBLL team = person.Team;
-            IEnumerable<PersonView> teamOfCurrentManager = Mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(personService.GetTeam(id));
+            IEnumerable<PersonView> teamOfCurrentManager = mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(personService.GetTeam(id));
 
             ViewBag.TeamName = (team != null) ? team.TeamName : string.Empty;
 
@@ -37,7 +39,7 @@ namespace TaskMng.Controllers
         [HttpGet]
         public ActionResult GetPossibleMembers()
         {
-            IEnumerable<PersonView> persons = Mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(personService.GetPeopleWithoutTeam());
+            IEnumerable<PersonView> persons = mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(personService.GetPeopleWithoutTeam());
 
             return PartialView("PossibleMembers", persons.ToList());
         }

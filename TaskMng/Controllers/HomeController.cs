@@ -19,16 +19,19 @@ namespace TaskMng.Controllers
         private readonly IPersonService personService;
         private readonly IFilterTaskService filterTaskService;
         private readonly IStatusService statusService;
+        private readonly IMapper mapper;
 
         public HomeController(ITaskService taskService, 
                               IPersonService personService,
                               IFilterTaskService filterTaskService,
-                              IStatusService statusService)
+                              IStatusService statusService,
+                                IMapper mapper)
         {
             this.taskService = taskService;
             this.personService = personService;
             this.filterTaskService = filterTaskService;
             this.statusService = statusService;
+            this.mapper = mapper;
         }
 
         public ActionResult Index()
@@ -52,7 +55,7 @@ namespace TaskMng.Controllers
         [HttpGet]
         public ActionResult MyTasks()
         {
-            IEnumerable<TaskView> tasks = Mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(filterTaskService.GetTaskOfAssignee(User.Identity.GetUserId())).ToList();
+            IEnumerable<TaskView> tasks = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(filterTaskService.GetTaskOfAssignee(User.Identity.GetUserId())).ToList();
 
             ViewBag.TeamTasksView = false;
 
@@ -104,11 +107,11 @@ namespace TaskMng.Controllers
             {
                 if (!newTask.ParentId.HasValue)
                 {
-                    taskService.CreateTask(Mapper.Map<TaskView, TaskBLL>(task), author, newTask.Assignee);
+                    taskService.CreateTask(mapper.Map<TaskView, TaskBLL>(task), author, newTask.Assignee);
                 }
                 else
                 {
-                    taskService.AddSubtask(Mapper.Map<TaskView, TaskBLL>(task), task.ParentId.Value);
+                    taskService.AddSubtask(mapper.Map<TaskView, TaskBLL>(task), task.ParentId.Value);
                 }
             }
             catch (Exception e)
@@ -120,8 +123,8 @@ namespace TaskMng.Controllers
         [HttpGet]
         public ActionResult Details(int id)
         {
-            TaskView task = Mapper.Map<TaskBLL, TaskView>(taskService.GetTask(id));
-            IEnumerable<TaskView> subtasks = Mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(taskService.GetSubtasksOfTask(id));
+            TaskView task = mapper.Map<TaskBLL, TaskView>(taskService.GetTask(id));
+            IEnumerable<TaskView> subtasks = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(taskService.GetSubtasksOfTask(id));
             DetailsTaskView tasks = new DetailsTaskView
             {
                 MainTask = task,
@@ -133,7 +136,7 @@ namespace TaskMng.Controllers
         [HttpPost]
         public ActionResult EditTask(int id)
         {
-            TaskView task = Mapper.Map<TaskBLL, TaskView>(taskService.GetTask(id));
+            TaskView task = mapper.Map<TaskBLL, TaskView>(taskService.GetTask(id));
             return PartialView("EditTask", task);
         }
 
@@ -165,7 +168,7 @@ namespace TaskMng.Controllers
         [HttpGet]
         public ActionResult ShowSubtask(int parentId)
         {
-            IEnumerable<TaskView> subtasks = Mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(taskService.GetSubtasksOfTask(parentId));
+            IEnumerable<TaskView> subtasks = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(taskService.GetSubtasksOfTask(parentId));
             
             ViewBag.ParentId = parentId;
 
@@ -180,7 +183,7 @@ namespace TaskMng.Controllers
             PersonBLL manager = personService.GetPerson(id);
 
             IEnumerable<TaskView> tasksOfMyTeam;
-            tasksOfMyTeam = Mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(filterTaskService.GetTasksOfTeam(id));
+            tasksOfMyTeam = mapper.Map<IEnumerable<TaskBLL>, IEnumerable<TaskView>>(filterTaskService.GetTasksOfTeam(id));
 
             ViewBag.ManagerId = manager.Id;
             ViewBag.TeamTasksView = true;
@@ -193,11 +196,11 @@ namespace TaskMng.Controllers
             IEnumerable<StatusView> statuses;
             if (User.IsInRole("Programmer"))
             {
-                statuses = Mapper.Map<IEnumerable<StatusBLL>, IEnumerable<StatusView>>(statusService.GetStatuses());
+                statuses = mapper.Map<IEnumerable<StatusBLL>, IEnumerable<StatusView>>(statusService.GetStatuses());
             }
             else
             {
-                statuses = Mapper.Map<IEnumerable<StatusBLL>, IEnumerable<StatusView>>(statusService.GetAllStatuses());
+                statuses = mapper.Map<IEnumerable<StatusBLL>, IEnumerable<StatusView>>(statusService.GetAllStatuses());
             }
             return PartialView("StatusList", statuses);
         }
@@ -205,7 +208,7 @@ namespace TaskMng.Controllers
         [HttpGet]
         public ActionResult GetAssignees(int managerId)
         {
-            IEnumerable<PersonView> assignees = Mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(personService.GetAssignees(managerId));
+            IEnumerable<PersonView> assignees = mapper.Map<IEnumerable<PersonBLL>, IEnumerable<PersonView>>(personService.GetAssignees(managerId));
             return PartialView("AssigneeList", assignees);
         }
 
