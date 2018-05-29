@@ -14,10 +14,10 @@ namespace TaskManagerBLL.Services
         private IUnitOfWork db { get; set; }
         private readonly ITaskService taskService;
 
-        public StatusService(IUnitOfWork uow, ITaskService taskService)
+        public StatusService(IUnitOfWork uow/*, ITaskService taskService*/)
         {
             db = uow;
-            this.taskService = taskService;
+            //this.taskService = taskService;
         }
         #region Status
         public IEnumerable<StatusBLL> GetAllStatuses()
@@ -112,7 +112,8 @@ namespace TaskManagerBLL.Services
         {
             var MainTask = db.Tasks.Get(mainTaskId);
 
-            var subtasks = taskService.GetSubtasksOfTask(mainTaskId).Where(s => s.Id != changedSubtaskId);
+            IEnumerable<_Task> subtasks = db.Tasks.Find(s => (s.ParentId == mainTaskId) && (s.Id != changedSubtaskId));
+                //taskService.GetSubtasksOfTask(mainTaskId).Where(s => s.Id != changedSubtaskId);
             int sumProgress = changedSubtaskProgress ?? 0;
             int num = 1;
 

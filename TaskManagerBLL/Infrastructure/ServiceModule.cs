@@ -14,11 +14,11 @@ namespace TaskManagerBLL.Infrastructure
             string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
 
             Bind<IUnitOfWork>().To<UnitOfWork>().WithConstructorArgument(connectionString);
-            Bind<ITaskService>().To<TaskService>().InSingletonScope();
+            Bind<ITaskService>().To<TaskService>();//.InSingletonScope();
             Bind<IPersonService>().To<PersonService>().InSingletonScope();
             Bind<IEmailService>().To<EmailService>().InSingletonScope();
-            Bind<IFilterTaskService>().To<FilterTaskService>().InSingletonScope();
-            Bind<IStatusService>().To<StatusService>().InSingletonScope();
+            Bind<IFilterTaskService>().To<FilterTaskService>();//.InSingletonScope();
+            Bind<IStatusService>().To<StatusService>();//.InSingletonScope();
 
         }
     }
